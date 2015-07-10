@@ -1,0 +1,24 @@
+[{
+    "modid": "FFS",
+    "name": "Fancy Fluid Storage",
+    "description": "A simple fluid storage mod that's gonna fancy up your world!",
+    "mcversion": "$mcversion",
+    "version": "$version",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+        "Lordmau5",
+        "maxpowa"
+    ],
+    "credits": "Thanks to FridgeBoy for helping out with the math on the calculations.",
+    "logoFile": "",
+    "screenshots": [ ],
+    "parent": "",
+    "dependencies": [
+        "waila",
+        "BuildCraft|Transport",
+        "chisel",
+        "OpenComputers",
+        "ComputerCraft"
+    ]
+}]

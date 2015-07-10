@@ -1,0 +1,102 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+    }
+}
+
+apply plugin: 'forge'
+idea.module.inheritOutputDirs = true
+
+repositories {
+    mavenCentral()
+    maven { // Waila
+        name "profmobius"
+        url "http://mobiusstrip.eu/maven"
+    }
+    maven { // NEI/CCC
+        name 'chickenbones'
+        url "http://chickenbones.net/maven/"
+    }
+    maven { // Chisel 2
+        name 'chisel'
+        url "http://coloredlightscore.us.to/maven/chisel-2"
+    }
+    maven { // OpenComputers
+        name 'opencomputers'
+        url "http://maven.cil.li"
+    }
+    ivy { // Buildcraft
+        name "BuildCraft"
+        artifactPattern "http://www.mod-buildcraft.com/releases/BuildCraft/[revision]/[module]-[revision]-dev.[ext]"
+    }
+}
+
+dependencies {
+    compile name: "buildcraft", version: "${buildcraft_version}"
+    compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev:dev"
+
+    compile "com.cricketcraft.chisel:Chisel2:${chisel_version}:deobf"
+    // Oh cool, it doesn't find CTMLib. Freaking useless.
+    compile "com.cricketcraft.ctmlib:CTMLib:${ctmlib_version}:deobf"
+    
+    compile "mcp.mobius.waila:Waila:${waila_version}_${minecraft_version}:dev"
+    // Apparently transitive dependency resolution doesn't want to find CCC
+    compile "codechicken:CodeChickenCore:${minecraft_version}-${codechickencore_version}:dev"
+    compile "codechicken:CodeChickenLib:${minecraft_version}-${codechickenlib_version}:dev"
+    // Or freaking NEI. Thanks a lot codechicken.
+    compile "codechicken:NotEnoughItems:${minecraft_version}-${nei_version}:dev"
+}
+
+group = 'lordmau5.extanks'
+version = "$minecraft_version-$mod_version"
+archivesBaseName = "ExtendedTanks"
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+minecraft {
+    runDir = "runtime/client/assets"
+    version = "$minecraft_version-$forge_version"
+}
+
+processResources {
+    if (System.env.BUILD_NUMBER != null) version = "$version.$System.env.BUILD_NUMBER"
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'deobf'
+}
+
+artifacts {
+    archives sourceJar, deobfJar
+}
