@@ -58,6 +58,8 @@ dependencies {
     compile "codechicken:NotEnoughItems:${minecraft_version}-${nei_version}:dev"
 }
 
+if (System.env.BUILD_NUMBER != null) mod_version = "$mod_version.$System.env.BUILD_NUMBER"
+
 group = 'lordmau5.ffs'
 version = "$minecraft_version-$mod_version"
 archivesBaseName = "Fancy Fluid Storage"
@@ -71,8 +73,6 @@ minecraft {
 }
 
 processResources {
-    if (System.env.BUILD_NUMBER != null) version = "$version.$System.env.BUILD_NUMBER"
-
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
