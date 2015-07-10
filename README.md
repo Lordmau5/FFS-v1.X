@@ -1,2 +1,4 @@
 # FFS - *Fancy Fluid Storage*
-Simple fluid storage that's gonna fancy up your house!
+A simple fluid storage mod that's gonna *fancy* up your world!  
+
+![recipe](http://i.imgur.com/ShsMSrk.png)
