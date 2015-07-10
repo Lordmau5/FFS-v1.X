@@ -679,7 +679,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     @Optional.Method(modid = "ComputerCraft")
     @Override
     public String getType() {
-        return "exTanksValve";
+        return "ffs_valve";
     }
 
     @Optional.Method(modid = "ComputerCraft")
@@ -742,7 +742,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     @Optional.Method(modid = "OpenComputers")
     @Override
     public String getComponentName() {
-        return "extanks_valve";
+        return "ffs_valve";
     }
 
     @Optional.Method(modid = "OpenComputers")

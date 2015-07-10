@@ -24,7 +24,7 @@ public class NetworkHandler {
     private static EnumMap<Side, FMLEmbeddedChannel> channels;
 
     public static void registerChannels(Side side){
-        channels = NetworkRegistry.INSTANCE.newChannel("exTanks", new PacketCodec());
+        channels = NetworkRegistry.INSTANCE.newChannel("ffs", new PacketCodec());
 
         ChannelPipeline pipeline = channels.get(Side.SERVER).pipeline();
         String targetName = channels.get(Side.SERVER).findChannelHandlerNameForType(PacketCodec.class);
@@ -44,24 +44,24 @@ public class NetworkHandler {
         pipeline.addAfter(targetName, "UpdateAutoOutput_Client", new UpdateAutoOutput_Client());
     }
 
-    public static Packet getProxyPacket(exTanksPacket packet){
+    public static Packet getProxyPacket(ffsPacket packet){
         return channels.get(FMLCommonHandler.instance().getEffectiveSide()).generatePacketFrom(packet);
     }
 
-    public static void sendPacketToPlayer(exTanksPacket packet, EntityPlayer player){
+    public static void sendPacketToPlayer(ffsPacket packet, EntityPlayer player){
         FMLEmbeddedChannel channel = channels.get(Side.SERVER);
         channel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.PLAYER);
         channel.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(player);
         channel.writeOutbound(packet);
     }
 
-    public static void sendPacketToAllPlayers(exTanksPacket packet){
+    public static void sendPacketToAllPlayers(ffsPacket packet){
         FMLEmbeddedChannel channel = channels.get(Side.SERVER);
         channel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.ALL);
         channel.writeOutbound(packet);
     }
 
-    public static void sendPacketToServer(exTanksPacket packet){
+    public static void sendPacketToServer(ffsPacket packet){
         FMLEmbeddedChannel channel = channels.get(Side.CLIENT);
         channel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.TOSERVER);
         channel.writeOutbound(packet);

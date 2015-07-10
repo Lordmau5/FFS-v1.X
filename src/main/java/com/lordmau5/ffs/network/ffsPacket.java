@@ -6,13 +6,13 @@ import io.netty.buffer.ByteBuf;
 /**
  * Created by Dustin on 07.07.2015.
  */
-public abstract class exTanksPacket {
+public abstract class ffsPacket {
     public abstract void encode(ByteBuf buffer);
 
     public abstract void decode(ByteBuf buffer);
 
     public static abstract class Client {
-        public static class UpdateAutoOutput extends exTanksPacket {
+        public static class UpdateAutoOutput extends ffsPacket {
             public int x, y, z;
             public boolean autoOutput;
 
@@ -52,7 +52,7 @@ public abstract class exTanksPacket {
     }
 
     public static class Server {
-        public static class UpdateAutoOutput extends exTanksPacket {
+        public static class UpdateAutoOutput extends ffsPacket {
             public int x, y, z;
             public boolean autoOutput;
 

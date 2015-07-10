@@ -3,7 +3,7 @@ package com.lordmau5.ffs.client.gui;
 import buildcraft.core.lib.render.FluidRenderer;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.network.NetworkHandler;
-import com.lordmau5.ffs.network.exTanksPacket;
+import com.lordmau5.ffs.network.ffsPacket;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.client.gui.GuiButton;
@@ -103,7 +103,7 @@ public class GuiValve extends GuiScreen {
             GuiToggle toggle = (GuiToggle)btn;
 
             this.valve.setAutoOutput(toggle.getState());
-            NetworkHandler.sendPacketToServer(new exTanksPacket.Server.UpdateAutoOutput(this.valve, this.valve.getAutoOutput()));
+            NetworkHandler.sendPacketToServer(new ffsPacket.Server.UpdateAutoOutput(this.valve, this.valve.getAutoOutput()));
         }
     }
 
