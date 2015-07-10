@@ -49,7 +49,7 @@ dependencies {
     compile "com.cricketcraft.chisel:Chisel2:${chisel_version}:deobf"
     // Oh cool, it doesn't find CTMLib. Freaking useless.
     compile "com.cricketcraft.ctmlib:CTMLib:${ctmlib_version}:deobf"
-    
+
     compile "mcp.mobius.waila:Waila:${waila_version}_${minecraft_version}:dev"
     // Apparently transitive dependency resolution doesn't want to find CCC
     compile "codechicken:CodeChickenCore:${minecraft_version}-${codechickencore_version}:dev"
@@ -58,9 +58,9 @@ dependencies {
     compile "codechicken:NotEnoughItems:${minecraft_version}-${nei_version}:dev"
 }
 
-group = 'lordmau5.extanks'
+group = 'lordmau5.ffs'
 version = "$minecraft_version-$mod_version"
-archivesBaseName = "ExtendedTanks"
+archivesBaseName = "Fancy Fluid Storage"
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
