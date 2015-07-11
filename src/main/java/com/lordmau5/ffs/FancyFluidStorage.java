@@ -18,6 +18,8 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 
 /**
  * Created by Dustin on 28.06.2015.
@@ -36,9 +38,28 @@ public class FancyFluidStorage {
     @SidedProxy(clientSide = "com.lordmau5.ffs.proxy.ClientProxy", serverSide = "com.lordmau5.ffs.proxy.CommonProxy")
     public static CommonProxy proxy;
 
+    public int MB_PER_TANK_BLOCK = 16000;
+    public boolean INSIDE_CAPACITY = false;
+
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         proxy.preInit();
+
+        Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+
+        config.load();
+
+        Property mbPerTankProp = config.get(Configuration.CATEGORY_GENERAL, "mbPerVirtualTank", 16000);
+        mbPerTankProp.comment = "How many millibuckets can each block within the tank store?";
+        MB_PER_TANK_BLOCK = mbPerTankProp.getInt(16000);
+
+        Property insideCapacityProp = config.get(Configuration.CATEGORY_GENERAL, "onlyCountInsideCapacity", false);
+        insideCapacityProp.comment = "Should tank capacity only count the interior air blocks, rather than including the frame?";
+        INSIDE_CAPACITY = insideCapacityProp.getBoolean(false);
+
+        if (config.hasChanged()) {
+            config.save();
+        }
 
         GameRegistry.registerBlock(blockValve = new BlockValve(), "blockValve");
         GameRegistry.registerBlock(blockTankFrame = new BlockTankFrame(), "blockTankFrame");
@@ -53,6 +74,7 @@ public class FancyFluidStorage {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
+
         GameRegistry.addRecipe(new ItemStack(blockValve), "IGI", "GBG", "IGI",
                 'I', Items.iron_ingot,
                 'G', Blocks.iron_bars,

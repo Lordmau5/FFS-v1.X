@@ -19,6 +19,7 @@
         "BuildCraftAPI|Transport",
         "chisel",
         "OpenComputers",
-        "ComputerCraft"
+        "ComputerCraft",
+        "funkylocomotion"
     ]
 }]

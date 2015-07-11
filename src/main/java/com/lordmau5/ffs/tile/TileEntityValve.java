@@ -11,6 +11,7 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import framesapi.IMoveCheck;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedPeripheral;
@@ -22,6 +23,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.*;
 
@@ -39,16 +41,18 @@ import java.util.Map;
         @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"),
 
         @Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "OpenComputers"),
-        @Optional.Interface(iface = "li.cil.oc.api.network.ManagedPeripheral", modid = "OpenComputers")
+        @Optional.Interface(iface = "li.cil.oc.api.network.ManagedPeripheral", modid = "OpenComputers"),
+        @Optional.Interface(iface = "framesapi.IMoveCheck", modid = "funkylocomotion")
 })
 public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHandler,
         IPipeConnection, // BuildCraft
         IPeripheral, // ComputerCraft
-        SimpleComponent, ManagedPeripheral // OpenComputers
+        SimpleComponent, ManagedPeripheral, // OpenComputers
+        IMoveCheck // Funky Locomotion
 {
 
     private final int maxSize = 9;
-    private final int mbPerVirtualTank = 16000;
+    protected int mbPerVirtualTank = FancyFluidStorage.instance.MB_PER_TANK_BLOCK;
 
     public boolean isValid;
     private boolean isMaster;
@@ -262,7 +266,11 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 return false;
         }
 
-        fluidCapacity = (maps[0].size() + maps[1].size() + maps[2].size()) * mbPerVirtualTank;
+        if (FancyFluidStorage.instance.INSIDE_CAPACITY) {
+            fluidCapacity = (maps[2].size()) * mbPerVirtualTank;
+        } else {
+            fluidCapacity = (maps[0].size() + maps[1].size() + maps[2].size()) * mbPerVirtualTank;
+        }
 
         for(Map.Entry<Position3D, ExtendedBlock> frameCheck : maps[0].entrySet()) {
             if(!frameCheck.getValue().equals(bottomDiagBlock))
@@ -785,5 +793,11 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             default:
         }
         return null;
+    }
+
+    @Optional.Method(modid = "funkylocomotion")
+    @Override
+    public boolean canMove(World worldObj, int x, int y, int z) {
+        return false;
     }
 }

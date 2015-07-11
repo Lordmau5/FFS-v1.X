@@ -1,17 +1,24 @@
 package com.lordmau5.ffs.tile;
 
 import com.lordmau5.ffs.util.ExtendedBlock;
+import cpw.mods.fml.common.Optional;
+import framesapi.IMoveCheck;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 
 /**
  * Created by Dustin on 28.06.2015.
  */
-public class TileEntityTankFrame extends TileEntity {
+
+@Optional.InterfaceList(value = {
+        @Optional.Interface(iface = "framesapi.IMoveCheck", modid = "funkylocomotion")
+})
+public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
 
     private ExtendedBlock block;
     private int valveX, valveY, valveZ;
@@ -104,4 +111,9 @@ public class TileEntityTankFrame extends TileEntity {
         worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
     }
 
+    @Optional.Method(modid = "funkylocomotion")
+    @Override
+    public boolean canMove(World worldObj, int x, int y, int z) {
+        return false;
+    }
 }
