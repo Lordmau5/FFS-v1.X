@@ -33,7 +33,7 @@ public class FancyFluidStorage {
     @Mod.Instance(modId)
     public static FancyFluidStorage instance;
 
-    @SidedProxy(clientSide = "com.lordmau5.ffs.proxy.ClientProxy", serverSide = "com.lordmau5.ffs.proxy.ServerProxy")
+    @SidedProxy(clientSide = "com.lordmau5.ffs.proxy.ClientProxy", serverSide = "com.lordmau5.ffs.proxy.CommonProxy")
     public static CommonProxy proxy;
 
     @Mod.EventHandler
