@@ -34,7 +34,7 @@ import java.util.Map;
  */
 
 @Optional.InterfaceList(value = {
-        @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraft|Transport"),
+        @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|Transport"),
 
         @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"),
 
@@ -672,7 +672,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         return getMaster() == this ? new FluidTankInfo[]{ getInfo() } : getMaster().getTankInfo(from);
     }
 
-    @Optional.Method(modid = "BuildCraft|Transport")
+    @Optional.Method(modid = "BuildCraftAPI|Transport")
     @Override
     public ConnectOverride overridePipeConnection(IPipeTile.PipeType pipeType, ForgeDirection from) {
         if(!isValid())

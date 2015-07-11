@@ -16,7 +16,7 @@
     "parent": "",
     "dependencies": [
         "waila",
-        "BuildCraft|Transport",
+        "BuildCraftAPI|Transport",
         "chisel",
         "OpenComputers",
         "ComputerCraft"

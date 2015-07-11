@@ -20,7 +20,7 @@ public class CommonProxy {
     public void registerIcons(IIconRegister iR) { }
 
     public void init() {
-        BUILDCRAFT_LOADED = Loader.isModLoaded("BuildCraft|Transport");
+        BUILDCRAFT_LOADED = Loader.isModLoaded("BuildCraftAPI|Transport");
         if(Loader.isModLoaded("ComputerCraft")) {
             new CCPeripheralProvider().register();
         }
