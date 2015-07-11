@@ -24,7 +24,7 @@ public class BlockValve extends Block {
         super(Material.iron);
         setBlockName("blockValve");
         setBlockTextureName(FancyFluidStorage.modId + ":" + "blockValve");
-        setCreativeTab(CreativeTabs.tabBlock);
+        setCreativeTab(CreativeTabs.tabRedstone);
     }
 
     @Override
