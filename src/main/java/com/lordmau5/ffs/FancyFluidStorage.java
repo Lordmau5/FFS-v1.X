@@ -2,14 +2,12 @@ package com.lordmau5.ffs;
 
 import com.lordmau5.ffs.blocks.BlockTankFrame;
 import com.lordmau5.ffs.blocks.BlockValve;
-import com.lordmau5.ffs.compat.CCPeripheralProvider;
 import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.proxy.CommonProxy;
 import com.lordmau5.ffs.proxy.GuiHandler;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.GenericUtil;
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -17,7 +15,6 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
-import dan200.computercraft.api.ComputerCraftAPI;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -61,9 +58,7 @@ public class FancyFluidStorage {
                 'G', Blocks.iron_bars,
                 'B', Items.bucket);
 
-        if(Loader.isModLoaded("ComputerCraft")) {
-            ComputerCraftAPI.registerPeripheralProvider(new CCPeripheralProvider());
-        }
+        proxy.init();
     }
 
     @Mod.EventHandler

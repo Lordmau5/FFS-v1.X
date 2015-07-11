@@ -1,5 +1,7 @@
 package com.lordmau5.ffs.proxy;
 
+import com.lordmau5.ffs.compat.CCPeripheralProvider;
+import cpw.mods.fml.common.Loader;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.util.IIcon;
 
@@ -15,4 +17,9 @@ public class CommonProxy {
 
     public void registerIcons(IIconRegister iR) { }
 
+    public void init() {
+        if(Loader.isModLoaded("ComputerCraft")) {
+            new CCPeripheralProvider().register();
+        }
+    }
 }

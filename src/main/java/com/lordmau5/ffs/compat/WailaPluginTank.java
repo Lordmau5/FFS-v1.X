@@ -4,6 +4,8 @@ import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.ExtendedBlock;
 import com.lordmau5.ffs.util.GenericUtil;
+import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.common.event.FMLInterModComms;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
@@ -19,8 +21,14 @@ import java.util.List;
 /**
  * Created by max on 7/4/15.
  */
+@Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
 public class WailaPluginTank implements IWailaDataProvider {
 
+    public static void init() {
+        FMLInterModComms.sendMessage("Waila", "register", WailaPluginTank.class.getName() + ".registerPlugin");
+    }
+
+    @Optional.Method(modid = "Waila")
     public static void registerPlugin(IWailaRegistrar registrar) {
         WailaPluginTank instance = new WailaPluginTank();
         registrar.registerStackProvider(instance, TileEntityTankFrame.class);
@@ -28,6 +36,7 @@ public class WailaPluginTank implements IWailaDataProvider {
         registrar.registerBodyProvider(instance, TileEntityTankFrame.class);
     }
 
+    @Optional.Method(modid = "Waila")
     @Override
     public ItemStack getWailaStack(IWailaDataAccessor iWailaDataAccessor, IWailaConfigHandler iWailaConfigHandler) {
         TileEntity te = iWailaDataAccessor.getTileEntity();
@@ -42,6 +51,7 @@ public class WailaPluginTank implements IWailaDataProvider {
         return null;
     }
 
+    @Optional.Method(modid = "Waila")
     @Override
     public List<String> getWailaBody(ItemStack itemStack, List<String> list, IWailaDataAccessor iWailaDataAccessor, IWailaConfigHandler iWailaConfigHandler) {
         TileEntity te = iWailaDataAccessor.getTileEntity();
@@ -72,18 +82,21 @@ public class WailaPluginTank implements IWailaDataProvider {
         return list;
     }
 
+    @Optional.Method(modid = "Waila")
     @Override
     public List<String> getWailaHead(ItemStack itemStack, List<String> list, IWailaDataAccessor iWailaDataAccessor, IWailaConfigHandler iWailaConfigHandler) {
         // Unused, implemented because of the interface
         return list;
     }
 
+    @Optional.Method(modid = "Waila")
     @Override
     public List<String> getWailaTail(ItemStack itemStack, List<String> list, IWailaDataAccessor iWailaDataAccessor, IWailaConfigHandler iWailaConfigHandler) {
         // Unused, implemented because of the interface
         return list;
     }
 
+    @Optional.Method(modid = "Waila")
     @Override
     public NBTTagCompound getNBTData(EntityPlayerMP entityPlayerMP, TileEntity tileEntity, NBTTagCompound nbtTagCompound, World world, int i, int i1, int i2) {
         // Unused, implemented because of the interface
