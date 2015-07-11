@@ -32,8 +32,9 @@ import java.util.Map;
 /**
  * Created by Dustin on 28.06.2015.
  */
+
 @Optional.InterfaceList(value = {
-        @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|core"),
+        @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraft|Transport"),
 
         @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"),
 
@@ -280,8 +281,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 if(valve == this)
                     continue;
 
-                if(valve.isMaster() && valve.getFluid() != null) {
-                    this.fluidStack = valve.getFluid();
+                if(valve.fluidStack != null) {
+                    this.fluidStack = valve.fluidStack;
                     // Make sure we don't overfill a tank. If the new tank is smaller than the old one, excess liquid disappear.
                     this.fluidStack.amount = Math.min(this.fluidStack.amount, this.fluidCapacity);
                 }
@@ -357,7 +358,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             valve.fluidStack = getFluid();
             valve.master = null;
             valve.isValid = false;
-            valve.markForUpdate();
+            valve.updateBlockAndNeighbors();
         }
 
         for(TileEntityTankFrame tankFrame : tankFrames) {
@@ -389,20 +390,25 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(worldObj.isRemote)
             return;
 
-        this.markForUpdate();
+        this.markForUpdate(false);
 
         if(otherValves != null) {
             for(TileEntityValve otherValve : otherValves) {
                 otherValve.isValid = isValid;
-                otherValve.markForUpdate();
+                otherValve.markForUpdate(true);
             }
         }
 
         ForgeDirection outside = getInside().getOpposite();
         TileEntity outsideTile = worldObj.getTileEntity(xCoord + outside.offsetX, yCoord + outside.offsetY, zCoord + outside.offsetZ);
-        if (outsideTile != null && outsideTile instanceof IPipeTile) {
-            ((IPipeTile) outsideTile).scheduleNeighborChange();
+        if (outsideTile != null) {
+            //BC Check
+            if(FancyFluidStorage.proxy.BUILDCRAFT_LOADED) {
+                if(outsideTile instanceof IPipeTile)
+                    ((IPipeTile) outsideTile).scheduleNeighborChange();
+            }
         }
+        worldObj.markBlockForUpdate(xCoord + outside.offsetX, yCoord + outside.offsetY, zCoord + outside.offsetZ);
     }
 
     public boolean isMaster() {
@@ -499,7 +505,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             }
         }
 
-         markForUpdate();
+         markForUpdate(true);
     }
 
     @Override
@@ -514,12 +520,15 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 0, tag);
     }
 
-    private void markForUpdate() {
+    private void markForUpdate(boolean onlyThis) {
         if (!worldObj.isRemote) {
-            for (TileEntityValve valve : otherValves)
-                worldObj.markBlockForUpdate(valve.xCoord, valve.yCoord, valve.zCoord);
-            for (TileEntityTankFrame frame : tankFrames)
-                worldObj.markBlockForUpdate(frame.xCoord, frame.yCoord, frame.zCoord);
+            if(!onlyThis) {
+                for (TileEntityValve valve : otherValves) {
+                    valve.updateBlockAndNeighbors();
+                }
+                for (TileEntityTankFrame frame : tankFrames)
+                    worldObj.markBlockForUpdate(frame.xCoord, frame.yCoord, frame.zCoord);
+            }
             worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
         }
     }
@@ -587,7 +596,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     fluidStack = resource;
                 fluidStack.amount = possibleAmount;
 
-                updateBlockAndNeighbors();
+                getMaster().markForUpdate(true);
             }
 
             return rest;
@@ -617,7 +626,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 if (possibleAmount == 0)
                     fluidStack = null;
 
-                updateBlockAndNeighbors();
+                getMaster().markForUpdate(true);
             }
 
             return returnStack;
@@ -645,13 +654,13 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public boolean canFill(ForgeDirection from, Fluid fluid) {
-        return isValid() && !(fluidStack != null && fluidStack.getFluid() != fluid);
+        return isValid() && ((getFluid() != null && getFluid().getFluid() == fluid && getFluid().amount < getCapacity()) || getFluid() == null);
 
     }
 
     @Override
     public boolean canDrain(ForgeDirection from, Fluid fluid) {
-        return isValid() && !(fluidStack == null || fluidStack.getFluid() != fluid);
+        return isValid() && getFluid() != null && getFluid().getFluid() == fluid && getFluid().amount > 0;
 
     }
 
@@ -660,10 +669,10 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(!isValid())
             return null;
 
-        return isMaster() ? new FluidTankInfo[]{ getInfo() } : getMaster().getTankInfo(from);
+        return getMaster() == this ? new FluidTankInfo[]{ getInfo() } : getMaster().getTankInfo(from);
     }
 
-    @Optional.Method(modid = "BuildCraftAPI|core")
+    @Optional.Method(modid = "BuildCraft|Transport")
     @Override
     public ConnectOverride overridePipeConnection(IPipeTile.PipeType pipeType, ForgeDirection from) {
         if(!isValid())

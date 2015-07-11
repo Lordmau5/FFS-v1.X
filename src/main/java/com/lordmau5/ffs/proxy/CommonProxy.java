@@ -10,6 +10,8 @@ import net.minecraft.util.IIcon;
  */
 public class CommonProxy {
 
+    public boolean BUILDCRAFT_LOADED;
+
     public IIcon tex_Valve, tex_ValveItem;
     public IIcon[] tex_SlaveValve, tex_MasterValve;
 
@@ -18,6 +20,7 @@ public class CommonProxy {
     public void registerIcons(IIconRegister iR) { }
 
     public void init() {
+        BUILDCRAFT_LOADED = Loader.isModLoaded("BuildCraft|Transport");
         if(Loader.isModLoaded("ComputerCraft")) {
             new CCPeripheralProvider().register();
         }

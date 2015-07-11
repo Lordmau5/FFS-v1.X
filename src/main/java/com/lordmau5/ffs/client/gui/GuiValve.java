@@ -2,6 +2,7 @@ package com.lordmau5.ffs.client.gui;
 
 import buildcraft.core.lib.render.FluidRenderer;
 import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.client.FluidHelper;
 import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.network.ffsPacket;
 import com.lordmau5.ffs.tile.TileEntityValve;
@@ -108,11 +109,11 @@ public class GuiValve extends GuiScreen {
     }
 
     private void drawFluid(int x, int y) {
-        IIcon fluidIcon = FluidRenderer.getFluidTexture(valve.getFluid(), false);
+        IIcon fluidIcon = FluidHelper.getFluidTexture(valve.getFluid().getFluid(), false);
         if(fluidIcon == null)
             return;
 
-        this.mc.getTextureManager().bindTexture(FluidRenderer.getFluidSheet(valve.getFluid()));
+        this.mc.getTextureManager().bindTexture(FluidHelper.BLOCK_TEXTURE);
 
         int height = (int) Math.ceil((float) valve.getFluidAmount() / (float) valve.getCapacity() * 101);
 
