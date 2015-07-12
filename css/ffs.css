@@ -65,6 +65,11 @@
   margin-bottom: 4rem;
 }
 
+/* Preload */
+.preload {
+  display: none;
+}
+
 /* Bigger than 550 */
 @media (min-width: 550px) {
   .section {
