@@ -16,7 +16,6 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedPeripheral;
 import li.cil.oc.api.network.SimpleComponent;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -262,8 +261,11 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             return false;
 
         for(Map.Entry<Position3D, ExtendedBlock> airCheck : maps[2].entrySet()) {
-            if(airCheck.getValue().getBlock() != Blocks.air)
+            if(!worldObj.isAirBlock(airCheck.getKey().getX(), airCheck.getKey().getY(), airCheck.getKey().getZ())) {
+                if (airCheck.getValue().getBlock().getUnlocalizedName() == "railcraft.residual.heat")
+                    continue; // Just to be /sure/ that railcraft isn't messing with us
                 return false;
+            }
         }
 
         if (FancyFluidStorage.instance.INSIDE_CAPACITY) {
