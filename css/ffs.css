@@ -12,12 +12,6 @@
 .section-description {
   margin-bottom: 1.2rem;
 }
-.section-how-to {
-  text-align: left;
-}
-.get-help{
-  padding: 8rem 0 2rem;
-}
 .footer {
   color: #AAA;
   text-align: center;
@@ -51,7 +45,7 @@
   margin-bottom: .3rem;
 }
 .value-description {
-  opacity: .8;
+  opacity: .9;
   font-weight: 400;
 }
 
@@ -65,7 +59,10 @@
   margin-bottom: 4rem;
 }
 
-/* Preload */
+/* How-to */
+.how-to {
+  text-align: left;
+}
 .preload {
   display: none;
 }
