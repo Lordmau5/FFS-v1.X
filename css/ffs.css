@@ -68,7 +68,7 @@
 /* Bigger than 550 */
 @media (min-width: 550px) {
   .section {
-    padding: 12rem 0 11rem;
+    padding: 5rem 0 2rem;
   }
   .hero {
     padding-bottom: 12rem;
@@ -104,10 +104,10 @@
     font-size: 2.6rem;
   }
   .section {
-    padding: 11rem 0 2rem;
+    padding: 5rem 0 2rem;
   }
   .hero {
-    padding: 15rem 0 14rem;
+    padding: 8rem 0 7rem;
   }
   .section-description {
     max-width: 60%;
