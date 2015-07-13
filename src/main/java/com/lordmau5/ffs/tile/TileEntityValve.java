@@ -84,7 +84,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     // TANK LOGIC
     private FluidStack fluidStack;
-    private int fluidCapacity;
+    private int fluidCapacity = 0;
     // ---------------
 
     public TileEntityValve() {
@@ -572,6 +572,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public int getCapacity() {
+        if(!isValid())
+            return 0;
+            
         return getMaster() == this ? fluidCapacity : getMaster().fluidCapacity;
     }
 
