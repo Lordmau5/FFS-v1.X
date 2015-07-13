@@ -460,7 +460,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(isMaster()) {
             if(tag.getBoolean("hasFluid")) {
                 fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getInteger("fluidID")), tag.getInteger("fluidAmount"));
-                fluidCapacity = tag.getInteger("fluidCapacity");
             }
             else {
                 fluidStack = null;
@@ -468,6 +467,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
             autoOutput = tag.getBoolean("autoOutput");
             tankHeight = tag.getInteger("tankHeight");
+            fluidCapacity = tag.getInteger("fluidCapacity");
         }
 
         if(tag.hasKey("bottomDiagF")) {
@@ -489,11 +489,11 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             if(fluidStack != null) {
                 tag.setInteger("fluidID", fluidStack.getFluidID());
                 tag.setInteger("fluidAmount", fluidStack.amount);
-                tag.setInteger("fluidCapacity", fluidCapacity);
             }
 
             tag.setBoolean("autoOutput", autoOutput);
             tag.setInteger("tankHeight", tankHeight);
+            tag.setInteger("fluidCapacity", fluidCapacity);
         }
 
         if(bottomDiagFrame != null && topDiagFrame != null) {
