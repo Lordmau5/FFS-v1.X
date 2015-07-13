@@ -73,7 +73,7 @@ public class WailaPluginTank implements IWailaDataProvider {
         }
         if (fluidAmount == 0) {
             list.add("Fluid: None");
-            list.add("Amount: 0/" + capacity + " mB");
+            list.add("Amount: 0/" + GenericUtil.intToFancyNumber(capacity) + " mB");
         } else {
             String fluid = valve.getFluid().getFluid().getLocalizedName(valve.getFluid());
             list.add("Fluid: " + fluid);
