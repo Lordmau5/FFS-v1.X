@@ -572,9 +572,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public int getCapacity() {
-        if(!isValid())
-            return 0;
-
         return getMaster() == this ? fluidCapacity : getMaster().fluidCapacity;
     }
 
