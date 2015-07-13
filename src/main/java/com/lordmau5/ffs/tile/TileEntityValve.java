@@ -293,14 +293,15 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
                 if(valve.fluidStack != null) {
                     this.fluidStack = valve.fluidStack;
-                    // Make sure we don't overfill a tank. If the new tank is smaller than the old one, excess liquid disappear.
-                    this.fluidStack.amount = Math.min(this.fluidStack.amount, this.fluidCapacity);
                 }
                 valves.add(valve);
                 continue;
             }
             return false;
         }
+
+        // Make sure we don't overfill a tank. If the new tank is smaller than the old one, excess liquid disappear.
+        this.fluidStack.amount = Math.min(this.fluidStack.amount, this.fluidCapacity);
 
         for(TileEntityValve valve : valves) {
             pos = new Position3D(valve.xCoord, valve.yCoord, valve.zCoord);
