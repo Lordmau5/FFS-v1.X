@@ -24,6 +24,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.*;
 
@@ -65,8 +66,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     private ForgeDirection inside = ForgeDirection.UNKNOWN;
 
     private TileEntityValve master;
-    private List<TileEntityTankFrame> tankFrames;
-    private List<TileEntityValve> otherValves;
+    public List<TileEntityTankFrame> tankFrames;
+    public List<TileEntityValve> otherValves;
 
     private Map<Position3D, ExtendedBlock>[] maps;
 
@@ -82,6 +83,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
      */
     private int[] length = new int[6];
     public Position3D bottomDiagFrame, topDiagFrame;
+    private int initialWaitTick = 20;
 
     // TANK LOGIC
     private FluidStack fluidStack;
@@ -98,6 +100,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     public void validate() {
         super.validate();
         initiated = true;
+        initialWaitTick = 20;
     }
 
     @Override
@@ -106,11 +109,25 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             return;
 
         if(initiated) {
-            initiated = false;
+            if (isMaster()) {
+                if(bottomDiagFrame != null && topDiagFrame != null) { // Potential fix for huge-ass tanks not loading properly on master-valve chunk load.
+                    Chunk chk = worldObj.getChunkFromBlockCoords(bottomDiagFrame.getX(), bottomDiagFrame.getZ());
+                    worldObj.getChunkProvider().loadChunk(chk.xPosition, chk.zPosition);
 
-            if(isMaster())
-                buildTank(inside);
+                    chk = worldObj.getChunkFromBlockCoords(topDiagFrame.getX(), topDiagFrame.getZ());
+                    worldObj.getChunkProvider().loadChunk(chk.xPosition, chk.zPosition);
+                }
+                if (initialWaitTick-- == 0) {
+                    initiated = false;
+                    buildTank(inside);
+                    return;
+                }
+            }
+        }
 
+        if(!isMaster() && master == null) {
+            isValid = false;
+            updateBlockAndNeighbors();
             return;
         }
 
@@ -174,6 +191,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if (worldObj.isRemote)
             return;
 
+        isValid = false;
+
         fluidCapacity = 0;
         tankFrames.clear();
         otherValves.clear();
@@ -203,8 +222,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 }
             }
         }
+
         for(int i=0; i<6; i += 2) {
-            if(length[i] + length[i + 1] - 2 > maxSize)
+            if(length[i] + length[i + 1] > maxSize)
                 return false;
         }
         return length[0] != -1;
@@ -478,6 +498,14 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             tankHeight = tag.getInteger("tankHeight");
             fluidCapacity = tag.getInteger("fluidCapacity");
         }
+        else {
+            if(master == null && tag.hasKey("masterValvePos")) {
+                int[] masterPos = tag.getIntArray("masterValvePos");
+                TileEntity tile = worldObj.getTileEntity(masterPos[0], masterPos[1], masterPos[2]);
+                if(tile != null && tile instanceof TileEntityValve)
+                    master = (TileEntityValve) tile;
+            }
+        }
 
         if(tag.hasKey("bottomDiagF")) {
             int[] bottomDiagF = tag.getIntArray("bottomDiagF");
@@ -503,6 +531,12 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             tag.setBoolean("autoOutput", autoOutput);
             tag.setInteger("tankHeight", tankHeight);
             tag.setInteger("fluidCapacity", fluidCapacity);
+        }
+        else {
+            if(master != null) {
+                int[] masterPos = new int[]{master.xCoord, master.yCoord, master.zCoord};
+                tag.setIntArray("masterValvePos", masterPos);
+            }
         }
 
         if(bottomDiagFrame != null && topDiagFrame != null) {
