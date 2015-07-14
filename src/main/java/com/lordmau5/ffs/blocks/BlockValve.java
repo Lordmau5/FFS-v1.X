@@ -11,11 +11,14 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import java.util.Random;
 
 /**
  * Created by Dustin on 28.06.2015.
@@ -27,6 +30,8 @@ public class BlockValve extends Block {
         setBlockName("blockValve");
         setBlockTextureName(FancyFluidStorage.modId + ":" + "blockValve");
         setCreativeTab(CreativeTabs.tabRedstone);
+        setHardness(5.0F); // Same hardness as an iron block
+        setResistance(10.0F); // Same as hardness
     }
 
     @Override
@@ -76,7 +81,11 @@ public class BlockValve extends Block {
             valve.buildTank(ForgeDirection.getOrientation(side).getOpposite());
         }
         return true;
+    }
 
+    @Override
+    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
+        return Item.getItemFromBlock(FancyFluidStorage.blockValve);
     }
 
     @SideOnly(Side.CLIENT)

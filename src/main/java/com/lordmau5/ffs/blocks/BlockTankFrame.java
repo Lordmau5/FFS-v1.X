@@ -12,12 +12,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
+
+import java.util.Random;
 
 /**
  * Created by Dustin on 02.07.2015.
@@ -45,9 +48,28 @@ public class BlockTankFrame extends Block implements IFacade {
         TileEntity tile = world.getTileEntity(x, y, z);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
+            for(ItemStack is : frame.getBlock().getBlock().getDrops(world, x, y, z, frame.getBlock().getMetadata(), 0)) {
+                dropBlockAsItem(world, x, y, z, is);
+            }
             frame.onBreak();
         }
         super.breakBlock(world, x, y, z, block, metadata);
+    }
+
+    @Override
+    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    {
+        return null;
+    }
+
+    @Override
+    public float getBlockHardness(World world, int x, int y, int z) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if(tile != null && tile instanceof TileEntityTankFrame) {
+            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
+            return frame.getBlock().getBlock().getBlockHardness(world, x, y, z);
+        }
+        return super.getBlockHardness(world, x, y, z);
     }
 
     @Override
