@@ -16,10 +16,7 @@ buildscript {
 }
 
 apply plugin: 'forge'
-<<<<<<< .merge_file_a08048
-=======
 apply plugin: 'curseforge'
->>>>>>> .merge_file_a06016
 idea.module.inheritOutputDirs = true
 
 repositories {
@@ -104,8 +101,6 @@ task deobfJar(type: Jar) {
 artifacts {
     archives sourceJar, deobfJar
 }
-<<<<<<< .merge_file_a08048
-=======
 
 curse {
     projectId='232683'
@@ -113,7 +108,6 @@ curse {
     displayName="FFS v$project.mod_version"
     changelog="https://github.com/Lordmau5/FFS/compare/$System.env.GIT_PREVIOUS_COMMIT...$System.env.GIT_COMMIT"
     releaseType='alpha'
-    
+
     additionalArtifact deobfJar
 }
->>>>>>> .merge_file_a06016
