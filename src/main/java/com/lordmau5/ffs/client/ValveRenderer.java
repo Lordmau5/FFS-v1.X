@@ -73,8 +73,6 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
 
                 preGL();
 
-                bindTexture(TextureMap.locationBlocksTexture);
-
                 IIcon flowing = FluidHelper.getFluidTexture(fluid.getFluid(), true);
                 IIcon still = FluidHelper.getFluidTexture(fluid.getFluid(), false);
 
@@ -96,6 +94,9 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
 
                             float flowMinV = flowMinV_;
                             if (renderHeight - rY < 1.0f) flowMinV += (flowMaxV - flowMinV_) * (1.0f - (renderHeight - rY));
+
+                            if(rY == 0)
+                                renderHeight = Math.max(0.01f, renderHeight);
 
                             float zMinOffset = 0;
                             float zMaxOffset = 0;
@@ -247,7 +248,7 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
             renderer.renderFaceZPos(block, x, y, z, isMaster ? FancyFluidStorage.proxy.tex_MasterValve[1] : FancyFluidStorage.proxy.tex_SlaveValve[1]);
         }
 
-        return false;
+        return true;
     }
 
     @Override

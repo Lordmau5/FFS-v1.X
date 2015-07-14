@@ -40,6 +40,7 @@ public class FancyFluidStorage {
 
     public int MB_PER_TANK_BLOCK = 16000;
     public boolean INSIDE_CAPACITY = false;
+    public int MAX_SIZE = 13;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -50,12 +51,16 @@ public class FancyFluidStorage {
         config.load();
 
         Property mbPerTankProp = config.get(Configuration.CATEGORY_GENERAL, "mbPerVirtualTank", 16000);
-        mbPerTankProp.comment = "How many millibuckets can each block within the tank store?";
+        mbPerTankProp.comment = "How many millibuckets can each block within the tank store?\nDefault: 16000";
         MB_PER_TANK_BLOCK = mbPerTankProp.getInt(16000);
 
-        Property insideCapacityProp = config.get(Configuration.CATEGORY_GENERAL, "onlyCountInsideCapacity", false);
-        insideCapacityProp.comment = "Should tank capacity only count the interior air blocks, rather than including the frame?";
-        INSIDE_CAPACITY = insideCapacityProp.getBoolean(false);
+        Property insideCapacityProp = config.get(Configuration.CATEGORY_GENERAL, "onlyCountInsideCapacity", true);
+        insideCapacityProp.comment = "Should tank capacity only count the interior air blocks, rather than including the frame?\nDefault: true";
+        INSIDE_CAPACITY = insideCapacityProp.getBoolean(true);
+
+        Property maxSizeProp = config.get(Configuration.CATEGORY_GENERAL, "maxSize", 13);
+        maxSizeProp.comment = "Define the maximum size a tank can have. This includes the whole tank, including the frame!\nMinimum: 3, Maximum: 32\nDefault: 13";
+        MAX_SIZE = Math.max(3, Math.min(MAX_SIZE, 32));
 
         if (config.hasChanged()) {
             config.save();

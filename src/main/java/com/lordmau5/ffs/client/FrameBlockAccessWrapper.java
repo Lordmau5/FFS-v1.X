@@ -23,6 +23,9 @@ public class FrameBlockAccessWrapper extends IBlockAccessHandler {
         TileEntity tile = getTileEntity(x, y, z);
         if(tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
+            if(frame.getBlock() == null)
+                return block;
+
             Block fac = frame.getBlock().getBlock();
             if(fac != null) {
                 block = fac;

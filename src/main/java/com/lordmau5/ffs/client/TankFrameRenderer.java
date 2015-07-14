@@ -41,12 +41,15 @@ public class TankFrameRenderer implements ISimpleBlockRenderingHandler {
         Tessellator.instance.addVertexWithUV(x, y, z, 0, 0);
         Tessellator.instance.addVertexWithUV(x, y, z, 0, 0);
 
-        boolean res;
         TileEntity tile = ba.getTileEntity(x, y, z);
         if (!(tile instanceof TileEntityTankFrame)) {
             return false;
         }
+
         TileEntityTankFrame te = (TileEntityTankFrame) tile;
+        if(te.getBlock() == null)
+            return false;
+
         Block exBlock = te.getBlock().getBlock();
         if (exBlock == null) {
             exBlock = block;
@@ -65,8 +68,7 @@ public class TankFrameRenderer implements ISimpleBlockRenderingHandler {
 
             rb.blockAccess = origBa;
         }
-        res = isFrameBlockOpaque;
-        return res;
+        return true;
     }
 
     @Override

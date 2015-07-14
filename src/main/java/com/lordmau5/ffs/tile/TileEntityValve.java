@@ -51,7 +51,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         IMoveCheck // Funky Locomotion
 {
 
-    private final int maxSize = 9;
+    private final int maxSize = FancyFluidStorage.instance.MAX_SIZE;
     protected int mbPerVirtualTank = FancyFluidStorage.instance.MB_PER_TANK_BLOCK;
 
     public boolean isValid;
@@ -202,6 +202,10 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     break;
                 }
             }
+        }
+        for(int i=0; i<6; i += 2) {
+            if(length[i] + length[i + 1] - 2 > maxSize)
+                return false;
         }
         return length[0] != -1;
     }
