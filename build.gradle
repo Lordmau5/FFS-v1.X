@@ -105,7 +105,7 @@ artifacts {
 curse {
     projectId='232683'
     apiKey=System.env.CURSE_API_KEY != null ? "$System.env.CURSE_API_KEY" : ''
-    displayName="FFS v$project.version"
+    displayName="FFS v$project.mod_version"
     changelog="https://github.com/Lordmau5/FFS/compare/$System.env.GIT_PREVIOUS_COMMIT...$System.env.GIT_COMMIT"
     releaseType='alpha'
     
