@@ -4,6 +4,8 @@ import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.client.ValveRenderer;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.GenericUtil;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -77,6 +79,7 @@ public class BlockValve extends Block {
 
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public int getRenderType() {
         return ValveRenderer.id;
