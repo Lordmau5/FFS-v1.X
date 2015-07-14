@@ -22,6 +22,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.*;
@@ -85,6 +86,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     // TANK LOGIC
     private FluidStack fluidStack;
     private int fluidCapacity = 0;
+    private int lastComparatorOut = 0;
     // ---------------
 
     public TileEntityValve() {
@@ -420,6 +422,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     ((IPipeTile) outsideTile).scheduleNeighborChange();
             }
         }
+        // notify change for comparators
+        worldObj.notifyBlockChange(xCoord, yCoord, zCoord, FancyFluidStorage.blockValve);
         worldObj.markBlockForUpdate(xCoord + outside.offsetX, yCoord + outside.offsetY, zCoord + outside.offsetZ);
     }
 
@@ -526,7 +530,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         writeToNBT(tag);
 
         if (!isMaster() && master != null) {
-            tag.setIntArray("masterValve", new int[] {master.xCoord, master.yCoord, master.zCoord});
+            tag.setIntArray("masterValve", new int[]{master.xCoord, master.yCoord, master.zCoord});
         }
 
         return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 0, tag);
@@ -534,10 +538,13 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     private void markForUpdate(boolean onlyThis) {
         if (!worldObj.isRemote) {
-            if(!onlyThis) {
+            if(!onlyThis || this.lastComparatorOut != getComparatorOutput()) {
+                this.lastComparatorOut = getComparatorOutput();
                 for (TileEntityValve valve : otherValves) {
                     valve.updateBlockAndNeighbors();
                 }
+            }
+            if (!onlyThis) {
                 for (TileEntityTankFrame frame : tankFrames)
                     worldObj.markBlockForUpdate(frame.xCoord, frame.yCoord, frame.zCoord);
             }
@@ -803,5 +810,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     @Override
     public boolean canMove(World worldObj, int x, int y, int z) {
         return false;
+    }
+
+    public int getComparatorOutput() {
+        return MathHelper.floor_float(((float) this.getFluidAmount() / this.getCapacity()) * 14.0F);
     }
 }

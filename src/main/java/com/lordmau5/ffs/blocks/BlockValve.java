@@ -115,4 +115,19 @@ public class BlockValve extends Block {
     public boolean isNormalCube() {
         return true;
     }
+
+    @Override
+    public boolean hasComparatorInputOverride() {
+        return true;
+    }
+
+    @Override
+    public int getComparatorInputOverride(World world, int x, int y, int z, int side) {
+        TileEntity te = world.getTileEntity(x, y, z);
+        if(te instanceof TileEntityValve) {
+            TileEntityValve valve = (TileEntityValve)te;
+            return valve.getComparatorOutput();
+        }
+        return 0;
+    }
 }
