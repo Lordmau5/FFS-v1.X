@@ -295,8 +295,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
         for(Map.Entry<Position3D, ExtendedBlock> airCheck : maps[2].entrySet()) {
             if(!worldObj.isAirBlock(airCheck.getKey().getX(), airCheck.getKey().getY(), airCheck.getKey().getZ())) {
-                if (airCheck.getValue().getBlock().getUnlocalizedName() == "railcraft.residual.heat")
+                if (airCheck.getValue().getBlock().getUnlocalizedName().equals("railcraft.residual.heat"))
                     continue; // Just to be /sure/ that railcraft isn't messing with us
+
                 return false;
             }
         }
@@ -317,19 +318,24 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             pos = insideFrameCheck.getKey();
             ExtendedBlock check = insideFrameCheck.getValue();
             TileEntity tile = worldObj.getTileEntity(pos.getX(), pos.getY(), pos.getZ());
-            if(check.equals(bottomDiagBlock) || GenericUtil.isBlockGlass(check.getBlock(), check.getMetadata()) || tile instanceof TileEntityTankFrame)
-                continue;
-            if(tile instanceof TileEntityValve) {
-                TileEntityValve valve = (TileEntityValve) tile;
-                if(valve == this)
-                    continue;
+            if(tile != null) {
+                if(tile instanceof TileEntityValve) {
+                    TileEntityValve valve = (TileEntityValve) tile;
+                    if (valve == this)
+                        continue;
 
-                if(valve.fluidStack != null) {
-                    this.fluidStack = valve.fluidStack;
+                    if (valve.fluidStack != null) {
+                        this.fluidStack = valve.fluidStack;
+                    }
+                    valves.add(valve);
+                    continue;
                 }
-                valves.add(valve);
-                continue;
+                return false;
             }
+
+            if(check.equals(bottomDiagBlock) || GenericUtil.isBlockGlass(check.getBlock(), check.getMetadata()))
+                continue;
+
             return false;
         }
 
