@@ -24,7 +24,7 @@ import net.minecraftforge.common.config.Property;
 /**
  * Created by Dustin on 28.06.2015.
  */
-@Mod(modid = FancyFluidStorage.modId, name = "Fancy Fluid Storage")
+@Mod(modid = FancyFluidStorage.modId, name = "Fancy Fluid Storage", dependencies="after:waila;after:chisel;after:OpenComputers;after:ComputerCraft;after:BuildCraftAPI|Transport;after:funkylocomotion")
 public class FancyFluidStorage {
 
     public static final String modId = "FFS";
