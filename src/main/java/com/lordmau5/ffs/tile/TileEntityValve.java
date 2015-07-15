@@ -111,11 +111,18 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(initiated) {
             if (isMaster()) {
                 if(bottomDiagFrame != null && topDiagFrame != null) { // Potential fix for huge-ass tanks not loading properly on master-valve chunk load.
-                    Chunk chk = worldObj.getChunkFromBlockCoords(bottomDiagFrame.getX(), bottomDiagFrame.getZ());
-                    worldObj.getChunkProvider().loadChunk(chk.xPosition, chk.zPosition);
+                    Chunk chunkBottom = worldObj.getChunkFromBlockCoords(bottomDiagFrame.getX(), bottomDiagFrame.getZ());
+                    Chunk chunkTop = worldObj.getChunkFromBlockCoords(topDiagFrame.getX(), topDiagFrame.getZ());
 
-                    chk = worldObj.getChunkFromBlockCoords(topDiagFrame.getX(), topDiagFrame.getZ());
-                    worldObj.getChunkProvider().loadChunk(chk.xPosition, chk.zPosition);
+                    Position3D pos_chunkBottom = new Position3D(chunkBottom.xPosition, 0, chunkBottom.zPosition);
+                    Position3D pos_chunkTop = new Position3D(chunkTop.xPosition, 0, chunkTop.zPosition);
+
+                    Position3D diff = pos_chunkTop.getDistance(pos_chunkBottom);
+                    for(int x = 0; x <= diff.getX(); x++) {
+                        for(int z = 0; z <= diff.getZ(); z++) {
+                            worldObj.getChunkProvider().loadChunk(pos_chunkTop.getX() + x, pos_chunkTop.getZ() + z);
+                        }
+                    }
                 }
                 if (initialWaitTick-- == 0) {
                     initiated = false;
