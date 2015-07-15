@@ -76,8 +76,8 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                 IIcon flowing = FluidHelper.getFluidTexture(fluid.getFluid(), true);
                 IIcon still = FluidHelper.getFluidTexture(fluid.getFluid(), false);
 
-                float flowMinU = flowing.getMinU(), flowMaxU = flowing.getMaxU(), flowMinV_ = flowing.getMinV(), flowMaxV = flowing.getMaxV();
                 float stillMinU = still.getMinU(), stillMaxU = still.getMaxU(), stillMinV = still.getMinV(), stillMaxV = still.getMaxV();
+                float flowMinU = flowing.getMinU(), flowMaxU = flowMinU + (stillMaxU - stillMinU), flowMinV_ = flowing.getMinV(), flowMaxV = flowMinV_ + (stillMaxV - stillMinV);
 
                 GL11.glTranslatef((float) x, (float) y, (float) z);
                 GL11.glTranslatef((float) (bottomDiag.getX() - tile.xCoord), (float) bottomDiag.getY() - tile.yCoord + 1, (float) (bottomDiag.getZ() - tile.zCoord));
