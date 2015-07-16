@@ -72,7 +72,7 @@ public class GenericUtil {
         if(blacklistedBlocks.contains(block))
             return false;
 
-        if(!block.isOpaqueCube() || !block.isBlockNormalCube())
+        if(!block.isOpaqueCube())
             return false;
 
         if(!block.func_149730_j() || !block.isNormalCube())
