@@ -58,28 +58,21 @@ public class BlockTankFrame extends Block implements IFacade {
                 int meta = frame.getBlock().getMetadata();
 
                 if(block.canSilkHarvest(world, player, x, y, z, meta) && EnchantmentHelper.getSilkTouchModifier(player)) {
+                    ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, true, player);
+
                     ItemStack itemstack = new ItemStack(Item.getItemFromBlock(block), 1, meta);
                     items.add(itemstack);
 
-                    ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, true, player);
                     for (ItemStack is : items)
                     {
                         this.dropBlockAsItem(world, x, y, z, is);
                     }
                 }
                 else {
-                    // Princess Vazkii wants to be special, so here we go with a special check just for her :)
-                    if(player.getHeldItem() != null && player.getHeldItem().getUnlocalizedName().equals("item.glassPick")) {
-                        ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, true, player);
-                        for (ItemStack is : items)
-                        {
-                            this.dropBlockAsItem(world, x, y, z, is);
-                        }
-                        frame.onBreak();
-                        return super.removedByPlayer(world, player, x, y, z, willHarvest);
-                    }
+                    ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, false, player);
 
-                    for (ItemStack is : block.getDrops(world, x, y, z, meta, 0))
+                    items.addAll(block.getDrops(world, x, y, z, meta, 0));
+                    for (ItemStack is : items)
                     {
                         this.dropBlockAsItem(world, x, y, z, is);
                     }
