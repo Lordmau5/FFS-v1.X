@@ -75,6 +75,7 @@ public class BlockTankFrame extends Block implements IFacade {
                         {
                             this.dropBlockAsItem(world, x, y, z, is);
                         }
+                        frame.onBreak();
                         return super.removedByPlayer(world, player, x, y, z, willHarvest);
                     }
 
