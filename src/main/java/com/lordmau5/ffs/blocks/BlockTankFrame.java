@@ -11,6 +11,7 @@ import cpw.mods.fml.common.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.particle.EffectRenderer;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -19,7 +20,9 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.event.ForgeEventFactory;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -44,16 +47,35 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public void breakBlock(World world, int x, int y, int z, Block block, int metadata) {
+    public boolean removedByPlayer(World world, EntityPlayer player, int x, int y, int z, boolean willHarvest) {
         TileEntity tile = world.getTileEntity(x, y, z);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
-            for(ItemStack is : frame.getBlock().getBlock().getDrops(world, x, y, z, frame.getBlock().getMetadata(), 0)) {
-                dropBlockAsItem(world, x, y, z, is);
+            if(!player.capabilities.isCreativeMode) {
+                ArrayList<ItemStack> items = new ArrayList<>();
+                Block block = frame.getBlock().getBlock();
+                int meta = frame.getBlock().getMetadata();
+                if(block.canSilkHarvest(world, player, x, y, z, meta) && EnchantmentHelper.getSilkTouchModifier(player)) {
+                    ItemStack itemstack = new ItemStack(Item.getItemFromBlock(block), 1, meta);
+                    items.add(itemstack);
+
+                    ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, true, player);
+                    for (ItemStack is : items)
+                    {
+                        this.dropBlockAsItem(world, x, y, z, is);
+                    }
+                }
+                else {
+                    ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, true, player);
+                    for (ItemStack is : items)
+                    {
+                        this.dropBlockAsItem(world, x, y, z, is);
+                    }
+                }
             }
             frame.onBreak();
         }
-        super.breakBlock(world, x, y, z, block, metadata);
+        return super.removedByPlayer(world, player, x, y, z, willHarvest);
     }
 
     @Override
@@ -63,13 +85,13 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public float getBlockHardness(World world, int x, int y, int z) {
+    public float getPlayerRelativeBlockHardness(EntityPlayer player, World world, int x, int y, int z) {
         TileEntity tile = world.getTileEntity(x, y, z);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
-            return frame.getBlock().getBlock().getBlockHardness(world, x, y, z);
+            return frame.getBlock().getBlock().getPlayerRelativeBlockHardness(player, world, x, y, z);
         }
-        return super.getBlockHardness(world, x, y, z);
+        return super.getPlayerRelativeBlockHardness(player, world, x, y, z);
     }
 
     @Override
