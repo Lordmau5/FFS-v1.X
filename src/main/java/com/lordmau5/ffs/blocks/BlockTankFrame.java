@@ -53,7 +53,7 @@ public class BlockTankFrame extends Block implements IFacade {
             TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
             if(!player.capabilities.isCreativeMode) {
                 ArrayList<ItemStack> items = new ArrayList<>();
-                
+
                 Block block = frame.getBlock().getBlock();
                 int meta = frame.getBlock().getMetadata();
 
@@ -68,8 +68,7 @@ public class BlockTankFrame extends Block implements IFacade {
                     }
                 }
                 else {
-                    ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, true, player);
-                    for (ItemStack is : items)
+                    for (ItemStack is : block.getDrops(world, x, y, z, meta, 0))
                     {
                         this.dropBlockAsItem(world, x, y, z, is);
                     }
