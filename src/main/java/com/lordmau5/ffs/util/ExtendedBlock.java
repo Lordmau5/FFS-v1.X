@@ -32,6 +32,10 @@ public class ExtendedBlock {
         return other.getBlock().getUnlocalizedName().equals(getBlock().getUnlocalizedName()) && other.getMetadata() == getMetadata();
     }
 
+    public boolean equalsIgnoreMetadata(ExtendedBlock block) {
+        return block.getBlock().getUnlocalizedName().equals(getBlock().getUnlocalizedName());
+    }
+
     @Override
     public String toString() {
         return getBlock().getUnlocalizedName() + ":" + getMetadata();

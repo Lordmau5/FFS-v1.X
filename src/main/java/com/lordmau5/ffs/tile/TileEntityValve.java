@@ -290,11 +290,11 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         ExtendedBlock topDiagBlock = new ExtendedBlock(worldObj.getBlock(topDiagFrame.getX(), topDiagFrame.getY(), topDiagFrame.getZ()),
                 worldObj.getBlockMetadata(topDiagFrame.getX(), topDiagFrame.getY(), topDiagFrame.getZ()));
 
-        if(!bottomDiagBlock.equals(topDiagBlock) || !GenericUtil.isValidTankBlock(worldObj, bottomDiagFrame, bottomDiagBlock))
+        if (!bottomDiagBlock.equals(topDiagBlock) && (!FancyFluidStorage.instance.ALLOW_DIFFERENT_METADATA || !bottomDiagBlock.equalsIgnoreMetadata(topDiagBlock)) && !GenericUtil.isValidTankBlock(worldObj, bottomDiagFrame, bottomDiagBlock))
             return false;
 
-        for(Map.Entry<Position3D, ExtendedBlock> airCheck : maps[2].entrySet()) {
-            if(!worldObj.isAirBlock(airCheck.getKey().getX(), airCheck.getKey().getY(), airCheck.getKey().getZ())) {
+        for (Map.Entry<Position3D, ExtendedBlock> airCheck : maps[2].entrySet()) {
+            if (!worldObj.isAirBlock(airCheck.getKey().getX(), airCheck.getKey().getY(), airCheck.getKey().getZ())) {
                 if (airCheck.getValue().getBlock().getUnlocalizedName().equals("railcraft.residual.heat"))
                     continue; // Just to be /sure/ that railcraft isn't messing with us
 
@@ -308,18 +308,18 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             fluidCapacity = (maps[0].size() + maps[1].size() + maps[2].size()) * mbPerVirtualTank;
         }
 
-        for(Map.Entry<Position3D, ExtendedBlock> frameCheck : maps[0].entrySet()) {
-            if(!frameCheck.getValue().equals(bottomDiagBlock))
+        for (Map.Entry<Position3D, ExtendedBlock> frameCheck : maps[0].entrySet()) {
+            if (!frameCheck.getValue().equals(bottomDiagBlock) && (!FancyFluidStorage.instance.ALLOW_DIFFERENT_METADATA || !frameCheck.getValue().equalsIgnoreMetadata(bottomDiagBlock)))
                 return false;
         }
 
         List<TileEntityValve> valves = new ArrayList<>();
-        for(Map.Entry<Position3D, ExtendedBlock> insideFrameCheck : maps[1].entrySet()) {
+        for (Map.Entry<Position3D, ExtendedBlock> insideFrameCheck : maps[1].entrySet()) {
             pos = insideFrameCheck.getKey();
             ExtendedBlock check = insideFrameCheck.getValue();
             TileEntity tile = worldObj.getTileEntity(pos.getX(), pos.getY(), pos.getZ());
-            if(tile != null) {
-                if(tile instanceof TileEntityValve) {
+            if (tile != null) {
+                if (tile instanceof TileEntityValve) {
                     TileEntityValve valve = (TileEntityValve) tile;
                     if (valve == this)
                         continue;
@@ -333,7 +333,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 return false;
             }
 
-            if(check.equals(bottomDiagBlock) || GenericUtil.isBlockGlass(check.getBlock(), check.getMetadata()))
+            if (check.equals(bottomDiagBlock) || FancyFluidStorage.instance.ALLOW_DIFFERENT_METADATA && check.equalsIgnoreMetadata(bottomDiagBlock) || GenericUtil.isBlockGlass(check.getBlock(), check.getMetadata()))
                 continue;
 
             return false;
@@ -343,7 +343,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if (this.fluidStack != null)
             this.fluidStack.amount = Math.min(this.fluidStack.amount, this.fluidCapacity);
 
-        for(TileEntityValve valve : valves) {
+        for (TileEntityValve valve : valves) {
             pos = new Position3D(valve.xCoord, valve.yCoord, valve.zCoord);
             valve.valveHeightPosition = Math.abs(bottomDiagFrame.getDistance(pos).getY());
 
@@ -353,35 +353,33 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         }
         isMaster = true;
 
-        for(Map.Entry<Position3D, ExtendedBlock> setTiles : maps[0].entrySet()) {
+        for (Map.Entry<Position3D, ExtendedBlock> setTiles : maps[0].entrySet()) {
             pos = setTiles.getKey();
             TileEntityTankFrame tankFrame;
-            if(setTiles.getValue().getBlock() != FancyFluidStorage.blockTankFrame) {
+            if (setTiles.getValue().getBlock() != FancyFluidStorage.blockTankFrame) {
                 tankFrame = new TileEntityTankFrame(this, setTiles.getValue());
                 worldObj.setBlock(pos.getX(), pos.getY(), pos.getZ(), FancyFluidStorage.blockTankFrame, setTiles.getValue().getMetadata(), 2);
                 worldObj.setTileEntity(pos.getX(), pos.getY(), pos.getZ(), tankFrame);
                 tankFrame.markForUpdate();
-            }
-            else {
+            } else {
                 tankFrame = (TileEntityTankFrame) worldObj.getTileEntity(pos.getX(), pos.getY(), pos.getZ());
                 tankFrame.setValve(this);
             }
             tankFrames.add(tankFrame);
         }
 
-        for(Map.Entry<Position3D, ExtendedBlock> setTiles : maps[1].entrySet()) {
+        for (Map.Entry<Position3D, ExtendedBlock> setTiles : maps[1].entrySet()) {
             pos = setTiles.getKey();
             TileEntity tile = worldObj.getTileEntity(pos.getX(), pos.getY(), pos.getZ());
-            if(tile != null) {
-                if(tile instanceof TileEntityValve && tile != this)
+            if (tile != null) {
+                if (tile instanceof TileEntityValve && tile != this)
                     otherValves.add((TileEntityValve) tile);
 
-                if(tile instanceof TileEntityTankFrame) {
+                if (tile instanceof TileEntityTankFrame) {
                     ((TileEntityTankFrame) tile).setValve(this);
                     tankFrames.add((TileEntityTankFrame) tile);
                 }
-            }
-            else {
+            } else {
                 TileEntityTankFrame tankFrame = new TileEntityTankFrame(this, setTiles.getValue());
                 worldObj.setBlock(pos.getX(), pos.getY(), pos.getZ(), FancyFluidStorage.blockTankFrame, setTiles.getValue().getMetadata(), 2);
                 worldObj.setTileEntity(pos.getX(), pos.getY(), pos.getZ(), tankFrame);

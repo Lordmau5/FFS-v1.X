@@ -41,6 +41,7 @@ public class FancyFluidStorage {
     public int MB_PER_TANK_BLOCK = 16000;
     public boolean INSIDE_CAPACITY = false;
     public int MAX_SIZE = 13;
+    public boolean ALLOW_DIFFERENT_METADATA = false;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -61,6 +62,10 @@ public class FancyFluidStorage {
         Property maxSizeProp = config.get(Configuration.CATEGORY_GENERAL, "maxSize", 13);
         maxSizeProp.comment = "Define the maximum size a tank can have. This includes the whole tank, including the frame!\nMinimum: 3, Maximum: 32\nDefault: 13";
         MAX_SIZE = Math.max(3, Math.min(maxSizeProp.getInt(), 32));
+
+        Property diffMetaProp = config.get(Configuration.CATEGORY_GENERAL, "allowDifferentMetadata", false);
+        diffMetaProp.comment = "Allow different metadata of the same block for the tank frames. This can be useful for mods like Chisel.\nDefault: false";
+        ALLOW_DIFFERENT_METADATA = diffMetaProp.getBoolean(false);
 
         if (config.hasChanged()) {
             config.save();
