@@ -22,7 +22,6 @@ public class UpdateAutoOutput_Server extends SimpleChannelInboundHandler<ffsPack
             TileEntity tile = world.getTileEntity(msg.x, msg.y, msg.z);
             if(tile != null && tile instanceof TileEntityValve) {
                 ((TileEntityValve) tile).setAutoOutput(msg.autoOutput);
-                NetworkHandler.sendPacketToPlayer(new ffsPacket.Client.UpdateAutoOutput(msg.x, msg.y, msg.z, msg.autoOutput), NetworkHandler.getPlayer(ctx));
             }
         }
     }
