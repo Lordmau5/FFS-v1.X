@@ -588,19 +588,17 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     private void markForUpdate(boolean onlyThis) {
-        if (!worldObj.isRemote) {
-            if(!onlyThis || this.lastComparatorOut != getComparatorOutput()) {
-                this.lastComparatorOut = getComparatorOutput();
-                for (TileEntityValve valve : otherValves) {
-                    valve.updateBlockAndNeighbors();
-                }
+        if(!onlyThis || this.lastComparatorOut != getComparatorOutput()) {
+            this.lastComparatorOut = getComparatorOutput();
+            for (TileEntityValve valve : otherValves) {
+                valve.updateBlockAndNeighbors();
             }
-            if (!onlyThis) {
-                for (TileEntityTankFrame frame : tankFrames)
-                    worldObj.markBlockForUpdate(frame.xCoord, frame.yCoord, frame.zCoord);
-            }
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
         }
+        if (!onlyThis) {
+            for (TileEntityTankFrame frame : tankFrames)
+                worldObj.markBlockForUpdate(frame.xCoord, frame.yCoord, frame.zCoord);
+        }
+        worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
     }
 
     @Override
