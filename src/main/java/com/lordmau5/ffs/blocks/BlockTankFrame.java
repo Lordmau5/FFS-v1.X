@@ -55,6 +55,8 @@ public class BlockTankFrame extends Block implements IFacade {
                 ArrayList<ItemStack> items = new ArrayList<>();
                 Block block = frame.getBlock().getBlock();
                 int meta = frame.getBlock().getMetadata();
+
+                items.addAll(block.getDrops(world, x, y, z, meta, 0));
                 if(block.canSilkHarvest(world, player, x, y, z, meta) && EnchantmentHelper.getSilkTouchModifier(player)) {
                     ItemStack itemstack = new ItemStack(Item.getItemFromBlock(block), 1, meta);
                     items.add(itemstack);
