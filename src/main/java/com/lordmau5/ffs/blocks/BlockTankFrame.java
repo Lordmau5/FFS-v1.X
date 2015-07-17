@@ -68,6 +68,16 @@ public class BlockTankFrame extends Block implements IFacade {
                     }
                 }
                 else {
+                    // Princess Vazkii wants to be special, so here we go with a special check just for her :)
+                    if(player.getHeldItem() != null && player.getHeldItem().getUnlocalizedName().equals("item.glassPick")) {
+                        ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, true, player);
+                        for (ItemStack is : items)
+                        {
+                            this.dropBlockAsItem(world, x, y, z, is);
+                        }
+                        return super.removedByPlayer(world, player, x, y, z, willHarvest);
+                    }
+
                     for (ItemStack is : block.getDrops(world, x, y, z, meta, 0))
                     {
                         this.dropBlockAsItem(world, x, y, z, is);
