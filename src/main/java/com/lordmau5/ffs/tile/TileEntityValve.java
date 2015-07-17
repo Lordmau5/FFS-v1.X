@@ -438,9 +438,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     private void updateBlockAndNeighbors() {
-        if(worldObj.isRemote)
-            return;
-
         this.markForUpdate(false);
 
         if(otherValves != null) {
