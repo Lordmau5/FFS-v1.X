@@ -12,8 +12,6 @@ public class PacketCodec extends FMLIndexedMessageToMessageCodec<ffsPacket> {
     int lastDiscriminator = 0;
 
     public PacketCodec(){
-        addPacket(ffsPacket.Client.UpdateAutoOutput.class);
-
         addPacket(ffsPacket.Server.UpdateAutoOutput.class);
     }
 

@@ -1,6 +1,5 @@
 package com.lordmau5.ffs.network;
 
-import com.lordmau5.ffs.network.handlers.client.UpdateAutoOutput_Client;
 import com.lordmau5.ffs.network.handlers.server.UpdateAutoOutput_Server;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.FMLEmbeddedChannel;
@@ -40,8 +39,6 @@ public class NetworkHandler {
     private static void registerClientHandlers(){
         ChannelPipeline pipeline = channels.get(Side.CLIENT).pipeline();
         String targetName = channels.get(Side.CLIENT).findChannelHandlerNameForType(PacketCodec.class);
-
-        pipeline.addAfter(targetName, "UpdateAutoOutput_Client", new UpdateAutoOutput_Client());
     }
 
     public static Packet getProxyPacket(ffsPacket packet){
