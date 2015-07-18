@@ -38,8 +38,11 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     public void updateEntity() {
         super.updateEntity();
 
-        if(masterValve == null && hasValve)
-            setValve((TileEntityValve) worldObj.getTileEntity(valveX, valveY, valveZ));
+        if(masterValve == null && hasValve) {
+            TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
+            if(tile != null && tile instanceof TileEntityValve)
+                setValve((TileEntityValve) tile);
+        }
     }
 
     public void breakFrame() {
