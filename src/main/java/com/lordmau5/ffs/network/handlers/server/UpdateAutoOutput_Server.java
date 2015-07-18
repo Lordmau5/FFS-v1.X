@@ -6,7 +6,6 @@ import com.lordmau5.ffs.network.ffsPacket;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
@@ -17,7 +16,7 @@ public class UpdateAutoOutput_Server extends SimpleChannelInboundHandler<ffsPack
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ffsPacket.Server.UpdateAutoOutput msg) throws Exception{
-        World world = MinecraftServer.getServer().worldServerForDimension(NetworkHandler.getPlayer(ctx).dimension);
+        World world = NetworkHandler.getPlayer(ctx).worldObj;
         if(world != null) {
             TileEntity tile = world.getTileEntity(msg.x, msg.y, msg.z);
             if(tile != null && tile instanceof TileEntityValve) {
