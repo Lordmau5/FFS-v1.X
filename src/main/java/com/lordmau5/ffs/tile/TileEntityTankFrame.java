@@ -23,7 +23,7 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     private ExtendedBlock block;
     private int valveX, valveY, valveZ;
     private TileEntityValve masterValve;
-    private boolean initiated = false;
+    private boolean hasValve = false;
 
     public TileEntityTankFrame() {
         super();
@@ -38,21 +38,16 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     public void updateEntity() {
         super.updateEntity();
 
-        if(!initiated) {
-            if(masterValve == null) {
-                TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
-                if(tile != null && tile instanceof TileEntityValve) {
-                    masterValve = (TileEntityValve) tile;
-                    if (!masterValve.tankFrames.contains(this) && !worldObj.isRemote) {
-                        worldObj.removeTileEntity(xCoord, yCoord, zCoord);
-                        worldObj.setBlock(xCoord, yCoord, zCoord, block.getBlock(), block.getMetadata(), 2);
-                        return;
-                    }
-                }
-            }
-            initiated = true;
-            markForUpdate();
-        }
+        if(masterValve == null && hasValve)
+            setValve((TileEntityValve) worldObj.getTileEntity(valveX, valveY, valveZ));
+    }
+
+    public void breakFrame() {
+        worldObj.removeTileEntity(xCoord, yCoord, zCoord);
+        if(block != null && block.getBlock() != null)
+            worldObj.setBlock(xCoord, yCoord, zCoord, block.getBlock(), block.getMetadata(), 2);
+        else
+            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
     }
 
     public void onBreak() {
@@ -81,9 +76,10 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
             valveX = tag.getInteger("valveX");
             valveY = tag.getInteger("valveY");
             valveZ = tag.getInteger("valveZ");
+            hasValve = true;
         }
         if(tag.hasKey("blockId")) {
-            block = new ExtendedBlock(Block.getBlockById(tag.getInteger("blockId")), tag.getInteger("metadata"));
+            this.block = new ExtendedBlock(Block.getBlockById(tag.getInteger("blockId")), tag.getInteger("metadata"));
         }
     }
 
@@ -91,14 +87,14 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     public void writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
 
-        if(masterValve != null) {
-            tag.setInteger("valveX", masterValve.xCoord);
-            tag.setInteger("valveY", masterValve.yCoord);
-            tag.setInteger("valveZ", masterValve.zCoord);
+        if(getValve() != null) {
+            tag.setInteger("valveX", getValve().xCoord);
+            tag.setInteger("valveY", getValve().yCoord);
+            tag.setInteger("valveZ", getValve().zCoord);
         }
-        if(block != null) {
-            tag.setInteger("blockId", Block.getIdFromBlock(block.getBlock()));
-            tag.setInteger("metadata", block.getMetadata());
+        if(getBlock() != null) {
+            tag.setInteger("blockId", Block.getIdFromBlock(getBlock().getBlock()));
+            tag.setInteger("metadata", getBlock().getMetadata());
         }
     }
 

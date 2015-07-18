@@ -123,6 +123,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                             worldObj.getChunkProvider().loadChunk(pos_chunkTop.getX() + x, pos_chunkTop.getZ() + z);
                         }
                     }
+
+                    updateBlockAndNeighbors();
                 }
                 if (initialWaitTick-- == 0) {
                     initiated = false;
@@ -213,6 +215,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(!setupTank())
             return;
 
+        initiated = false;
         updateBlockAndNeighbors();
     }
 
@@ -330,6 +333,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     valves.add(valve);
                     continue;
                 }
+                else if (tile instanceof TileEntityTankFrame) {
+                    continue;
+                }
                 return false;
             }
 
@@ -407,6 +413,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             valve.fluidStack = getFluid();
             valve.master = null;
             valve.isValid = false;
+            valve.autoOutput = autoOutput;
             valve.updateBlockAndNeighbors();
         }
 
@@ -414,21 +421,14 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             if(frame == tankFrame)
                 continue;
 
-            ExtendedBlock block = tankFrame.getBlock();
-            Position3D pos = new Position3D(tankFrame.xCoord, tankFrame.yCoord, tankFrame.zCoord);
-            if(block == null || worldObj.isAirBlock(pos.getX(), pos.getY(), pos.getZ()))
-                continue;
-
-            worldObj.removeTileEntity(tankFrame.xCoord, tankFrame.yCoord, tankFrame.zCoord);
-            worldObj.setBlock(pos.getX(), pos.getY(), pos.getZ(), block.getBlock(), block.getMetadata(), 2);
+            tankFrame.breakFrame();
         }
+        tankFrames = new ArrayList<>();
+        otherValves = new ArrayList<>();
 
         isValid = false;
 
         this.updateBlockAndNeighbors();
-
-        otherValves = new ArrayList<>();
-        tankFrames = new ArrayList<>();
     }
 
     public boolean isValid() {
@@ -436,7 +436,14 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     private void updateBlockAndNeighbors() {
-        this.markForUpdate(false);
+        updateBlockAndNeighbors(false);
+    }
+
+    private void updateBlockAndNeighbors(boolean onlyThis) {
+        if(worldObj.isRemote)
+            return;
+
+        this.markForUpdate(onlyThis);
 
         if(otherValves != null) {
             for(TileEntityValve otherValve : otherValves) {
@@ -483,7 +490,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         }
 
         this.autoOutput = autoOutput;
-        updateBlockAndNeighbors();
+        updateBlockAndNeighbors(true);
     }
 
     @Override
@@ -507,8 +514,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             fluidCapacity = tag.getInteger("fluidCapacity");
         }
         else {
-            if(master == null && tag.hasKey("masterValvePos")) {
-                int[] masterPos = tag.getIntArray("masterValvePos");
+            if(master == null && tag.hasKey("masterValve")) {
+                int[] masterPos = tag.getIntArray("masterValve");
                 TileEntity tile = worldObj.getTileEntity(masterPos[0], masterPos[1], masterPos[2]);
                 if(tile != null && tile instanceof TileEntityValve)
                     master = (TileEntityValve) tile;
@@ -543,7 +550,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         else {
             if(master != null) {
                 int[] masterPos = new int[]{master.xCoord, master.yCoord, master.zCoord};
-                tag.setIntArray("masterValvePos", masterPos);
+                tag.setIntArray("masterValve", masterPos);
             }
         }
 
