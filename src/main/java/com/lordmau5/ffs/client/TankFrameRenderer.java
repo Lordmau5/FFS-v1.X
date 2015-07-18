@@ -46,26 +46,33 @@ public class TankFrameRenderer implements ISimpleBlockRenderingHandler {
             return false;
         }
 
-        TileEntityTankFrame te = (TileEntityTankFrame) tile;
-        if(te.getBlock() == null)
-            return false;
+        boolean invalidRender = true;
+        Block renderBlock = Blocks.stone;
 
-        Block exBlock = te.getBlock().getBlock();
-        if (exBlock == null) {
-            exBlock = block;
+        TileEntityTankFrame te = (TileEntityTankFrame) tile;
+        if(te.getBlock() != null) {
+            Block exBlock = te.getBlock().getBlock();
+            if (exBlock != null) {
+                renderBlock = exBlock;
+                invalidRender = false;
+            }
         }
 
         IBlockAccess origBa = rb.blockAccess;
-        boolean isFrameBlockOpaque = exBlock.isOpaqueCube();
+        boolean isFrameBlockOpaque = renderBlock.isOpaqueCube();
 
-        if (((isFrameBlockOpaque || exBlock.canRenderInPass(0)) && pass == 0) || ((!isFrameBlockOpaque || exBlock.canRenderInPass(1)) && pass == 1)) {
-            rb.blockAccess = new FrameBlockAccessWrapper(origBa);
-            try {
-                rb.renderBlockByRenderType(exBlock, x, y, z);
-            } catch (Exception e) {
-                rb.renderStandardBlock(Blocks.stone, x, y, z);
+        if (((isFrameBlockOpaque || renderBlock.canRenderInPass(0)) && pass == 0) || ((!isFrameBlockOpaque || renderBlock.canRenderInPass(1)) && pass == 1)) {
+            if(invalidRender) {
+                rb.renderStandardBlock(renderBlock, x, y, z);
             }
-
+            else {
+                rb.blockAccess = new FrameBlockAccessWrapper(origBa);
+                try {
+                    rb.renderBlockByRenderType(renderBlock, x, y, z);
+                } catch (Exception e) {
+                    rb.renderStandardBlock(Blocks.stone, x, y, z);
+                }
+            }
             rb.blockAccess = origBa;
         }
         return true;
