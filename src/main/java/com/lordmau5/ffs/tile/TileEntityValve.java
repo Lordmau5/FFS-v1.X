@@ -57,6 +57,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     public boolean isValid;
     private boolean isMaster;
+    private int[] masterValvePos;
     private boolean initiated;
 
     public int tankHeight = 0;
@@ -135,9 +136,16 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         }
 
         if(!isMaster() && master == null) {
-            isValid = false;
-            updateBlockAndNeighbors();
-            return;
+            if(masterValvePos != null) {
+                TileEntity tile = worldObj.getTileEntity(masterValvePos[0], masterValvePos[1], masterValvePos[2]);
+                if(tile != null && tile instanceof TileEntityValve)
+                    master = (TileEntityValve) tile;
+            }
+            else {
+                isValid = false;
+                updateBlockAndNeighbors();
+                return;
+            }
         }
 
         if(!isValid())
@@ -515,10 +523,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         }
         else {
             if(master == null && tag.hasKey("masterValve")) {
-                int[] masterPos = tag.getIntArray("masterValve");
-                TileEntity tile = worldObj.getTileEntity(masterPos[0], masterPos[1], masterPos[2]);
-                if(tile != null && tile instanceof TileEntityValve)
-                    master = (TileEntityValve) tile;
+                masterValvePos = tag.getIntArray("masterValve");
             }
         }
 
