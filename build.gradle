@@ -41,16 +41,20 @@ repositories {
         name "BuildCraft"
         artifactPattern "http://www.mod-buildcraft.com/releases/BuildCraft/[revision]/[module]-[revision]-dev.[ext]"
     }
-}
-
-repositories { // I'm sorry, but this is necessary for Redstone in Motion ...
-   flatDir {
-       dirs 'libs'
-   }
+    ivy { // Remain In Motion
+        name "RemainInMotion"
+        artifactPattern "http://addons-origin.cursecdn.com/files/2248/197/[module]-[revision].[ext]"
+    }
+    ivy { // PlanetguyLib (For RiM)
+        name "PlanetguyLib"
+        artifactPattern "http://addons-origin.cursecdn.com/files/2248/190/[module]-[revision].[ext]"
+    }
 }
 
 dependencies {
     compile name: "buildcraft", version: "${buildcraft_version}"
+    compile name: "PlanetguyLib", version: "${pglib_version}"
+    compile name: "RemainInMotion", version: "${rim_version}"
     compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev:dev"
 
     compile "com.cricketcraft.chisel:Chisel2:${chisel_version}:deobf"
