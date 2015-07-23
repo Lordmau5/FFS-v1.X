@@ -3,6 +3,7 @@ package com.lordmau5.ffs.tile;
 import buildcraft.api.transport.IPipeConnection;
 import buildcraft.api.transport.IPipeTile;
 import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.blocks.BlockTankFrame;
 import com.lordmau5.ffs.util.ExtendedBlock;
 import com.lordmau5.ffs.util.GenericUtil;
 import com.lordmau5.ffs.util.Position3D;
@@ -87,7 +88,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
      */
     private int[] length = new int[6];
     public Position3D bottomDiagFrame, topDiagFrame;
-    private int initialWaitTick = 20;
+    public int initialWaitTick = 20;
 
     // TANK LOGIC
     private FluidStack fluidStack;
@@ -136,7 +137,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
                     updateBlockAndNeighbors();
                 }
-                if (initialWaitTick-- == 0) {
+                if (initialWaitTick-- <= 0) {
                     initiated = false;
                     buildTank(inside);
                     return;
@@ -205,7 +206,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         return isMaster() ? tankHeight : getMaster().tankHeight;
     }
 
-    private void setInside(ForgeDirection inside) {
+    public void setInside(ForgeDirection inside) {
         this.inside = inside;
     }
 
@@ -236,7 +237,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         updateBlockAndNeighbors();
     }
 
-    private boolean calculateInside() {
+    public boolean calculateInside() {
         int xIn = xCoord + inside.offsetX;
         int yIn = yCoord + inside.offsetY;
         int zIn = zCoord + inside.offsetZ;
@@ -284,18 +285,21 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         }
     }
 
-    private void fetchMaps() {
+    public void updateCornerFrames() {
         bottomDiagFrame = new Position3D(xCoord + inside.offsetX + length[ForgeDirection.WEST.ordinal()] * ForgeDirection.WEST.offsetX + ForgeDirection.WEST.offsetX,
                 yCoord + inside.offsetY + length[ForgeDirection.DOWN.ordinal()] * ForgeDirection.DOWN.offsetY + ForgeDirection.DOWN.offsetY,
                 zCoord + inside.offsetZ + length[ForgeDirection.NORTH.ordinal()] * ForgeDirection.NORTH.offsetZ + ForgeDirection.NORTH.offsetZ);
         topDiagFrame = new Position3D(xCoord + inside.offsetX + length[ForgeDirection.EAST.ordinal()] * ForgeDirection.EAST.offsetX + ForgeDirection.EAST.offsetX,
                 yCoord + inside.offsetY + length[ForgeDirection.UP.ordinal()] * ForgeDirection.UP.offsetY + ForgeDirection.UP.offsetY,
                 zCoord + inside.offsetZ + length[ForgeDirection.SOUTH.ordinal()] * ForgeDirection.SOUTH.offsetZ + ForgeDirection.SOUTH.offsetZ);
+    }
 
+    private void fetchMaps() {
         maps = GenericUtil.getTankFrame(worldObj, bottomDiagFrame, topDiagFrame);
     }
 
     private boolean setupTank() {
+        updateCornerFrames();
         fetchMaps();
 
         otherValves = new ArrayList<>();
@@ -309,6 +313,18 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 worldObj.getBlockMetadata(bottomDiagFrame.getX(), bottomDiagFrame.getY(), bottomDiagFrame.getZ()));
         ExtendedBlock topDiagBlock = new ExtendedBlock(worldObj.getBlock(topDiagFrame.getX(), topDiagFrame.getY(), topDiagFrame.getZ()),
                 worldObj.getBlockMetadata(topDiagFrame.getX(), topDiagFrame.getY(), topDiagFrame.getZ()));
+
+        if(bottomDiagBlock.getBlock() instanceof BlockTankFrame) {
+            TileEntity tile = worldObj.getTileEntity(bottomDiagFrame.getX(), bottomDiagFrame.getY(), bottomDiagFrame.getZ());
+            if(tile != null && tile instanceof TileEntityTankFrame)
+                bottomDiagBlock = ((TileEntityTankFrame) tile).getBlock();
+        }
+
+        if(topDiagBlock.getBlock() instanceof BlockTankFrame) {
+            TileEntity tile = worldObj.getTileEntity(topDiagFrame.getX(), topDiagFrame.getY(), topDiagFrame.getZ());
+            if(tile != null && tile instanceof TileEntityTankFrame)
+                topDiagBlock = ((TileEntityTankFrame) tile).getBlock();
+        }
 
         if (!bottomDiagBlock.equals(topDiagBlock) && (!FancyFluidStorage.instance.ALLOW_DIFFERENT_METADATA || !bottomDiagBlock.equalsIgnoreMetadata(topDiagBlock)) && !GenericUtil.isValidTankBlock(worldObj, bottomDiagFrame, bottomDiagBlock))
             return false;
@@ -329,7 +345,14 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         }
 
         for (Map.Entry<Position3D, ExtendedBlock> frameCheck : maps[0].entrySet()) {
-            if (!frameCheck.getValue().equals(bottomDiagBlock) && (!FancyFluidStorage.instance.ALLOW_DIFFERENT_METADATA || !frameCheck.getValue().equalsIgnoreMetadata(bottomDiagBlock)))
+            Position3D fPos = frameCheck.getKey();
+            ExtendedBlock fBlock = frameCheck.getValue();
+            if(fBlock.getBlock() instanceof BlockTankFrame) {
+                TileEntity tile = worldObj.getTileEntity(fPos.getX(), fPos.getY(), fPos.getZ());
+                if(tile != null && tile instanceof TileEntityTankFrame)
+                    fBlock = ((TileEntityTankFrame) tile).getBlock();
+            }
+            if (!fBlock.equals(bottomDiagBlock) && (!FancyFluidStorage.instance.ALLOW_DIFFERENT_METADATA || !fBlock.equalsIgnoreMetadata(bottomDiagBlock)))
                 return false;
         }
 
@@ -452,11 +475,11 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         return isValid;
     }
 
-    private void updateBlockAndNeighbors() {
+    public void updateBlockAndNeighbors() {
         updateBlockAndNeighbors(false);
     }
 
-    private void updateBlockAndNeighbors(boolean onlyThis) {
+    public void updateBlockAndNeighbors(boolean onlyThis) {
         if(worldObj.isRemote)
             return;
 
@@ -520,7 +543,10 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         isMaster = tag.getBoolean("master");
         if(isMaster()) {
             if(tag.getBoolean("hasFluid")) {
-                fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getInteger("fluidID")), tag.getInteger("fluidAmount"));
+                if(tag.hasKey("fluidID"))
+                    fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getInteger("fluidID")), tag.getInteger("fluidAmount"));
+                else if(tag.hasKey("fluidName"))
+                    fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getString("fluidName")), tag.getInteger("fluidAmount"));
             }
             else {
                 fluidStack = null;
@@ -553,7 +579,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(isMaster()) {
             tag.setBoolean("hasFluid", fluidStack != null);
             if(fluidStack != null) {
-                tag.setInteger("fluidID", fluidStack.getFluidID());
+                tag.setString("fluidName", FluidRegistry.getFluidName(fluidStack));
                 tag.setInteger("fluidAmount", fluidStack.amount);
             }
 
@@ -611,8 +637,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             }
         }
         if (!onlyThis) {
-            for (TileEntityTankFrame frame : tankFrames)
-                worldObj.markBlockForUpdate(frame.xCoord, frame.yCoord, frame.zCoord);
+            for (TileEntityTankFrame frame : tankFrames) {
+                frame.markForUpdate();
+            }
         }
         worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
     }

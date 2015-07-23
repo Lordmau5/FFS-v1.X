@@ -13,6 +13,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -49,6 +50,16 @@ public class BlockValve extends Block {
         super.registerBlockIcons(iR);
 
         FancyFluidStorage.proxy.registerIcons(iR);
+    }
+
+    @Override
+    public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if(tile != null && tile instanceof TileEntityValve) {
+            TileEntityValve valve = (TileEntityValve) world.getTileEntity(x, y, z);
+            valve.breakTank(null);
+        }
+        super.onBlockDestroyedByExplosion(world, x, y, z, explosion);
     }
 
     @Override

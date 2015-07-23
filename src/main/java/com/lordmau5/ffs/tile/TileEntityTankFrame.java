@@ -9,6 +9,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
 /**
@@ -21,9 +22,10 @@ import net.minecraft.world.World;
 public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
 
     private ExtendedBlock block;
-    private int valveX, valveY, valveZ;
+    public int valveX, valveY, valveZ;
     private TileEntityValve masterValve;
     private boolean hasValve = false;
+    private int prevLightValue = 0;
 
     public TileEntityTankFrame() {
         super();
@@ -36,7 +38,17 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
 
     @Override
     public void updateEntity() {
-        super.updateEntity();
+        if(worldObj.isRemote) {
+            if(getValve() != null) {
+                int brightness = getValve().getFluidLuminosity();
+                if(prevLightValue != brightness) {
+                    prevLightValue = brightness;
+                    worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+                }
+                return;
+            }
+            return;
+        }
 
         if(masterValve == null && hasValve) {
             TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
@@ -45,7 +57,15 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
         }
     }
 
+    public boolean isFrameInvalid() {
+        TileEntity tile = worldObj.getTileEntity(xCoord, yCoord, zCoord);
+        return tile == null || !(tile instanceof TileEntityTankFrame) || tile != this;
+    }
+
     public void breakFrame() {
+        if(isFrameInvalid())
+            return;
+
         worldObj.removeTileEntity(xCoord, yCoord, zCoord);
         if(block != null && block.getBlock() != null)
             worldObj.setBlock(xCoord, yCoord, zCoord, block.getBlock(), block.getMetadata(), 2);
@@ -64,7 +84,16 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     }
 
     public TileEntityValve getValve() {
+        if(this.masterValve == null && hasValve) {
+            TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
+            if(tile != null && tile instanceof TileEntityValve)
+                setValve((TileEntityValve) tile);
+        }
         return this.masterValve;
+    }
+
+    public void setBlock(ExtendedBlock block) {
+        this.block = block;
     }
 
     public ExtendedBlock getBlock() {
@@ -114,7 +143,7 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
         return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 0, tag);
     }
 
-    void markForUpdate() {
+    public void markForUpdate() {
         worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
     }
 

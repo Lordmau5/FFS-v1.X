@@ -17,9 +17,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.ForgeEventFactory;
 
 import java.util.ArrayList;
@@ -44,6 +46,18 @@ public class BlockTankFrame extends Block implements IFacade {
     @Override
     public TileEntity createTileEntity(World world, int metadata) {
         return new TileEntityTankFrame();
+    }
+
+    @Override
+    public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if(tile != null && tile instanceof TileEntityTankFrame) {
+            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
+            frame.setBlock(null);
+            frame.breakFrame();
+            frame.onBreak();
+        }
+        super.onBlockDestroyedByExplosion(world, x, y, z, explosion);
     }
 
     @Override
@@ -182,6 +196,28 @@ public class BlockTankFrame extends Block implements IFacade {
                 return block.getBlock().getPickBlock(target, world, x, y, z, player);
         }
         return null;
+    }
+
+    public int getFlammability(IBlockAccess world, int x, int y, int z, ForgeDirection face)
+    {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if(tile != null && tile instanceof TileEntityTankFrame) {
+            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
+            if(frame.getBlock() != null) {
+                return frame.getBlock().getBlock().getFlammability(world, x, y, z, face);
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public void breakBlock(World world, int x, int y, int z, Block block, int metadata) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if(tile != null && tile instanceof TileEntityTankFrame) {
+            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
+            frame.onBreak();
+        }
+        super.breakBlock(world, x, y, z, block, metadata);
     }
 
     @Override
