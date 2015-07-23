@@ -43,6 +43,12 @@ repositories {
     }
 }
 
+repositories { // I'm sorry, but this is necessary for Redstone in Motion ...
+   flatDir {
+       dirs 'libs'
+   }
+}
+
 dependencies {
     compile name: "buildcraft", version: "${buildcraft_version}"
     compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev:dev"
