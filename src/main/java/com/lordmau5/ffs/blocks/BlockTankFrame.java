@@ -131,14 +131,20 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public int getMixedBrightnessForBlock(IBlockAccess world, int x, int y, int z) {
+    public int getLightValue(IBlockAccess world, int x, int y, int z) {
         TileEntity tile = world.getTileEntity(x, y, z);
         if(tile != null && tile instanceof TileEntityTankFrame) {
-            ExtendedBlock block = ((TileEntityTankFrame)tile).getBlock();
-            if(block != null)
-                return block.getBlock().getMixedBrightnessForBlock(world, x, y, z);
+            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
+            TileEntityValve valve = frame.getValve();
+
+            ExtendedBlock block = frame.getBlock();
+            if(block != null) {
+                if(valve != null && valve.getFluid() != null) {
+                    return valve.getFluidLuminosity();
+                }
+            }
         }
-        return super.getMixedBrightnessForBlock(world, x, y, z);
+        return super.getLightValue(world, x, y, z);
     }
 
     @Override

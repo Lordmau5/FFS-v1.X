@@ -58,11 +58,13 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     public boolean isValid;
     private boolean isMaster;
     private int[] masterValvePos;
-    private boolean initiated;
+    public boolean initiated;
 
     public int tankHeight = 0;
     public int valveHeightPosition = 0;
     private boolean autoOutput;
+
+    private int prevLightValue = 0;
 
     private ForgeDirection inside = ForgeDirection.UNKNOWN;
 
@@ -106,8 +108,14 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public void updateEntity() {
-        if(worldObj.isRemote)
+        if(worldObj.isRemote) {
+            int brightness = getFluidLuminosity();
+            if(prevLightValue != brightness) {
+                prevLightValue = brightness;
+                worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+            }
             return;
+        }
 
         if(initiated) {
             if (isMaster()) {
@@ -617,6 +625,18 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     // Tank logic!
+
+    public int getFluidLuminosity() {
+        FluidStack fstack = getFluid();
+        if(fstack == null)
+            return 0;
+
+        Fluid fluid = fstack.getFluid();
+        if(fluid == null)
+            return 0;
+
+        return fluid.getLuminosity(fstack);
+    }
 
     @Override
     public FluidStack getFluid() {
