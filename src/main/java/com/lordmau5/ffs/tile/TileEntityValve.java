@@ -33,6 +33,7 @@ import net.minecraftforge.fluids.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by Dustin on 28.06.2015.
@@ -206,26 +207,53 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             }
         }
 
-        // TODO: Figure out how to make the frames properly catch fire and stuff...
-        /*
-        if(fluidTemperature >= minBurnableTemp && frameBurnability > 0) {
+        if(minBurnableTemp > 0 && fluidTemperature >= minBurnableTemp && frameBurnability > 0) {
             if(randomBurnTicks-- <= 0) {
                 randomBurnTicks = 20 * 5;
                 Random random = new Random();
 
-                System.out.println("Try fire!");
-
                 int temperatureDiff = fluidTemperature - minBurnableTemp;
                 int chanceOfBurnability = 300 - frameBurnability;
-                int rand = random.nextInt(300) + temperatureDiff;
+                int rand = random.nextInt(300) + temperatureDiff + ((int) Math.floor((float) getFluidAmount() / (float) getCapacity() * 300));
                 if(rand >= chanceOfBurnability) {
-                    for(TileEntityTankFrame frame : tankFrames) {
-                        frame.startBurning();
+                    boolean successfullyBurned = false;
+
+                    List<TileEntityTankFrame> remainingFrames = new ArrayList<>();
+                    remainingFrames.addAll(tankFrames);
+
+                    List<TileEntityTankFrame> removingFrames = new ArrayList<>();
+                    while(!successfullyBurned) { // Try to burn at least one
+                        if(remainingFrames.size() == 0)
+                            break;
+
+                        boolean couldBurnOne = false;
+                        for(int i=0; i<Math.min(10, remainingFrames.size()); i++) {
+                            int id = random.nextInt(remainingFrames.size());
+                            TileEntityTankFrame frame = remainingFrames.get(id);
+                            couldBurnOne = frame.tryBurning();
+                            if(!couldBurnOne)
+                                removingFrames.add(frame);
+                        }
+                        remainingFrames.removeAll(removingFrames);
+                        removingFrames.clear();
+                        if(couldBurnOne)
+                            successfullyBurned = true;
                     }
+                    if(!successfullyBurned) {
+                        for(int i=0; i<3; i++) {
+                            removingFrames.add(tankFrames.get(random.nextInt(tankFrames.size())));
+                        }
+                        for(TileEntityTankFrame frame : removingFrames)
+                            frame.setToFire();
+                    }
+
+                    frameBurnability = 0;
+
+                    if(FancyFluidStorage.instance.SET_WORLD_ON_FIRE)
+                        worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, FancyFluidStorage.modId + ":fire", 1.0F, worldObj.rand.nextFloat() * 0.1F + 0.9F);
                 }
             }
         }
-        */
     }
 
     public int getTankHeight() {

@@ -43,6 +43,7 @@ public class FancyFluidStorage {
     public int MAX_SIZE = 13;
     public boolean ALLOW_DIFFERENT_METADATA = false;
     public int MIN_BURNABLE_TEMPERATURE = 1300;
+    public boolean SET_WORLD_ON_FIRE = true;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -53,8 +54,10 @@ public class FancyFluidStorage {
         config.load();
 
         Property mbPerTankProp = config.get(Configuration.CATEGORY_GENERAL, "mbPerVirtualTank", 16000);
-        mbPerTankProp.comment = "How many millibuckets can each block within the tank store?\nDefault: 16000";
-        MB_PER_TANK_BLOCK = mbPerTankProp.getInt(16000);
+        mbPerTankProp.comment = "How many millibuckets can each block within the tank store? (Has to be higher than 1!)\nDefault: 16000";
+        MB_PER_TANK_BLOCK = Math.max(1, Math.min(Integer.MAX_VALUE, mbPerTankProp.getInt(16000)));
+        if(mbPerTankProp.getInt(16000) < 1 || mbPerTankProp.getInt(16000) > Integer.MAX_VALUE)
+            mbPerTankProp.set(16000);
 
         Property insideCapacityProp = config.get(Configuration.CATEGORY_GENERAL, "onlyCountInsideCapacity", true);
         insideCapacityProp.comment = "Should tank capacity only count the interior air blocks, rather than including the frame?\nDefault: true";
@@ -62,15 +65,23 @@ public class FancyFluidStorage {
 
         Property maxSizeProp = config.get(Configuration.CATEGORY_GENERAL, "maxSize", 13);
         maxSizeProp.comment = "Define the maximum size a tank can have. This includes the whole tank, including the frame!\nMinimum: 3, Maximum: 32\nDefault: 13";
-        MAX_SIZE = Math.max(3, Math.min(maxSizeProp.getInt(), 32));
+        MAX_SIZE = Math.max(3, Math.min(maxSizeProp.getInt(13), 32));
+        if(maxSizeProp.getInt(13) < 3 || maxSizeProp.getInt(13) > 32)
+            maxSizeProp.set(13);
 
         Property diffMetaProp = config.get(Configuration.CATEGORY_GENERAL, "allowDifferentMetadata", false);
         diffMetaProp.comment = "Allow different metadata of the same block for the tank frames. This can be useful for mods like Chisel.\nDefault: false";
         ALLOW_DIFFERENT_METADATA = diffMetaProp.getBoolean(false);
 
         Property minBurnProp = config.get(Configuration.CATEGORY_GENERAL, "minimumBurnableTemperature", 1300);
-        minBurnProp.comment = "At which temperature should a tank start burning on a random occasion?\nThis only applies to blocks that are flammable, like Wood or Wool.\nDefault: 1300 (Temperature of Lava)";
-        MIN_BURNABLE_TEMPERATURE = minBurnProp.getInt(1300);
+        minBurnProp.comment = "At which temperature should a tank start burning on a random occasion? (Has to be positive!)\nThis only applies to blocks that are flammable, like Wood or Wool.\nDefault: 1300 (Temperature of Lava)\n0 to disable.";
+        MIN_BURNABLE_TEMPERATURE = Math.max(0, minBurnProp.getInt(1300));
+        if(minBurnProp.getInt(1300) < 0)
+            minBurnProp.set(1300);
+
+        Property setWorldOnFire = config.get(Configuration.CATEGORY_GENERAL, "setWorldOnFire", true);
+        setWorldOnFire.comment = "Do you want to set the world on fire? Or do you just want to create a flame in my heart?\n(Don't worry, this is harmless :))\nDefault: true";
+        SET_WORLD_ON_FIRE = setWorldOnFire.getBoolean(true);
 
         if (config.hasChanged()) {
             config.save();

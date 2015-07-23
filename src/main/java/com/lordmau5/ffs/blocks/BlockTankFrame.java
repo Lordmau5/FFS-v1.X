@@ -210,16 +210,6 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public boolean isBurning(IBlockAccess world, int x, int y, int z) {
-        TileEntity tile = world.getTileEntity(x, y, z);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
-            return frame.burning;
-        }
-        return false;
-    }
-
-    @Override
     public void breakBlock(World world, int x, int y, int z, Block block, int metadata) {
         TileEntity tile = world.getTileEntity(x, y, z);
         if(tile != null && tile instanceof TileEntityTankFrame) {

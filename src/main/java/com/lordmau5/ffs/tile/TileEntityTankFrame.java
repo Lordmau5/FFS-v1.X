@@ -66,7 +66,23 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
         return tile == null || !(tile instanceof TileEntityTankFrame) || tile != this;
     }
 
-    public void startBurning() {
+    public boolean tryBurning() {
+        Block block = getBlock().getBlock();
+        if(block == null)
+            return false;
+
+        for(ForgeDirection dr : ForgeDirection.VALID_DIRECTIONS) {
+            if(block.isFlammable(worldObj, xCoord, yCoord, zCoord, dr)) {
+                if (worldObj.isAirBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ)) {
+                    worldObj.setBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ, Blocks.fire);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void setToFire() {
         Block block = getBlock().getBlock();
         if(block == null || !block.isFlammable(worldObj, xCoord, yCoord, zCoord, ForgeDirection.UNKNOWN))
             return;

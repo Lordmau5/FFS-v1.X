@@ -1,0 +1,11 @@
+{
+	"fire": {
+		"category": "master",
+		"sounds": [
+			{
+				"name": "fire",
+				"stream": false
+			}
+		]
+	}
+}
