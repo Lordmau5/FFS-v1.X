@@ -4,6 +4,7 @@ import com.lordmau5.ffs.util.ExtendedBlock;
 import cpw.mods.fml.common.Optional;
 import framesapi.IMoveCheck;
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -11,6 +12,7 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * Created by Dustin on 28.06.2015.
@@ -26,6 +28,8 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     private TileEntityValve masterValve;
     private boolean hasValve = false;
     private int prevLightValue = 0;
+
+    public boolean burning = false;
 
     public TileEntityTankFrame() {
         super();
@@ -60,6 +64,15 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     public boolean isFrameInvalid() {
         TileEntity tile = worldObj.getTileEntity(xCoord, yCoord, zCoord);
         return tile == null || !(tile instanceof TileEntityTankFrame) || tile != this;
+    }
+
+    public void startBurning() {
+        Block block = getBlock().getBlock();
+        if(block == null || !block.isFlammable(worldObj, xCoord, yCoord, zCoord, ForgeDirection.UNKNOWN))
+            return;
+
+        onBreak();
+        worldObj.setBlock(xCoord, yCoord, zCoord, Blocks.fire);
     }
 
     public void breakFrame() {
@@ -133,6 +146,7 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
         readFromNBT(pkt.func_148857_g());
+        this.burning = pkt.func_148857_g().getBoolean("burning");
         markForUpdate();
     }
 
@@ -140,6 +154,7 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     public Packet getDescriptionPacket() {
         NBTTagCompound tag = new NBTTagCompound();
         writeToNBT(tag);
+        tag.setBoolean("burning", this.burning);
         return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 0, tag);
     }
 

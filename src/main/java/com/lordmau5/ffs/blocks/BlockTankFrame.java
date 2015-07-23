@@ -198,8 +198,7 @@ public class BlockTankFrame extends Block implements IFacade {
         return null;
     }
 
-    public int getFlammability(IBlockAccess world, int x, int y, int z, ForgeDirection face)
-    {
+    public int getFlammability(IBlockAccess world, int x, int y, int z, ForgeDirection face) {
         TileEntity tile = world.getTileEntity(x, y, z);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
@@ -208,6 +207,16 @@ public class BlockTankFrame extends Block implements IFacade {
             }
         }
         return 0;
+    }
+
+    @Override
+    public boolean isBurning(IBlockAccess world, int x, int y, int z) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if(tile != null && tile instanceof TileEntityTankFrame) {
+            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
+            return frame.burning;
+        }
+        return false;
     }
 
     @Override

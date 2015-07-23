@@ -42,6 +42,7 @@ public class FancyFluidStorage {
     public boolean INSIDE_CAPACITY = false;
     public int MAX_SIZE = 13;
     public boolean ALLOW_DIFFERENT_METADATA = false;
+    public int MIN_BURNABLE_TEMPERATURE = 1300;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -66,6 +67,10 @@ public class FancyFluidStorage {
         Property diffMetaProp = config.get(Configuration.CATEGORY_GENERAL, "allowDifferentMetadata", false);
         diffMetaProp.comment = "Allow different metadata of the same block for the tank frames. This can be useful for mods like Chisel.\nDefault: false";
         ALLOW_DIFFERENT_METADATA = diffMetaProp.getBoolean(false);
+
+        Property minBurnProp = config.get(Configuration.CATEGORY_GENERAL, "minimumBurnableTemperature", 1300);
+        minBurnProp.comment = "At which temperature should a tank start burning on a random occasion?\nThis only applies to blocks that are flammable, like Wood or Wool.\nDefault: 1300 (Temperature of Lava)";
+        MIN_BURNABLE_TEMPERATURE = minBurnProp.getInt(1300);
 
         if (config.hasChanged()) {
             config.save();

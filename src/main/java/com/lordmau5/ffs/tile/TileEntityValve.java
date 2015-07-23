@@ -56,6 +56,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     private final int maxSize = FancyFluidStorage.instance.MAX_SIZE;
     protected int mbPerVirtualTank = FancyFluidStorage.instance.MB_PER_TANK_BLOCK;
+    protected int minBurnableTemp = FancyFluidStorage.instance.MIN_BURNABLE_TEMPERATURE;
+
+    private int frameBurnability = 0;
 
     public boolean isValid;
     private boolean isMaster;
@@ -67,6 +70,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     private boolean autoOutput;
 
     private int prevLightValue = 0;
+    private int randomBurnTicks = 20 * 5; // Every 5 seconds
 
     private ForgeDirection inside = ForgeDirection.UNKNOWN;
 
@@ -92,6 +96,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     // TANK LOGIC
     private FluidStack fluidStack;
+    private int fluidTemperature = 0;
     private int fluidCapacity = 0;
     private int lastComparatorOut = 0;
     // ---------------
@@ -200,6 +205,27 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 }
             }
         }
+
+        // TODO: Figure out how to make the frames properly catch fire and stuff...
+        /*
+        if(fluidTemperature >= minBurnableTemp && frameBurnability > 0) {
+            if(randomBurnTicks-- <= 0) {
+                randomBurnTicks = 20 * 5;
+                Random random = new Random();
+
+                System.out.println("Try fire!");
+
+                int temperatureDiff = fluidTemperature - minBurnableTemp;
+                int chanceOfBurnability = 300 - frameBurnability;
+                int rand = random.nextInt(300) + temperatureDiff;
+                if(rand >= chanceOfBurnability) {
+                    for(TileEntityTankFrame frame : tankFrames) {
+                        frame.startBurning();
+                    }
+                }
+            }
+        }
+        */
     }
 
     public int getTankHeight() {
@@ -314,6 +340,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         ExtendedBlock topDiagBlock = new ExtendedBlock(worldObj.getBlock(topDiagFrame.getX(), topDiagFrame.getY(), topDiagFrame.getZ()),
                 worldObj.getBlockMetadata(topDiagFrame.getX(), topDiagFrame.getY(), topDiagFrame.getZ()));
 
+        frameBurnability = bottomDiagBlock.getBlock().getFlammability(worldObj, bottomDiagFrame.getX(), bottomDiagFrame.getY(), bottomDiagFrame.getZ(), ForgeDirection.UNKNOWN);
+
         if(bottomDiagBlock.getBlock() instanceof BlockTankFrame) {
             TileEntity tile = worldObj.getTileEntity(bottomDiagFrame.getX(), bottomDiagFrame.getY(), bottomDiagFrame.getZ());
             if(tile != null && tile instanceof TileEntityTankFrame)
@@ -369,6 +397,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
                     if (valve.fluidStack != null) {
                         this.fluidStack = valve.fluidStack;
+                        updateFluidTemperature();
                     }
                     valves.add(valve);
                     continue;
@@ -451,6 +480,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
         for(TileEntityValve valve : otherValves) {
             valve.fluidStack = getFluid();
+            valve.updateFluidTemperature();
             valve.master = null;
             valve.isValid = false;
             valve.autoOutput = autoOutput;
@@ -547,6 +577,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getInteger("fluidID")), tag.getInteger("fluidAmount"));
                 else if(tag.hasKey("fluidName"))
                     fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getString("fluidName")), tag.getInteger("fluidAmount"));
+                updateFluidTemperature();
             }
             else {
                 fluidStack = null;
@@ -666,6 +697,18 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         return fluid.getLuminosity(fstack);
     }
 
+    public void updateFluidTemperature() {
+        FluidStack fstack = getFluid();
+        if(fstack == null)
+            return;
+
+        Fluid fluid = fstack.getFluid();
+        if(fluid == null)
+            return;
+
+        this.fluidTemperature = fluid.getTemperature(fstack);
+    }
+
     @Override
     public FluidStack getFluid() {
         if(!isValid())
@@ -715,8 +758,10 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             }
 
             if(doFill) {
-                if (fluidStack == null)
+                if (fluidStack == null) {
                     fluidStack = resource;
+                    updateFluidTemperature();
+                }
                 fluidStack.amount = possibleAmount;
 
                 getMaster().markForUpdate(true);
@@ -746,8 +791,10 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
             if(doDrain) {
                 fluidStack.amount = possibleAmount;
-                if (possibleAmount == 0)
+                if (possibleAmount == 0) {
                     fluidStack = null;
+                    updateFluidTemperature();
+                }
 
                 getMaster().markForUpdate(true);
             }
