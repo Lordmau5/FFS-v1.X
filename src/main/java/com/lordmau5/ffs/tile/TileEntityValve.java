@@ -17,6 +17,7 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedPeripheral;
 import li.cil.oc.api.network.SimpleComponent;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -240,11 +241,26 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                             successfullyBurned = true;
                     }
                     if(!successfullyBurned) {
-                        for(int i=0; i<3; i++) {
-                            removingFrames.add(tankFrames.get(random.nextInt(tankFrames.size())));
+                        remainingFrames.clear();
+                        remainingFrames.addAll(tankFrames);
+                        List<Position3D> firePos = new ArrayList<>();
+                        for(int i=0; i<3;) {
+                            if(remainingFrames.size() == 0)
+                                break;
+
+                            int id = random.nextInt(remainingFrames.size());
+                            TileEntityTankFrame frame = remainingFrames.get(id);
+                            if(frame.getBlock().getBlock().isFlammable(worldObj, frame.xCoord, frame.yCoord, frame.zCoord, ForgeDirection.UNKNOWN)) {
+                                firePos.add(new Position3D(frame.xCoord, frame.yCoord, frame.zCoord));
+                                i++;
+                            }
+                            else
+                                remainingFrames.remove(id);
                         }
-                        for(TileEntityTankFrame frame : removingFrames)
-                            frame.setToFire();
+                        for(Position3D pos : firePos) {
+                            if(worldObj.getBlock(pos.getX(), pos.getY(), pos.getZ()).isFlammable(worldObj, pos.getX(), pos.getY(), pos.getZ(), ForgeDirection.UNKNOWN))
+                                worldObj.setBlock(pos.getX(), pos.getY(), pos.getZ(), Blocks.fire);
+                        }
                     }
 
                     frameBurnability = 0;
@@ -527,6 +543,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         isValid = false;
 
         this.updateBlockAndNeighbors();
+        worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
     }
 
     public boolean isValid() {
@@ -726,7 +743,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     public void updateFluidTemperature() {
-        FluidStack fstack = getFluid();
+        FluidStack fstack = fluidStack;
         if(fstack == null)
             return;
 

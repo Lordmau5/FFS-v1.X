@@ -82,15 +82,6 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
         return false;
     }
 
-    public void setToFire() {
-        Block block = getBlock().getBlock();
-        if(block == null || !block.isFlammable(worldObj, xCoord, yCoord, zCoord, ForgeDirection.UNKNOWN))
-            return;
-
-        onBreak();
-        worldObj.setBlock(xCoord, yCoord, zCoord, Blocks.fire);
-    }
-
     public void breakFrame() {
         if(isFrameInvalid())
             return;
