@@ -794,10 +794,10 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
             int possibleAmount = resource.amount;
             if(fluidStack != null)
-                possibleAmount += getFluid().amount;
+                possibleAmount += fluidStack.amount;
 
             int rest = resource.amount;
-            if(possibleAmount > fluidCapacity) {
+            if(possibleAmount >= fluidCapacity) {
                 rest = possibleAmount - fluidCapacity;
                 possibleAmount = fluidCapacity;
             }
@@ -811,6 +811,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
                 getMaster().markForUpdate(true);
             }
+            else
+                rest = 0;
 
             return rest;
         }
@@ -827,7 +829,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             int possibleAmount = fluidStack.amount - maxDrain;
 
             int drained = maxDrain;
-            if(possibleAmount < 0) {
+            if(possibleAmount <= 0) {
                 drained += possibleAmount;
                 possibleAmount = 0;
             }
@@ -843,6 +845,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
                 getMaster().markForUpdate(true);
             }
+            else
+                returnStack.amount = 0;
 
             return returnStack;
         }
