@@ -792,29 +792,33 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             if(!isValid() || fluidStack != null && !fluidStack.isFluidEqual(resource))
                 return 0;
 
-            int possibleAmount = resource.amount;
-            if(fluidStack != null)
-                possibleAmount += fluidStack.amount;
-
-            int rest = resource.amount;
-            if(possibleAmount >= fluidCapacity) {
-                rest = possibleAmount - fluidCapacity;
-                possibleAmount = fluidCapacity;
-            }
-
-            if(doFill) {
+            if (!doFill)
+            {
                 if (fluidStack == null) {
-                    fluidStack = resource;
-                    updateFluidTemperature();
+                    return Math.min(fluidCapacity, resource.amount);
                 }
-                fluidStack.amount = possibleAmount;
 
-                getMaster().markForUpdate(true);
+                return Math.min(fluidCapacity - fluidStack.amount, resource.amount);
             }
-            else
-                rest = 0;
 
-            return rest;
+            if (fluidStack == null)
+            {
+                fluidStack = new FluidStack(resource, Math.min(fluidCapacity, resource.amount));
+                return fluidStack.amount;
+            }
+
+            int filled = fluidCapacity - fluidStack.amount;
+            if (resource.amount < filled) {
+                fluidStack.amount += resource.amount;
+                filled = resource.amount;
+            }
+            else {
+                fluidStack.amount = fluidCapacity;
+            }
+
+            getMaster().markForUpdate(true);
+
+            return filled;
         }
         else
             return getMaster().fill(resource, doFill);
@@ -826,29 +830,20 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             if(!isValid() || fluidStack == null)
                 return null;
 
-            int possibleAmount = fluidStack.amount - maxDrain;
-
             int drained = maxDrain;
-            if(possibleAmount <= 0) {
-                drained += possibleAmount;
-                possibleAmount = 0;
+            if (fluidStack.amount < drained) {
+                drained = fluidStack.amount;
             }
 
-            FluidStack returnStack = new FluidStack(fluidStack, drained);
-
-            if(doDrain) {
-                fluidStack.amount = possibleAmount;
-                if (possibleAmount == 0) {
+            FluidStack stack = new FluidStack(fluidStack, drained);
+            if (doDrain) {
+                fluidStack.amount -= drained;
+                if (fluidStack.amount <= 0) {
                     fluidStack = null;
-                    updateFluidTemperature();
                 }
-
                 getMaster().markForUpdate(true);
             }
-            else
-                returnStack.amount = 0;
-
-            return returnStack;
+            return stack;
         }
         else
             return getMaster().drain(maxDrain, doDrain);
