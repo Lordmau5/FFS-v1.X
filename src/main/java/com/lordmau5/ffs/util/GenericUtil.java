@@ -88,6 +88,11 @@ public class GenericUtil {
 
     }
 
+    public static boolean canBlockLeak(Block block) {
+        Material mat = block.getMaterial();
+        return mat.equals(Material.grass) || mat.equals(Material.sponge) || mat.equals(Material.cloth) || mat.equals(Material.clay) || mat.equals(Material.gourd) || mat.equals(Material.sand);
+    }
+
     public static boolean isFluidContainer(ItemStack playerItem) {
         if (playerItem == null)
             return false;

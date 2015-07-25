@@ -32,6 +32,8 @@ public class FancyFluidStorage {
     public static BlockValve blockValve;
     public static BlockTankFrame blockTankFrame;
 
+    public static Configuration config;
+
     @Mod.Instance(modId)
     public static FancyFluidStorage instance;
 
@@ -44,13 +46,9 @@ public class FancyFluidStorage {
     public boolean ALLOW_DIFFERENT_METADATA = false;
     public int MIN_BURNABLE_TEMPERATURE = 1300;
     public boolean SET_WORLD_ON_FIRE = true;
+    public boolean SHOULD_TANKS_LEAK = true;
 
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        proxy.preInit();
-
-        Configuration config = new Configuration(event.getSuggestedConfigurationFile());
-
+    public void loadConfig() {
         config.load();
 
         Property mbPerTankProp = config.get(Configuration.CATEGORY_GENERAL, "mbPerVirtualTank", 16000);
@@ -79,13 +77,25 @@ public class FancyFluidStorage {
         if(minBurnProp.getInt(1300) < 0)
             minBurnProp.set(1300);
 
-        Property setWorldOnFire = config.get(Configuration.CATEGORY_GENERAL, "setWorldOnFire", true);
-        setWorldOnFire.comment = "Do you want to set the world on fire? Or do you just want to create a flame in my heart?\n(Don't worry, this is harmless :))\nDefault: true";
-        SET_WORLD_ON_FIRE = setWorldOnFire.getBoolean(true);
+        Property setWorldOnFireProp = config.get(Configuration.CATEGORY_GENERAL, "setWorldOnFire", true);
+        setWorldOnFireProp.comment = "Do you want to set the world on fire? Or do you just want to create a flame in my heart?\n(Don't worry, this is harmless :))\nDefault: true";
+        SET_WORLD_ON_FIRE = setWorldOnFireProp.getBoolean(true);
+
+        Property tanksLeakProp = config.get(Configuration.CATEGORY_GENERAL, "shouldTanksLeak", true);
+        tanksLeakProp.comment = "Should tanks with leaky materials start leaking randomly?\nDefault: true";
+        SHOULD_TANKS_LEAK = tanksLeakProp.getBoolean(true);
 
         if (config.hasChanged()) {
             config.save();
         }
+    }
+
+    @Mod.EventHandler
+    public void preInit(FMLPreInitializationEvent event) {
+        proxy.preInit();
+
+        config = new Configuration(event.getSuggestedConfigurationFile());
+        loadConfig();
 
         GameRegistry.registerBlock(blockValve = new BlockValve(), "blockValve");
         GameRegistry.registerBlock(blockTankFrame = new BlockTankFrame(), "blockTankFrame");

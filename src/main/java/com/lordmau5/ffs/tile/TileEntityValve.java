@@ -17,6 +17,7 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedPeripheral;
 import li.cil.oc.api.network.SimpleComponent;
+import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -73,6 +74,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     private int prevLightValue = 0;
     private int randomBurnTicks = 20 * 5; // Every 5 seconds
+    private int randomLeakTicks = 20 * 60; // Every minute
 
     private ForgeDirection inside = ForgeDirection.UNKNOWN;
 
@@ -208,65 +210,123 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             }
         }
 
-        if(minBurnableTemp > 0 && fluidTemperature >= minBurnableTemp && frameBurnability > 0) {
-            if(randomBurnTicks-- <= 0) {
-                randomBurnTicks = 20 * 5;
-                Random random = new Random();
+        if(isMaster()) {
+            if(minBurnableTemp > 0 && fluidTemperature >= minBurnableTemp && frameBurnability > 0) {
+                if(randomBurnTicks-- <= 0) {
+                    randomBurnTicks = 20 * 5;
+                    Random random = new Random();
 
-                int temperatureDiff = fluidTemperature - minBurnableTemp;
-                int chanceOfBurnability = 300 - frameBurnability;
-                int rand = random.nextInt(300) + temperatureDiff + ((int) Math.floor((float) getFluidAmount() / (float) getCapacity() * 300));
-                if(rand >= chanceOfBurnability) {
-                    boolean successfullyBurned = false;
+                    int temperatureDiff = fluidTemperature - minBurnableTemp;
+                    int chanceOfBurnability = 300 - frameBurnability;
+                    int rand = random.nextInt(300) + temperatureDiff + ((int) Math.floor((float) getFluidAmount() / (float) getCapacity() * 300));
+                    if(rand >= chanceOfBurnability) {
+                        boolean successfullyBurned = false;
+
+                        List<TileEntityTankFrame> remainingFrames = new ArrayList<>();
+                        remainingFrames.addAll(tankFrames);
+
+                        List<TileEntityTankFrame> removingFrames = new ArrayList<>();
+                        while(!successfullyBurned) { // Try to burn at least one
+                            if(remainingFrames.size() == 0)
+                                break;
+
+                            boolean couldBurnOne = false;
+                            for(int i=0; i<Math.min(10, remainingFrames.size()); i++) {
+                                int id = random.nextInt(remainingFrames.size());
+                                TileEntityTankFrame frame = remainingFrames.get(id);
+                                couldBurnOne = frame.tryBurning();
+                                if(!couldBurnOne)
+                                    removingFrames.add(frame);
+                            }
+                            remainingFrames.removeAll(removingFrames);
+                            removingFrames.clear();
+                            if(couldBurnOne)
+                                successfullyBurned = true;
+                        }
+                        if(!successfullyBurned) {
+                            remainingFrames.clear();
+                            remainingFrames.addAll(tankFrames);
+                            List<Position3D> firePos = new ArrayList<>();
+                            for(int i=0; i<3;) {
+                                if(remainingFrames.size() == 0)
+                                    break;
+
+                                int id = random.nextInt(remainingFrames.size());
+                                TileEntityTankFrame frame = remainingFrames.get(id);
+                                if(frame.getBlock().getBlock().isFlammable(worldObj, frame.xCoord, frame.yCoord, frame.zCoord, ForgeDirection.UNKNOWN)) {
+                                    firePos.add(new Position3D(frame.xCoord, frame.yCoord, frame.zCoord));
+                                    i++;
+                                }
+                                else
+                                    remainingFrames.remove(id);
+                            }
+                            for(Position3D pos : firePos) {
+                                if(worldObj.getBlock(pos.getX(), pos.getY(), pos.getZ()).isFlammable(worldObj, pos.getX(), pos.getY(), pos.getZ(), ForgeDirection.UNKNOWN))
+                                    worldObj.setBlock(pos.getX(), pos.getY(), pos.getZ(), Blocks.fire);
+                            }
+                        }
+
+                        frameBurnability = 0;
+
+                        if(FancyFluidStorage.instance.SET_WORLD_ON_FIRE)
+                            worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, FancyFluidStorage.modId + ":fire", 1.0F, worldObj.rand.nextFloat() * 0.1F + 0.9F);
+                    }
+                }
+            }
+
+            if(FancyFluidStorage.instance.SHOULD_TANKS_LEAK) {
+                if(randomLeakTicks-- <= 0 && fluidStack != null && fluidStack.getFluid().canBePlacedInWorld()) {
+                    randomLeakTicks = 20 * 60;
+
+                    Random random = new Random();
+                    int amt = random.nextInt(3) + 1;
+
+                    List<TileEntityTankFrame> validFrames = new ArrayList<>();
 
                     List<TileEntityTankFrame> remainingFrames = new ArrayList<>();
                     remainingFrames.addAll(tankFrames);
 
-                    List<TileEntityTankFrame> removingFrames = new ArrayList<>();
-                    while(!successfullyBurned) { // Try to burn at least one
-                        if(remainingFrames.size() == 0)
+                    for (int i = 0; i < amt; ) {
+                        if (remainingFrames.size() == 0)
                             break;
 
-                        boolean couldBurnOne = false;
-                        for(int i=0; i<Math.min(10, remainingFrames.size()); i++) {
-                            int id = random.nextInt(remainingFrames.size());
-                            TileEntityTankFrame frame = remainingFrames.get(id);
-                            couldBurnOne = frame.tryBurning();
-                            if(!couldBurnOne)
-                                removingFrames.add(frame);
-                        }
-                        remainingFrames.removeAll(removingFrames);
-                        removingFrames.clear();
-                        if(couldBurnOne)
-                            successfullyBurned = true;
+                        int id = random.nextInt(remainingFrames.size());
+                        TileEntityTankFrame frame = remainingFrames.get(id);
+                        Block block = frame.getBlock().getBlock();
+                        if (GenericUtil.canBlockLeak(block) && !frame.getNeighborBlockOrAir(fluidStack.getFluid().getBlock()).isEmpty() && block.getBlockHardness(worldObj, frame.xCoord, frame.yCoord, frame.zCoord) <= 1.0F) {
+                            validFrames.add(frame);
+                            i++;
+                        } else
+                            remainingFrames.remove(id);
                     }
-                    if(!successfullyBurned) {
-                        remainingFrames.clear();
-                        remainingFrames.addAll(tankFrames);
-                        List<Position3D> firePos = new ArrayList<>();
-                        for(int i=0; i<3;) {
-                            if(remainingFrames.size() == 0)
-                                break;
 
-                            int id = random.nextInt(remainingFrames.size());
-                            TileEntityTankFrame frame = remainingFrames.get(id);
-                            if(frame.getBlock().getBlock().isFlammable(worldObj, frame.xCoord, frame.yCoord, frame.zCoord, ForgeDirection.UNKNOWN)) {
-                                firePos.add(new Position3D(frame.xCoord, frame.yCoord, frame.zCoord));
-                                i++;
+                    for (TileEntityTankFrame frame : validFrames) {
+                        Block block = frame.getBlock().getBlock();
+                        int hardness = (int) Math.ceil(block.getBlockHardness(worldObj, frame.xCoord, frame.yCoord, frame.zCoord) * 100);
+                        int rand = random.nextInt(hardness) + 1;
+                        int diff = (int) Math.ceil(50 * ((float) getFluidAmount() / (float) getCapacity()));
+                        if (rand >= hardness - diff) {
+                            ForgeDirection leakDir;
+                            List<ForgeDirection> dirs = frame.getNeighborBlockOrAir(fluidStack.getFluid().getBlock());
+                            if (dirs.size() == 0)
+                                continue;
+
+                            if (dirs.size() > 1) {
+                                leakDir = dirs.get(random.nextInt(dirs.size()));
+                            } else
+                                leakDir = dirs.get(0);
+
+                            Position3D leakPos = new Position3D(frame.xCoord + leakDir.offsetX, frame.yCoord + leakDir.offsetY, frame.zCoord + leakDir.offsetZ);
+                            if (maps[2].containsKey(leakPos))
+                                continue;
+
+                            if (fluidStack.amount >= FluidContainerRegistry.BUCKET_VOLUME) {
+                                worldObj.setBlock(frame.xCoord + leakDir.offsetX, frame.yCoord + leakDir.offsetY, frame.zCoord + leakDir.offsetZ, fluidStack.getFluid().getBlock(), 0, 3);
+                                worldObj.notifyBlockOfNeighborChange(frame.xCoord + leakDir.offsetX, frame.yCoord + leakDir.offsetY, frame.zCoord + leakDir.offsetZ, fluidStack.getFluid().getBlock());
+                                drain(FluidContainerRegistry.BUCKET_VOLUME, true);
                             }
-                            else
-                                remainingFrames.remove(id);
-                        }
-                        for(Position3D pos : firePos) {
-                            if(worldObj.getBlock(pos.getX(), pos.getY(), pos.getZ()).isFlammable(worldObj, pos.getX(), pos.getY(), pos.getZ(), ForgeDirection.UNKNOWN))
-                                worldObj.setBlock(pos.getX(), pos.getY(), pos.getZ(), Blocks.fire);
                         }
                     }
-
-                    frameBurnability = 0;
-
-                    if(FancyFluidStorage.instance.SET_WORLD_ON_FIRE)
-                        worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, FancyFluidStorage.modId + ":fire", 1.0F, worldObj.rand.nextFloat() * 0.1F + 0.9F);
                 }
             }
         }
@@ -804,6 +864,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             if (fluidStack == null)
             {
                 fluidStack = new FluidStack(resource, Math.min(fluidCapacity, resource.amount));
+                updateFluidTemperature();
                 return fluidStack.amount;
             }
 
@@ -840,6 +901,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 fluidStack.amount -= drained;
                 if (fluidStack.amount <= 0) {
                     fluidStack = null;
+                    updateFluidTemperature();
                 }
                 getMaster().markForUpdate(true);
             }

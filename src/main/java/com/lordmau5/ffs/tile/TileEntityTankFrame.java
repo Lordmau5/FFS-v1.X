@@ -14,6 +14,9 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Dustin on 28.06.2015.
  */
@@ -49,7 +52,6 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
                     prevLightValue = brightness;
                     worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
                 }
-                return;
             }
             return;
         }
@@ -66,17 +68,32 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
         return tile == null || !(tile instanceof TileEntityTankFrame) || tile != this;
     }
 
+    public List<ForgeDirection> getNeighborBlockOrAir(Block block) {
+        List<ForgeDirection> dirs = new ArrayList<>();
+        for(ForgeDirection dr : ForgeDirection.VALID_DIRECTIONS) {
+            if(block == Blocks.air) {
+                if (worldObj.isAirBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ))
+                    dirs.add(dr);
+            }
+            else {
+                Block otherBlock = worldObj.getBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ);
+                if(block == otherBlock || worldObj.isAirBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ))
+                    dirs.add(dr);
+            }
+        }
+        return dirs;
+    }
+
     public boolean tryBurning() {
         Block block = getBlock().getBlock();
         if(block == null)
             return false;
 
-        for(ForgeDirection dr : ForgeDirection.VALID_DIRECTIONS) {
+        List<ForgeDirection> air = getNeighborBlockOrAir(Blocks.air);
+        for(ForgeDirection dr : air) {
             if(block.isFlammable(worldObj, xCoord, yCoord, zCoord, dr)) {
-                if (worldObj.isAirBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ)) {
-                    worldObj.setBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ, Blocks.fire);
-                    return true;
-                }
+                worldObj.setBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ, Blocks.fire, 0, 3);
+                return true;
             }
         }
         return false;
@@ -88,7 +105,7 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
 
         worldObj.removeTileEntity(xCoord, yCoord, zCoord);
         if(block != null && block.getBlock() != null)
-            worldObj.setBlock(xCoord, yCoord, zCoord, block.getBlock(), block.getMetadata(), 2);
+            worldObj.setBlock(xCoord, yCoord, zCoord, block.getBlock(), block.getMetadata(), 3);
         else
             worldObj.setBlockToAir(xCoord, yCoord, zCoord);
     }
