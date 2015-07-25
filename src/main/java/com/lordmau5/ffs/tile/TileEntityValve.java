@@ -458,7 +458,10 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 topDiagBlock = ((TileEntityTankFrame) tile).getBlock();
         }
 
-        if (!bottomDiagBlock.equals(topDiagBlock) && (!FancyFluidStorage.instance.ALLOW_DIFFERENT_METADATA || !bottomDiagBlock.equalsIgnoreMetadata(topDiagBlock)) && !GenericUtil.isValidTankBlock(worldObj, bottomDiagFrame, bottomDiagBlock))
+        if(!GenericUtil.isValidTankBlock(worldObj, bottomDiagFrame, bottomDiagBlock))
+            return false;
+
+        if (!bottomDiagBlock.equals(topDiagBlock) && (!FancyFluidStorage.instance.ALLOW_DIFFERENT_METADATA || !bottomDiagBlock.equalsIgnoreMetadata(topDiagBlock)))
             return false;
 
         for (Map.Entry<Position3D, ExtendedBlock> airCheck : maps[2].entrySet()) {
