@@ -14,6 +14,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -71,6 +72,13 @@ public class WailaPluginTank implements IWailaDataProvider {
             list.add("Invalid tank");
             return list;
         }
+
+        if(te instanceof TileEntityValve) {
+            list.add("Name: " + EnumChatFormatting.ITALIC + valve.getValveName() + EnumChatFormatting.RESET);
+            String autoOutput = valve.getAutoOutput() ? "true" : "false";
+            list.add("Auto Output: " + (valve.getAutoOutput() ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + EnumChatFormatting.ITALIC + autoOutput + EnumChatFormatting.RESET);
+        }
+
         if (fluidAmount == 0) {
             list.add("Fluid: None");
             list.add("Amount: 0/" + GenericUtil.intToFancyNumber(capacity) + " mB");

@@ -43,10 +43,16 @@ public class FancyFluidStorage {
     public int MB_PER_TANK_BLOCK = 16000;
     public boolean INSIDE_CAPACITY = false;
     public int MAX_SIZE = 13;
-    public boolean ALLOW_DIFFERENT_METADATA = false;
     public int MIN_BURNABLE_TEMPERATURE = 1300;
     public boolean SET_WORLD_ON_FIRE = true;
     public boolean SHOULD_TANKS_LEAK = true;
+
+    public enum TankFrameMode {
+        SAME_BLOCK,
+        DIFFERENT_METADATA,
+        DIFFERENT_BLOCK
+    }
+    public TankFrameMode TANK_FRAME_MODE = TankFrameMode.SAME_BLOCK;
 
     public void loadConfig() {
         config.load();
@@ -67,9 +73,14 @@ public class FancyFluidStorage {
         if(maxSizeProp.getInt(13) < 3 || maxSizeProp.getInt(13) > 32)
             maxSizeProp.set(13);
 
-        Property diffMetaProp = config.get(Configuration.CATEGORY_GENERAL, "allowDifferentMetadata", false);
-        diffMetaProp.comment = "Allow different metadata of the same block for the tank frames. This can be useful for mods like Chisel.\nDefault: false";
-        ALLOW_DIFFERENT_METADATA = diffMetaProp.getBoolean(false);
+        Property tankFrameModeProp = config.get(Configuration.CATEGORY_GENERAL, "tankFrameMode", 1);
+        tankFrameModeProp.comment = "Declare which mode you want the tank frames to be.\n0 = Only the same block with the same metadata is allowed\n1 = Only the same block is allowed, but the metadata can be different\n2 = Allow any block\nDefault: 1";
+        int mode = tankFrameModeProp.getInt(1);
+        if(mode < 0 || mode > 2) {
+            mode = 1;
+            tankFrameModeProp.set(1);
+        }
+        TANK_FRAME_MODE = TankFrameMode.values()[mode];
 
         Property minBurnProp = config.get(Configuration.CATEGORY_GENERAL, "minimumBurnableTemperature", 1300);
         minBurnProp.comment = "At which temperature should a tank start burning on a random occasion? (Has to be positive!)\nThis only applies to blocks that are flammable, like Wood or Wool.\nDefault: 1300 (Temperature of Lava)\n0 to disable.";

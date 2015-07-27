@@ -1,5 +1,6 @@
 package com.lordmau5.ffs.util;
 
+import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import net.minecraft.block.Block;
@@ -28,6 +29,7 @@ import java.util.Map;
 public class GenericUtil {
 
     private static List<Block> blacklistedBlocks;
+    private static List<String> validTiles;
     private static List<ItemStack> glassList;
 
     public static void init() {
@@ -40,6 +42,23 @@ public class GenericUtil {
         blacklistedBlocks.add(Blocks.bedrock);
         blacklistedBlocks.add(Blocks.redstone_lamp);
         blacklistedBlocks.add(Blocks.sponge);
+
+        validTiles = new ArrayList<>();
+
+        validTiles.add("blockFusedQuartz");
+    }
+
+    public static String getUniqueValveName(TileEntityValve valve) {
+        return "valve_" + Integer.toHexString(new Position3D(valve.xCoord, valve.yCoord, valve.zCoord).hashCode());
+    }
+
+    public static boolean canAutoOutput(float height, int tankHeight, int valvePosition, boolean negativeDensity) {
+        height *= tankHeight;
+
+        if(negativeDensity)
+            return false;
+
+        return height > (valvePosition - 0.5f);
     }
 
     public static boolean isBlockGlass(Block block, int metadata) {
@@ -61,27 +80,57 @@ public class GenericUtil {
         return false;
     }
 
+    public static boolean areTankBlocksValid(ExtendedBlock bottomBlock, ExtendedBlock topBlock, World world, Position3D bottomPos) {
+        if(!isValidTankBlock(world, bottomPos, bottomBlock))
+            return false;
+
+        switch(FancyFluidStorage.instance.TANK_FRAME_MODE) {
+            case SAME_BLOCK: return bottomBlock.equals(topBlock);
+            case DIFFERENT_METADATA: return bottomBlock.equalsIgnoreMetadata(topBlock);
+            case DIFFERENT_BLOCK: return true;
+
+            default: return false;
+        }
+    }
+
+    public static boolean isTileEntityAcceptable(Block block, TileEntity tile) {
+        for(String name : validTiles) {
+            if(block.getUnlocalizedName().toLowerCase().contains(name.toLowerCase()))
+                return true;
+        }
+
+        return false;
+    }
+
     public static boolean isValidTankBlock(World world, Position3D pos, ExtendedBlock extendedBlock) {
         Block block = extendedBlock.getBlock();
 
         if (block.hasTileEntity(extendedBlock.getMetadata())) {
             TileEntity tile = world.getTileEntity(pos.getX(), pos.getY(), pos.getZ());
-            return tile != null && tile instanceof TileEntityTankFrame;
+            if(tile != null) {
+                return tile instanceof TileEntityTankFrame || isTileEntityAcceptable(block, tile);
+            }
         }
 
         if(blacklistedBlocks.contains(block))
-            return false;
-
-        if(!block.isOpaqueCube())
-            return false;
-
-        if(!block.func_149730_j() || !block.isNormalCube())
             return false;
 
         if(block.canProvidePower())
             return false;
 
         if(block.getMaterial() == Material.sand)
+            return false;
+
+        if(!block.isNormalCube())
+            return false;
+
+        if(FancyFluidStorage.instance.TANK_FRAME_MODE == FancyFluidStorage.TankFrameMode.DIFFERENT_BLOCK)
+            return true;
+
+        if(!block.isOpaqueCube())
+            return false;
+
+        if(!block.func_149730_j())
             return false;
 
         return true;

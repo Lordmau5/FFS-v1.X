@@ -1,6 +1,5 @@
 package com.lordmau5.ffs.client.gui;
 
-import buildcraft.core.lib.render.FluidRenderer;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.client.FluidHelper;
 import com.lordmau5.ffs.network.NetworkHandler;
@@ -9,6 +8,7 @@ import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
@@ -27,15 +27,19 @@ public class GuiValve extends GuiScreen {
     protected static final int AUTO_FLUID_OUTPUT_BTN_ID = 23442;
 
     TileEntityValve valve;
+    boolean isFrame;
+
+    GuiTextField valveName;
 
     int xSize = 256, ySize = 121;
     int left = 0, top = 0;
     int mouseX, mouseY;
 
-    public GuiValve(TileEntityValve valve) {
+    public GuiValve(TileEntityValve valve, boolean isFrame) {
         super();
 
         this.valve = valve;
+        this.isFrame = isFrame;
     }
 
     @Override
@@ -44,16 +48,43 @@ public class GuiValve extends GuiScreen {
 
         this.left = (this.width - this.xSize) / 2;
         this.top = (this.height - this.ySize) / 2;
-        this.buttonList.add(new GuiToggle(AUTO_FLUID_OUTPUT_BTN_ID, this.left + 80, this.top + 20, "Auto fluid output", this.valve.getAutoOutput(), 16777215));
+        if(!isFrame) {
+            this.buttonList.add(new GuiToggle(AUTO_FLUID_OUTPUT_BTN_ID, this.left + 80, this.top + 20, "Auto fluid output", this.valve.getAutoOutput(), 16777215));
+            valveName = new GuiTextField(this.fontRendererObj, this.left + 80, this.top + 100, 120, 10);
+            valveName.setText(valve.getValveName());
+            valveName.setMaxStringLength(18);
+        }
+    }
+
+    @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+
+        if(!isFrame)
+            if(!valveName.getText().isEmpty())
+                NetworkHandler.sendPacketToServer(new ffsPacket.Server.UpdateValveName(valve, valveName.getText()));
     }
 
     @Override
     protected void keyTyped(char keyChar, int keyCode) {
+        if(!isFrame) {
+            if(valveName.isFocused()) {
+                valveName.textboxKeyTyped(keyChar, keyCode);
+                return;
+            }
+        }
+
         if (keyCode == 1 || keyCode == this.mc.gameSettings.keyBindInventory.getKeyCode())
         {
             this.mc.thePlayer.closeScreen();
             this.mc.setIngameFocus();
         }
+    }
+
+    @Override
+    protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_) {
+        super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
+        valveName.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
     }
 
     @Override
@@ -84,6 +115,15 @@ public class GuiValve extends GuiScreen {
 
         if(this.valve.getFluid() != null)
             fluidHoveringText(fluid);
+
+        if(!isFrame) {
+            drawValveName(x, y);
+        }
+    }
+
+    private void drawValveName(int x, int y) {
+        this.drawString(this.fontRendererObj, "Valve Name:", this.left + 80, this.top + 88, 16777215);
+        valveName.drawTextBox();
     }
 
     private void fluidHoveringText(String fluid) {

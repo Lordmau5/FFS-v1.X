@@ -77,7 +77,7 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                 IIcon still = FluidHelper.getFluidTexture(fluid.getFluid(), false);
 
                 float stillMinU = still.getMinU(), stillMaxU = still.getMaxU(), stillMinV = still.getMinV(), stillMaxV = still.getMaxV();
-                float flowMinU = flowing.getMinU(), flowMaxU = flowMinU + (stillMaxU - stillMinU), flowMinV_ = flowing.getMinV(), flowMaxV = flowMinV_ + (stillMaxV - stillMinV);
+                float flowMinU = flowing.getMinU(), flowMaxU = flowMinU + (stillMaxU - stillMinU), flowMinV_ = flowing.getMinV(), flowMaxV_ = flowMinV_ + (stillMaxV - stillMinV);
 
                 GL11.glTranslatef((float) x, (float) y, (float) z);
                 GL11.glTranslatef((float) (bottomDiag.getX() - tile.xCoord), (float) bottomDiag.getY() - tile.yCoord + 1, (float) (bottomDiag.getZ() - tile.zCoord));
@@ -85,18 +85,25 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                 t.startDrawingQuads();
 
                 float pureRenderHeight = (height - 1) * (float) fillPercentage;
+                boolean isNegativeDensity = fluid.getFluid().getDensity(fluid) < 0;
 
-                for (int rX = 0; rX < xSize; rX++) {
-                    for (int rZ = 0; rZ < zSize; rZ++) {
-                        for (int rY = 0; rY < Math.ceil(pureRenderHeight); rY++) {
-                            float renderHeight = pureRenderHeight - rY;
-                            renderHeight = Math.min(renderHeight, 1) + rY;
+                for (int rY = 0; rY < (isNegativeDensity ? (height - 1) : Math.ceil(pureRenderHeight)); rY++) {
+                    float renderHeight = pureRenderHeight - rY;
+                    renderHeight = Math.min(renderHeight, 1) + rY;
 
-                            float flowMinV = flowMinV_;
-                            if (renderHeight - rY < 1.0f) flowMinV += (flowMaxV - flowMinV_) * (1.0f - (renderHeight - rY));
+                    if (rY == 0)
+                        renderHeight = Math.max(0.01f, renderHeight);
 
-                            if(rY == 0)
-                                renderHeight = Math.max(0.01f, renderHeight);
+                    if (isNegativeDensity) {
+                        renderHeight = 1f + rY;
+                    }
+
+                    float flowMinV = flowMinV_;
+                    if (renderHeight - rY < 1.0f)
+                        flowMinV += (flowMaxV_ - flowMinV_) * (1.0f - (renderHeight - rY));
+
+                    for (int rX = 0; rX < xSize; rX++) {
+                        for (int rZ = 0; rZ < zSize; rZ++) {
 
                             float zMinOffset = 0;
                             float zMaxOffset = 0;
@@ -105,17 +112,17 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                             //North
                             if (rZ == 0) {
                                 zMinOffset = 0.005f;
-                                t.addVertexWithUV(rX, rY, rZ + zMinOffset, flowMaxU, flowMaxV);
+                                t.addVertexWithUV(rX, rY, rZ + zMinOffset, flowMaxU, flowMaxV_);
                                 t.addVertexWithUV(rX, renderHeight, rZ + zMinOffset, flowMaxU, flowMinV);
                                 t.addVertexWithUV(rX + 1, renderHeight, rZ + zMinOffset, flowMinU, flowMinV);
-                                t.addVertexWithUV(rX + 1, rY, rZ + zMinOffset, flowMinU, flowMaxV);
+                                t.addVertexWithUV(rX + 1, rY, rZ + zMinOffset, flowMinU, flowMaxV_);
                             }
 
                             //South
                             if (rZ == zSize - 1) {
                                 zMaxOffset = 0.005f;
-                                t.addVertexWithUV(rX, rY, rZ + 1 - zMaxOffset, flowMaxU, flowMaxV);
-                                t.addVertexWithUV(rX + 1, rY, rZ + 1 - zMaxOffset, flowMinU, flowMaxV);
+                                t.addVertexWithUV(rX, rY, rZ + 1 - zMaxOffset, flowMaxU, flowMaxV_);
+                                t.addVertexWithUV(rX + 1, rY, rZ + 1 - zMaxOffset, flowMinU, flowMaxV_);
                                 t.addVertexWithUV(rX + 1, renderHeight, rZ + 1 - zMaxOffset, flowMinU, flowMinV);
                                 t.addVertexWithUV(rX, renderHeight, rZ + 1 - zMaxOffset, flowMaxU, flowMinV);
                             }
@@ -123,8 +130,8 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                             //West
                             if (rX == 0) {
                                 xMinOffset = 0.005f;
-                                t.addVertexWithUV(rX + xMinOffset, rY, rZ, flowMaxU, flowMaxV);
-                                t.addVertexWithUV(rX + xMinOffset, rY, rZ + 1, flowMinU, flowMaxV);
+                                t.addVertexWithUV(rX + xMinOffset, rY, rZ, flowMaxU, flowMaxV_);
+                                t.addVertexWithUV(rX + xMinOffset, rY, rZ + 1, flowMinU, flowMaxV_);
                                 t.addVertexWithUV(rX + xMinOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
                                 t.addVertexWithUV(rX + xMinOffset, renderHeight, rZ, flowMaxU, flowMinV);
                             }
@@ -132,18 +139,28 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                             //East
                             if (rX == xSize - 1) {
                                 xMaxOffset = 0.005f;
-                                t.addVertexWithUV(rX + 1 - xMaxOffset, rY, rZ, flowMaxU, flowMaxV);
+                                t.addVertexWithUV(rX + 1 - xMaxOffset, rY, rZ, flowMaxU, flowMaxV_);
                                 t.addVertexWithUV(rX + 1 - xMaxOffset, renderHeight, rZ, flowMaxU, flowMinV);
                                 t.addVertexWithUV(rX + 1 - xMaxOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
-                                t.addVertexWithUV(rX + 1 - xMaxOffset, rY, rZ + 1, flowMinU, flowMaxV);
+                                t.addVertexWithUV(rX + 1 - xMaxOffset, rY, rZ + 1, flowMinU, flowMaxV_);
                             }
 
                             //Top
-                            if (rY == Math.floor(pureRenderHeight) || rY + 1 == Math.ceil(pureRenderHeight)) {
-                                t.addVertexWithUV(rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
-                                t.addVertexWithUV(rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
-                                t.addVertexWithUV(rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
-                                t.addVertexWithUV(rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
+                            if(isNegativeDensity) {
+                                if(rY == height - 2) {
+                                    t.addVertexWithUV(rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
+                                    t.addVertexWithUV(rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
+                                    t.addVertexWithUV(rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
+                                    t.addVertexWithUV(rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
+                                }
+                            }
+                            else {
+                                if (rY == Math.floor(pureRenderHeight) || rY + 1 == Math.ceil(pureRenderHeight)) {
+                                    t.addVertexWithUV(rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
+                                    t.addVertexWithUV(rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
+                                    t.addVertexWithUV(rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
+                                    t.addVertexWithUV(rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
+                                }
                             }
 
                             //Bottom
@@ -153,6 +170,12 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                             t.addVertexWithUV(rX, 0.01f, rZ + zMinOffset, stillMaxU, stillMinV);
                         }
                     }
+                }
+
+                if(isNegativeDensity) {
+                    GL11.glColor4d(1d, 1d, 1d, 0.125 + fillPercentage - (0.125 * fillPercentage));
+                    GL11.glRotatef(180, 1, 0, 1);
+                    GL11.glTranslatef(0, -height + 1, 0);
                 }
 
                 t.draw();

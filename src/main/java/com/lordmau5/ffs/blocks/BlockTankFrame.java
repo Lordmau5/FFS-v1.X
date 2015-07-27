@@ -12,6 +12,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -145,23 +146,6 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public int getLightValue(IBlockAccess world, int x, int y, int z) {
-        TileEntity tile = world.getTileEntity(x, y, z);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
-            TileEntityValve valve = frame.getValve();
-
-            ExtendedBlock block = frame.getBlock();
-            if(block != null) {
-                if(valve != null && valve.getFluid() != null) {
-                    return valve.getFluidLuminosity();
-                }
-            }
-        }
-        return super.getLightValue(world, x, y, z);
-    }
-
-    @Override
     public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
         if (super.onBlockActivated(world, x, y, z, player, side, hitX, hitY, hitZ)) {
             return true;
@@ -175,7 +159,7 @@ public class BlockTankFrame extends Block implements IFacade {
                 if(GenericUtil.isFluidContainer(player.getHeldItem()))
                     return GenericUtil.fluidContainerHandler(world, x, y, z, valve, player);
 
-                player.openGui(FancyFluidStorage.instance, 0, world, valve.xCoord, valve.yCoord, valve.zCoord);
+                player.openGui(FancyFluidStorage.instance, 0, world, x, y, z);
                 return true;
             }
         }
@@ -207,6 +191,18 @@ public class BlockTankFrame extends Block implements IFacade {
             }
         }
         return 0;
+    }
+
+    @Override
+    public float getExplosionResistance(Entity par1Entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if(tile != null && tile instanceof TileEntityTankFrame) {
+            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
+            if(frame.getBlock() != null) {
+                return frame.getBlock().getBlock().getExplosionResistance(par1Entity, world, x, y, z, explosionX, explosionY, explosionZ);
+            }
+        }
+        return super.getExplosionResistance(par1Entity);
     }
 
     @Override

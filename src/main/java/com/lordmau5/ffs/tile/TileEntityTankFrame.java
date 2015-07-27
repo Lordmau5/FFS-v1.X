@@ -10,7 +10,6 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -30,9 +29,6 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     public int valveX, valveY, valveZ;
     private TileEntityValve masterValve;
     private boolean hasValve = false;
-    private int prevLightValue = 0;
-
-    public boolean burning = false;
 
     public TileEntityTankFrame() {
         super();
@@ -45,17 +41,6 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
 
     @Override
     public void updateEntity() {
-        if(worldObj.isRemote) {
-            if(getValve() != null) {
-                int brightness = getValve().getFluidLuminosity();
-                if(prevLightValue != brightness) {
-                    prevLightValue = brightness;
-                    worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
-                }
-            }
-            return;
-        }
-
         if(masterValve == null && hasValve) {
             TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
             if(tile != null && tile instanceof TileEntityValve)
@@ -170,7 +155,6 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
         readFromNBT(pkt.func_148857_g());
-        this.burning = pkt.func_148857_g().getBoolean("burning");
         markForUpdate();
     }
 
@@ -178,7 +162,6 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     public Packet getDescriptionPacket() {
         NBTTagCompound tag = new NBTTagCompound();
         writeToNBT(tag);
-        tag.setBoolean("burning", this.burning);
         return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 0, tag);
     }
 

@@ -150,19 +150,4 @@ public class BlockValve extends Block {
         }
         return 0;
     }
-
-    @Override
-    public int getLightValue(IBlockAccess world, int x, int y, int z) {
-        int light = super.getLightValue(world, x, y, z);
-
-        TileEntity tile = world.getTileEntity(x, y, z);
-        if(tile != null && tile instanceof TileEntityValve) {
-            TileEntityValve valve = (TileEntityValve) tile;
-
-            if(valve.isValid() && valve.getFluid() != null) {
-                light = valve.getFluidLuminosity();
-            }
-        }
-        return light;
-    }
 }
