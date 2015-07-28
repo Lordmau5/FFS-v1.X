@@ -84,7 +84,9 @@ public class GuiValve extends GuiScreen {
     @Override
     protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_) {
         super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
-        valveName.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
+
+        if(!isFrame)
+            valveName.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
     }
 
     @Override
@@ -134,7 +136,9 @@ public class GuiValve extends GuiScreen {
             texts.add("\u00A7" + EnumChatFormatting.GRAY.getFormattingCode() + (GenericUtil.intToFancyNumber(this.valve.getFluidAmount()) + " / " + GenericUtil.intToFancyNumber(this.valve.getCapacity())) + " mB");
 
             GL11.glPushMatrix();
+            GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
             drawHoveringText(texts, mouseX, mouseY, fontRendererObj);
+            GL11.glPopAttrib();
             GL11.glPopMatrix();
         }
     }
