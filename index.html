@@ -94,7 +94,7 @@
                 var data = versionData[v];
                 if(data["video"] != null) {
                     $("#changelog-cont #video").removeClass("displayNone");
-                    $("#changelog-cont #video iframe").attr("src", "//www.youtube.com/embed/" + data["video"] + "?autohide=1");
+                    $("#changelog-cont #video .video-container iframe").attr("src", "//www.youtube.com/embed/" + data["video"] + "?autohide=1");
                 }
 
                 if(data["new"] != null) {
