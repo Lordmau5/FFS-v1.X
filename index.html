@@ -2,36 +2,139 @@
 <html lang="en">
 <head>
 
-  <!-- Basic Page Needs
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <meta charset="utf-8">
-  <title>FFS: Fancy Fluid Storage</title>
-  <meta name="description" content="Fancy Fluid Storage is a fluid storage mod for Minecraft! You can build tanks out of any block, making your tanks aesthetic and useful.">
-  <meta name="author" content="Lordmau5 &amp; maxpowa">
+    <!-- Basic Page Needs
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="utf-8">
+    <title>FFS: Fancy Fluid Storage</title>
+    <meta name="description" content="Fancy Fluid Storage is a fluid storage mod for Minecraft! You can build tanks out of any block, making your tanks aesthetic and useful.">
+    <meta name="author" content="Lordmau5 &amp; maxpowa">
 
-  <!-- Mobile Specific Metas
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Mobile Specific Metas
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- FONT
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
+    <!-- FONT
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
 
-  <!-- CSS
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/skeleton.css">
-  <link rel="stylesheet" href="css/ffs.css">
-  <link rel="stylesheet" href="css/ffs-icons.css">
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/ffs.css">
+    <link rel="stylesheet" href="css/ffs-icons.css">
 
-  <!-- Scripts
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script src="js/ffs.js"></script>
+    <!-- Scripts
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="js/ffs.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#menu-information").click(function(e) {
+                $("#menu-changelog").removeClass("selectedSlide");
+                $("#menu-changelog").addClass("menuNotActive");
 
-  <!-- Favicon
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="icon" type="image/png" href="images/favicon.png">
+                $("#changelog-section").addClass("displayNone");
+                $("#information-section").removeClass("displayNone");
+
+                $("#menu-information").addClass("selectedSlide");
+            });
+
+            $("#menu-changelog").click(function(e) {
+                $("#menu-information").removeClass("selectedSlide");
+                $("#menu-information").addClass("menuNotActive");
+
+                $("#information-section").addClass("displayNone");
+                $("#changelog-section").removeClass("displayNone");
+
+                $("#menu-changelog").addClass("selectedSlide");
+            });
+
+            var versions = [];
+            var versionData = [];
+
+            /* Fill changelog */
+            $.getJSON( "changelog.json", function(data) {
+                $.each( data, function( v, val ) {
+                    versionData[v] = {};
+                    if(val["new"] != null && val["new"] != "")
+                        versionData[v]["new"] = val["new"];
+                    if(val["changes"] != null && val["changes"] != "")
+                        versionData[v]["changes"] = val["changes"];
+                    if(val["removed"] != null && val["removed"] != "")
+                        versionData[v]["removed"] = val["removed"];
+                    if(val["memo"] != null && val["memo"] != "")
+                        versionData[v]["memo"] = val["memo"];
+                    if(val["video"] != null && val["video"] != "")
+                        versionData[v]["video"] = val["video"];
+
+                    versions.push(v);
+                    versionData[v]["version"] = v;
+                });
+
+                $.each(versions, function(index, v) {
+                   $("#versionSelector").append("<option value='" + v + "'>Version " + v + "</option>");
+                });
+
+                showVersion(versions[0]);
+            });
+
+            function showVersion(v) {
+                $("#versionShowings").text("Version: " + v);
+
+                $("#changelog-cont #video").addClass("displayNone");
+                $("#changelog-cont #new").addClass("displayNone");
+                $("#changelog-cont #new ul").text("");
+                $("#changelog-cont #changes").addClass("displayNone");
+                $("#changelog-cont #changes ul").text("");
+                $("#changelog-cont #removed").addClass("displayNone");
+                $("#changelog-cont #removed ul").text("");
+                $("#changelog-cont #memo").addClass("displayNone");
+
+                var data = versionData[v];
+                if(data["video"] != null) {
+                    $("#changelog-cont #video").removeClass("displayNone");
+                    $("#changelog-cont #video iframe").attr("src", "//www.youtube.com/embed/" + data["video"] + "?autohide=1");
+                }
+
+                if(data["new"] != null) {
+                    $("#changelog-cont #new").removeClass("displayNone");
+                    $.each(data["new"], function(index, text) {
+                       $("#changelog-cont #new ul").append("<li>" + text + "</li>");
+                    });
+                }
+
+                if(data["changes"] != null) {
+                    $("#changelog-cont #changes").removeClass("displayNone");
+                    $.each(data["changes"], function(index, text) {
+                       $("#changelog-cont #changes ul").append("<li>" + text + "</li>");
+                    });
+                }
+
+                if(data["removed"] != null) {
+                    $("#changelog-cont #removed").removeClass("displayNone");
+                    $.each(data["removed"], function(index, text) {
+                       $("#changelog-cont #removed ul").append("<li>" + text + "</li>");
+                    });
+                }
+
+                if(data["memo"] != null) {
+                    $("#changelog-cont #memo").removeClass("displayNone");
+                    $("#changelog-cont #memo #text").text(data["memo"]);
+                }
+            }
+
+            $("#versionSelector").change(function() {
+                var v = $("#versionSelector option:selected").val();
+
+                showVersion(v);
+            });
+        });
+    </script>
+
+    <!-- Favicon
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="icon" type="image/png" href="images/favicon.png">
 
 </head>
 <body>
@@ -39,73 +142,129 @@
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
 
-  <div class="section hero">
-    <div class="container">
-      <div class="row">
-        <div class="one-half column">
-          <h4 class="hero-heading"><b>Fancy Fluid Storage</b> is the fluid storage solution you've been looking for!</h4>
-          <a class="button button-primary" href="http://minecraft.curseforge.com/mc-mods/232683-ffs-fancy-fluid-storage">Download 1.7.10 Stable</a>
-          <a class="button" href="https://jenkins.maxpowa.us/job/FFS">Developer Builds</a>
+    <div class="section hero">
+        <div class="container">
+            <div class="row">
+                <div class="one-half column">
+                    <h4 class="hero-heading"><b>Fancy Fluid Storage</b> is the fluid storage solution you've been looking for!</h4>
+                    <a class="button button-primary" href="http://minecraft.curseforge.com/mc-mods/232683-ffs-fancy-fluid-storage">Download 1.7.10 Stable</a>
+                    <a class="button" href="https://jenkins.maxpowa.us/job/FFS">Developer Builds</a>
+                </div>
+                <div class="one-half column spin-blocks">
+                    <img class="spin-block" src="images/block_spin.gif" onmouseenter="fadeIn()" onmouseleave="fadeOut()">
+                </div>
+            </div>
         </div>
-        <div class="one-half column spin-blocks">
-          <img class="spin-block" src="images/block_spin.gif" onmouseenter="fadeIn()" onmouseleave="fadeOut()">
-        </div>
-      </div>
     </div>
-  </div>
 
-  <div class="section values">
-    <div class="container">
-      <div class="row">
-        <div class="one-third column value">
-          <img class="value-image" src="images/bucket.png">
-          <h5 class="value-heading">Massive Storage</h5>
-          <p class="value-description">With Fancy Fluid Storage you can store massive amounts of fluids in aesthetically pleasing tanks.</p>
+    <div class="section-no-space">
+        <div class="container">
+            <div class="row">
+                <div id="menu-information" class="one-half column bigFont clickable selectedSlide">
+                    Information
+                </div>
+                <div id="menu-changelog" class="one-half column bigFont clickable menuNotActive">
+                    Changelog
+                </div>
+            </div>
         </div>
-        <div class="one-third column value">
-          <img class="value-image" src="images/daisy.png">
-          <h5 class="value-heading">Customizability</h5>
-          <p class="value-description">Build your fluid tanks out of whatever block you want, from cobblestone to diamond blocks!</p>
-        </div>
-        <div class="one-third column value">
-          <img class="value-image" src="images/wood.png">
-          <h5 class="value-heading">Compatibility</h5>
-          <p class="value-description">Compatibility with many major mods is built in out of the box, including BuildCraft and ComputerCraft</p>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <div class="section">
-    <div class="container">
-      <h3 class="section-heading">How to use</h3>
-      <ol class="how-to">
-        <li>Build a frame out of whatever <b>solid</b> block you desire. (Minimum dimensions: 3x3x3, Maximum dimensions: 32x32x32)</li>
-        <li>Fill in the sides of the frame with another block of your choice, ex; glass.</li>
-        <li>Craft a valve by using the following recipe:<br />
-          <img src="images/crafting.png"/>
-        </li>
-        <li>Choose a side you want to place your valve, break a single block and place the valve in the hole.</li>
-        <li>Right click the valve you placed. The valve will turn green to indicate success.</li>
-      </ol>
-      <div class="row">
-        <div class="one-half column category">
-          <img class="u-max-full-width placeholder" src="images/how_to.png">
-          <img class="u-max-full-width preload" src="images/how_to.gif">
+    <div id="information-section">
+        <div class="section values">
+            <div class="container">
+                <div class="row">
+                    <div class="one-third column value">
+                        <img class="value-image" src="images/bucket.png">
+                        <h5 class="value-heading">Massive Storage</h5>
+                        <p class="value-description">With Fancy Fluid Storage you can store massive amounts of fluids in aesthetically pleasing tanks.</p>
+                    </div>
+                    <div class="one-third column value">
+                        <img class="value-image" src="images/daisy.png">
+                        <h5 class="value-heading">Customizability</h5>
+                        <p class="value-description">Build your fluid tanks out of whatever block you want, from cobblestone to diamond blocks!</p>
+                    </div>
+                    <div class="one-third column value">
+                        <img class="value-image" src="images/wood.png">
+                        <h5 class="value-heading">Compatibility</h5>
+                        <p class="value-description">Compatibility with many major mods is built in out of the box, including BuildCraft and ComputerCraft</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="one-half column category">
-          <img class="u-max-full-width placeholder" src="images/how_dont.png">
-          <img class="u-max-full-width preload" src="images/how_dont.gif">
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="footer">
-    <div class="container">
-      <p>FFS/Fancy Fluid Storage (this website included) is licensed under the MIT License. Powered by <a href="http://getskeleton.com">Skeleton</a>.</p>
+        <div class="section">
+            <div class="container">
+                <h3 class="section-heading">How to use</h3>
+                <ol class="how-to">
+                <li>Build a frame out of whatever <b>solid</b> block you desire. (Minimum dimensions: 3x3x3, Maximum dimensions: 32x32x32)</li>
+                <li>Fill in the sides of the frame with another block of your choice, ex; glass.</li>
+                <li>Craft a valve by using the following recipe:<br />
+                <img src="images/crafting.png"/>
+                </li>
+                <li>Choose a side you want to place your valve, break a single block and place the valve in the hole.</li>
+                <li>Right click the valve you placed. The valve will turn green to indicate success.</li>
+                </ol>
+                <div class="row">
+                    <div class="one-half column category">
+                        <img class="u-max-full-width placeholder" src="images/how_to.png">
+                        <img class="u-max-full-width preload" src="images/how_to.gif">
+                    </div>
+                    <div class="one-half column category">
+                        <img class="u-max-full-width placeholder" src="images/how_dont.png">
+                        <img class="u-max-full-width preload" src="images/how_dont.gif">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <div id="changelog-section" class="displayNone">
+        <div class="section values">
+            <div class="container">
+                <div class="row">
+                    <div class="one-half column">
+                        <h3 id="versionShowings" class="one-half section-heading">Version: 1.3.3</h3>
+                    </div>
+                    <div class="one-half column">
+                        <select id="versionSelector" class="u-full-width" style="color: black"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="container">
+                <div id="changelog-cont">
+                    <div id="video">
+                        <h3>Videocal Changelog:</h3>
+                        <iframe class="u-full-width" height="542"></iframe>
+                    </div>
+                    <div id="new">
+                        <h3>What's new?</h3>
+                        <ul></ul>
+                    </div>
+                    <div id="changes">
+                        <h3>What changed?</h3>
+                        <ul></ul>
+                    </div>
+                    <div id="removed">
+                        <h3>What got removed?</h3>
+                        <ul></ul>
+                    </div>
+                    <div id="memo">
+                        <h3>Additional information</h3>
+                        <h5 id="text"></h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>FFS/Fancy Fluid Storage (this website included) is licensed under the MIT License. Powered by <a href="http://getskeleton.com">Skeleton</a>.</p>
+        </div>
+    </div>
 
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->

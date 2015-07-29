@@ -8,6 +8,10 @@
   padding: 8rem 0 7rem;
   text-align: center;
 }
+.section-no-space {
+  padding: 0rem 0 0;
+  text-align: center;
+}
 .section-heading,
 .section-description {
   margin-bottom: 1.2rem;
@@ -28,6 +32,36 @@
 }
 .spin-block + .spin-block {
   display: none;
+}
+
+/* Custom */
+.menuLink {
+    text-decoration: none;   
+}
+.bigFont {
+    font-size: 26px;
+}
+.selectedSlide {
+    background-color: #33C3F0;
+    color: white;
+    border-color: #33C3F0;
+}
+.menuNotActive:hover {
+  color: #FFF;
+  background-color: #1EAEDB;
+  border-color: #1EAEDB;
+}
+.clickable {
+    cursor: pointer;   
+}
+
+#versionShowings {
+    margin-top: -0.5rem;
+    margin-bottom: 1.6rem;
+}
+
+.displayNone {
+    display: none;   
 }
 
 /* Values */

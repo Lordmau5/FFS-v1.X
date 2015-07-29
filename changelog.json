@@ -1,0 +1,31 @@
+{
+  "1.3.3": {
+    "new": [
+      "Tanks now update every second to cause WAY LESS tick updates",
+      "Multiple Tank-Frame modes (Same Block, Different Metadata, Different Block)",
+      "Per-Valve Auto-Output",
+      "Valve-Names for CC / OC integration",
+      "Fixed Explosion resistance",
+      "Negative density fluids (=> Gases) now get more dense the more is in the tank (and also render upside down)",
+      "Waila shows the Valve-Name + it's Auto-Output",
+      "EnderIO Glass is now working"
+    ],
+    "changes": "",
+    "removed": [
+      "Lighting based on the fluid's luminosity (It didn't update properly and after 4 hours of desperately trying to fix it, I just removed it.)"
+    ],
+    "memo": "",
+    "video": "aKfJiUhM0-E"
+  },
+
+  "1.3.2 and 1.3.1": {
+    "new": [
+      "Tanks with flammable frames, that contain high-temperature fluids (such as Lava) now have a random chance to start burning (this is configurable)",
+      "Tanks now have the change of leaking, if the material is not waterproof (e.g. hay)"
+    ],
+    "changes": "",
+    "removed": "",
+    "memo": "",
+    "video": "94dizC_el5w"
+  }
+}
