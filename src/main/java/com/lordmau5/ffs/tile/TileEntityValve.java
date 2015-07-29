@@ -1254,12 +1254,12 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 }
                 else if(args.count() == 1) {
                     if(!(args.isString(0))) {
-                        throw new LuaException("expected argument 1 to be of type \"String\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
+                        throw new Exception("expected argument 1 to be of type \"String\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
                     }
 
                     List<TileEntityValve> valves = getValvesByName(args.checkString(0));
                     if(valves.isEmpty()) {
-                        throw new LuaException("no valves found");
+                        throw new Exception("no valves found");
                     }
 
                     Map<String, Boolean> valveOutputs = new HashMap<>();
@@ -1270,7 +1270,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     return new Object[]{valveOutputs};
                 }
                 else {
-                    throw new LuaException("insufficient number of arguments found - expected 1, got " + args.count());
+                    throw new Exception("insufficient number of arguments found - expected 1, got " + args.count());
                 }
             }
             default:
