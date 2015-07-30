@@ -4,9 +4,11 @@
 package de.npe.gameanalytics;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.MessageDigest;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,14 +19,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import javax.xml.bind.DatatypeConverter;
 
 import com.google.gson.Gson;
 
@@ -209,7 +204,7 @@ final class EventHandler {
 
 		private static final Gson gson = new Gson();
 
-		private static final String contentType = "application/json";
+		private static final String contentType = "application/json; charset=utf-8";
 		private static final String accept = "application/json";
 
 		static void sendSingleEvent(GAEvent event) {
@@ -221,57 +216,49 @@ final class EventHandler {
 		}
 
 		static void sendData(KeyPair keyPair, String category, List<GAEvent> events) {
-			HttpPost request = createPostRequest(keyPair, category, events);
-
-			try (CloseableHttpClient httpClient = HttpClients.createDefault();
-					CloseableHttpResponse response = httpClient.execute(request)) {
-				// String responseContent = readResponseContent(response);
-				// System.out.println("Sent GA event of category \"" + category + "\", response: " + responseContent);
-			} catch (Exception e) {
-				// e.printStackTrace();
+			String response = sendAndGetResponse(keyPair, category, events);
+			if (!"{\"status\":\"ok\"}".equals(response)) {
+				System.err.println("Failed to send analytics event data. Result of attempt: " + response);
 			}
 		}
 
-		private static HttpPost createPostRequest(KeyPair keyPair, String category, List<GAEvent> events) {
-			String uri = APIProps.GA_API_URL + APIProps.GA_API_VERSION + "/" + keyPair.gameKey + "/" + category;
-			// Create POST request
-			HttpPost request = new HttpPost(uri);
-
-			String content = gson.toJson(events);
-			byte[] authData = (content + keyPair.secretKey).getBytes();
-			String hashedAuthData = DigestUtils.md5Hex(authData);
-			request.setHeader("Authorization", hashedAuthData);
-			request.setHeader("Accept", accept);
-
+		private static String sendAndGetResponse(KeyPair keyPair, String category, List<GAEvent> events) {
 			try {
-				// Prepare the request content
-				StringEntity entity = new StringEntity(content);
-				entity.setContentType(contentType);
-				request.setEntity(entity);
-			} catch (UnsupportedEncodingException e) {
-				// should not happen, I think
+				String postData = gson.toJson(events);
+				byte[] postBytes = postData.getBytes("UTF-8");
+
+				byte[] authData = (postData + keyPair.secretKey).getBytes();
+				String hashedAuthData = DatatypeConverter.printHexBinary(MessageDigest.getInstance("MD5").digest(authData)).toLowerCase();
+
+				URL url = new URL(APIProps.GA_API_URL + APIProps.GA_API_VERSION + "/" + keyPair.gameKey + "/" + category);
+
+				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+				connection.setDoOutput(true);
+				connection.setRequestMethod("POST");
+				connection.setRequestProperty("Authorization", hashedAuthData);
+				connection.setRequestProperty("Accept", accept);
+				connection.setRequestProperty("Content-Type", contentType);
+				connection.setRequestProperty("Content-Length", String.valueOf(postBytes.length));
+
+				StringBuilder responseSB = new StringBuilder();
+
+				try (OutputStream os = connection.getOutputStream()) {
+					// Write data
+					os.write(postBytes);
+
+					// Read response
+					try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
+						String line;
+						while ((line = br.readLine()) != null) {
+							responseSB.append(line);
+						}
+					}
+				}
+
+				return responseSB.toString();
+			} catch (Exception ex) {
+				return ex.getMessage();
 			}
-
-			return request;
-		}
-
-		/**
-		 * This method stays here for a while for testing purposes
-		 */
-		@SuppressWarnings("unused")
-		private static String readResponseContent(HttpResponse response) throws ClientProtocolException, IOException {
-			// Read the whole body
-			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			// Read the info
-			StringBuilder sb = new StringBuilder();
-			String line = reader.readLine();
-			while (line != null) {
-				sb.append(line);
-				line = reader.readLine();
-			}
-
-			return sb.toString();
 		}
 	}
 }
