@@ -174,8 +174,8 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
 
                 if(isNegativeDensity) {
                     GL11.glColor4d(1d, 1d, 1d, 0.125 + fillPercentage - (0.125 * fillPercentage));
-                    GL11.glRotatef(180, 1, 0, 1);
-                    GL11.glTranslatef(0, -height + 1, 0);
+                    GL11.glRotatef(180, 0, 0, 1);
+                    GL11.glTranslatef(bottomDiag.getX() - topDiag.getX() - 1, -height + 1, 0);
                 }
 
                 t.draw();

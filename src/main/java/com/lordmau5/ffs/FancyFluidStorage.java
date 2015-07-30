@@ -2,6 +2,7 @@ package com.lordmau5.ffs;
 
 import com.lordmau5.ffs.blocks.BlockTankFrame;
 import com.lordmau5.ffs.blocks.BlockValve;
+import com.lordmau5.ffs.compat.FFSAnalytics;
 import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.proxy.CommonProxy;
 import com.lordmau5.ffs.proxy.GuiHandler;
@@ -33,12 +34,15 @@ public class FancyFluidStorage {
     public static BlockTankFrame blockTankFrame;
 
     public static Configuration config;
+    public static FFSAnalytics analytics;
 
     @Mod.Instance(modId)
     public static FancyFluidStorage instance;
 
     @SidedProxy(clientSide = "com.lordmau5.ffs.proxy.ClientProxy", serverSide = "com.lordmau5.ffs.proxy.CommonProxy")
     public static CommonProxy proxy;
+
+    public boolean ANONYMOUS_STATISTICS = true;
 
     public int MB_PER_TANK_BLOCK = 16000;
     public boolean INSIDE_CAPACITY = false;
@@ -56,6 +60,10 @@ public class FancyFluidStorage {
 
     public void loadConfig() {
         config.load();
+
+        Property usageStatistics = config.get(Configuration.CATEGORY_GENERAL, "usageStatistics", true);
+        usageStatistics.comment = "Should the mod send anonymous usage statistics to GameAnalytics?\nThis allows us to evaluate interesting statistics :)\nDefault: true";
+        ANONYMOUS_STATISTICS = usageStatistics.getBoolean(true);
 
         Property mbPerTankProp = config.get(Configuration.CATEGORY_GENERAL, "mbPerVirtualTank", 16000);
         mbPerTankProp.comment = "How many millibuckets can each block within the tank store? (Has to be higher than 1!)\nDefault: 16000";
@@ -117,6 +125,8 @@ public class FancyFluidStorage {
         NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 
         NetworkHandler.registerChannels(event.getSide());
+
+        analytics = new FFSAnalytics();
     }
 
     @Mod.EventHandler

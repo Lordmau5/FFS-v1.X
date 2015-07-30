@@ -115,20 +115,20 @@ public class GenericUtil {
         if(blacklistedBlocks.contains(block))
             return false;
 
-        if(block.canProvidePower())
-            return false;
+        //if(block.canProvidePower())
+        //    return false;
 
         if(block.getMaterial() == Material.sand)
             return false;
 
-        if(!block.isNormalCube())
+        if(!block.isOpaqueCube())
+            return false;
+
+        if(!block.renderAsNormalBlock())
             return false;
 
         if(FancyFluidStorage.instance.TANK_FRAME_MODE == FancyFluidStorage.TankFrameMode.DIFFERENT_BLOCK)
             return true;
-
-        if(!block.isOpaqueCube())
-            return false;
 
         if(!block.func_149730_j())
             return false;

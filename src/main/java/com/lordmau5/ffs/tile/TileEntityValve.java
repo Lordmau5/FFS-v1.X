@@ -4,6 +4,7 @@ import buildcraft.api.transport.IPipeConnection;
 import buildcraft.api.transport.IPipeTile;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.blocks.BlockTankFrame;
+import com.lordmau5.ffs.compat.FFSAnalytics;
 import com.lordmau5.ffs.util.ExtendedBlock;
 import com.lordmau5.ffs.util.GenericUtil;
 import com.lordmau5.ffs.util.Position3D;
@@ -71,6 +72,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     public int tankHeight = 0;
     public int valveHeightPosition = 0;
     private boolean autoOutput;
+
+    private int fluidIntake, fluidOuttake, rainIntake;
 
     private int randomBurnTicks = 20 * 5; // Every 5 seconds
     private int randomLeakTicks = 20 * 60; // Every minute
@@ -168,13 +171,26 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             if(needsUpdate) {
                 getMaster().markForUpdate(false);
                 needsUpdate = false;
+
+                if(fluidIntake != 0) {
+                    FancyFluidStorage.analytics.event(FFSAnalytics.Category.TANK, FFSAnalytics.Event.FLUID_INTAKE, fluidIntake);
+                    fluidIntake = 0;
+                }
+                if(fluidOuttake != 0) {
+                    FancyFluidStorage.analytics.event(FFSAnalytics.Category.TANK, FFSAnalytics.Event.FLUID_OUTTAKE, fluidOuttake);
+                    fluidOuttake = 0;
+                }
+                if(rainIntake != 0) {
+                    FancyFluidStorage.analytics.event(FFSAnalytics.Category.TANK, FFSAnalytics.Event.RAIN_INTAKE, rainIntake);
+                    rainIntake = 0;
+                }
             }
         }
 
         if(getFluid() == null)
             return;
 
-        if(getAutoOutput()) { // Auto outputs at 50mB/t (1B/s) if enabled
+        if(getAutoOutput() || valveHeightPosition == 0) { // Auto outputs at 50mB/t (1B/s) if enabled
             if (getFluidAmount() != 0) {
                 float height = (float) getFluidAmount() / (float) getCapacity();
                 boolean isNegativeDensity = getFluid().getFluid().getDensity(getFluid()) < 0 ;
@@ -182,18 +198,21 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     ForgeDirection out = inside.getOpposite();
                     TileEntity tile = worldObj.getTileEntity(xCoord + out.offsetX, yCoord + out.offsetY, zCoord + out.offsetZ);
                     if(tile != null) {
-                        int maxAmount = 0;
-                        if(tile instanceof TileEntityValve)
-                            maxAmount = 1000; // When two tanks are connected by valves, allow faster output
-                        else if(tile instanceof IFluidHandler)
-                            maxAmount = 50;
+                        if(!(tile instanceof TileEntityValve) && !getAutoOutput() && valveHeightPosition == 0) {}
+                        else {
+                            int maxAmount = 0;
+                            if (tile instanceof TileEntityValve)
+                                maxAmount = 1000; // When two tanks are connected by valves, allow faster output
+                            else if (tile instanceof IFluidHandler)
+                                maxAmount = 50;
 
-                        if(maxAmount != 0) {
-                            IFluidHandler handler = (IFluidHandler) tile;
-                            FluidStack fillStack = getFluid().copy();
-                            fillStack.amount = Math.min(getFluidAmount(), maxAmount);
-                            if (handler.fill(inside, fillStack, false) > 0) {
-                                drain(handler.fill(inside, fillStack, true), true);
+                            if (maxAmount != 0) {
+                                IFluidHandler handler = (IFluidHandler) tile;
+                                FluidStack fillStack = getFluid().copy();
+                                fillStack.amount = Math.min(getFluidAmount(), maxAmount);
+                                if (handler.fill(inside, fillStack, false) > 0) {
+                                    drain(handler.fill(inside, fillStack, true), true);
+                                }
                             }
                         }
                     }
@@ -207,6 +226,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 if (yCoord == worldObj.getPrecipitationHeight(xCoord, zCoord) - 1) {
                     FluidStack waterStack = getFluid().copy();
                     waterStack.amount = rate * 10;
+                    rainIntake += waterStack.amount;
                     fill(waterStack, true);
                 }
             }
@@ -669,6 +689,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         isValid = false;
 
         this.updateBlockAndNeighbors();
+        FancyFluidStorage.analytics.event(FFSAnalytics.Category.TANK, FFSAnalytics.Event.TANK_BREAK);
         //worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
     }
 
@@ -920,8 +941,21 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     @Override
     public int fill(FluidStack resource, boolean doFill) {
         if(getMaster() == this) {
-            if(!isValid() || fluidStack != null && !fluidStack.isFluidEqual(resource))
+            if (!isValid() || fluidStack != null && !fluidStack.isFluidEqual(resource))
                 return 0;
+
+            if (getFluidAmount() >= getCapacity()) {
+                for(TileEntityValve valve : getAllValves()) {
+                    if (valve == this)
+                        continue;
+
+                    ForgeDirection outside = valve.getInside().getOpposite();
+                    TileEntity tile = worldObj.getTileEntity(valve.xCoord + outside.offsetX, valve.yCoord + outside.offsetY, valve.zCoord + outside.offsetZ);
+                    if (tile != null && tile instanceof TileEntityValve) {
+                        return ((TileEntityValve) tile).fill(getInside(), resource, doFill);
+                    }
+                }
+            }
 
             if (!doFill)
             {
@@ -937,6 +971,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 fluidStack = new FluidStack(resource, Math.min(fluidCapacity, resource.amount));
                 updateFluidTemperature();
                 setNeedsUpdate();
+                fluidIntake += fluidStack.amount;
                 return fluidStack.amount;
             }
 
@@ -948,6 +983,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             else {
                 fluidStack.amount = fluidCapacity;
             }
+
+            fluidIntake += filled;
 
             getMaster().setNeedsUpdate();
             //getMaster().markForUpdate(true);
@@ -976,6 +1013,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     fluidStack = null;
                     updateFluidTemperature();
                 }
+                fluidOuttake += drained;
                 getMaster().setNeedsUpdate();
                 //getMaster().markForUpdate(true);
             }
@@ -1023,8 +1061,21 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(getFluid() != null && getFluid().getFluid() != fluid)
             return false;
 
-        if(getFluidAmount() >= getCapacity())
+        if(getFluidAmount() >= getCapacity()) {
+            for(TileEntityValve valve : getAllValves()) {
+                if(valve == this)
+                    continue;
+
+                if (valve.valveHeightPosition > getTankHeight()) {
+                    ForgeDirection outside = valve.getInside().getOpposite();
+                    TileEntity tile = worldObj.getTileEntity(valve.xCoord + outside.offsetX, valve.yCoord + outside.offsetY, valve.zCoord + outside.offsetZ);
+                    if (tile != null && tile instanceof TileEntityValve) {
+                        return ((TileEntityValve) tile).canFill(valve.getInside(), fluid);
+                    }
+                }
+            }
             return false;
+        }
 
         if(autoOutput) {
             return valveHeightPosition > getTankHeight() || valveHeightPosition + 0.5f >= getTankHeight() * getFillPercentage();

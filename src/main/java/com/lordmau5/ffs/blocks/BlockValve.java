@@ -2,6 +2,7 @@ package com.lordmau5.ffs.blocks;
 
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.client.ValveRenderer;
+import com.lordmau5.ffs.compat.FFSAnalytics;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import cpw.mods.fml.relauncher.Side;
@@ -90,6 +91,9 @@ public class BlockValve extends Block {
         }
         else {
             valve.buildTank(ForgeDirection.getOrientation(side).getOpposite());
+            if(valve.isValid()) {
+                FancyFluidStorage.analytics.event(FFSAnalytics.Category.TANK, FFSAnalytics.Event.TANK_BUILD);
+            }
         }
         return true;
     }
