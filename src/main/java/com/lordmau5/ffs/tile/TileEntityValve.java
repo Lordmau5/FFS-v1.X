@@ -355,7 +355,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     private List<TileEntityValve> getAllValves() {
-        if(!isMaster())
+        if(!isMaster() && getMaster() != this)
             return getMaster().getAllValves();
 
         List<TileEntityValve> valves = new ArrayList<>();
