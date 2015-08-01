@@ -31,7 +31,7 @@ public class FFSAnalytics extends MCSimpleAnalytics {
 
     @Override
     public boolean isActive() {
-        return FancyFluidStorage.instance.ANONYMOUS_STATISTICS;
+        return FancyFluidStorage.instance.ANONYMOUS_STATISTICS && super.isActive();
     }
 
     public void event(Category cat, Event event) {
