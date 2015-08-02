@@ -1,6 +1,7 @@
 package com.lordmau5.ffs.tile;
 
 import com.lordmau5.ffs.util.ExtendedBlock;
+
 import cpw.mods.fml.common.Optional;
 import framesapi.IMoveCheck;
 import net.minecraft.block.Block;
@@ -10,8 +11,10 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fluids.Fluid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +32,7 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     public int valveX, valveY, valveZ;
     private TileEntityValve masterValve;
     private boolean hasValve = false;
+    private Fluid lastFluid = null;
 
     public TileEntityTankFrame() {
         super();
@@ -45,6 +49,15 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
             TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
             if(tile != null && tile instanceof TileEntityValve)
                 setValve((TileEntityValve) tile);
+        }
+        else if (!worldObj.isRemote && getValve() != null)
+        {
+            Fluid held = getValve().getFluid() == null ? null : getValve().getFluid().getFluid();
+            if (lastFluid != held)
+            {
+                lastFluid = held;
+                worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+            }
         }
     }
 

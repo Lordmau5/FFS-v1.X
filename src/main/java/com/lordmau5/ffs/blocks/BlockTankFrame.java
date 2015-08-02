@@ -182,6 +182,7 @@ public class BlockTankFrame extends Block implements IFacade {
         return null;
     }
 
+    @Override
     public int getFlammability(IBlockAccess world, int x, int y, int z, ForgeDirection face) {
         TileEntity tile = world.getTileEntity(x, y, z);
         if(tile != null && tile instanceof TileEntityTankFrame) {
@@ -203,6 +204,18 @@ public class BlockTankFrame extends Block implements IFacade {
             }
         }
         return super.getExplosionResistance(par1Entity);
+    }
+    
+    @Override
+    public int getLightValue(IBlockAccess world, int x, int y, int z)
+    {
+        TileEntityTankFrame tef = (TileEntityTankFrame) world.getTileEntity(x, y, z);
+        ExtendedBlock data = tef.getBlock();
+        if (data != null && GenericUtil.isBlockGlass(data.getBlock(), data.getMetadata()))
+        {
+            return tef.getValve().getFluidLuminosity();
+        }
+        return 0;
     }
 
     @Override
