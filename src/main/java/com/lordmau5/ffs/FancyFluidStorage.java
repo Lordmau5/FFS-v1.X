@@ -51,6 +51,8 @@ public class FancyFluidStorage {
     public boolean SET_WORLD_ON_FIRE = true;
     public boolean SHOULD_TANKS_LEAK = true;
 
+    public boolean TANK_RENDER_INSIDE = true;
+
     public enum TankFrameMode {
         SAME_BLOCK,
         DIFFERENT_METADATA,
@@ -103,6 +105,10 @@ public class FancyFluidStorage {
         Property tanksLeakProp = config.get(Configuration.CATEGORY_GENERAL, "shouldTanksLeak", true);
         tanksLeakProp.comment = "Should tanks with leaky materials start leaking randomly?\nDefault: true";
         SHOULD_TANKS_LEAK = tanksLeakProp.getBoolean(true);
+
+        Property tankRenderInside = config.get(Configuration.CATEGORY_GENERAL, "tanksRenderInsideOnly", true);
+        tankRenderInside.comment = "Should tanks only render the inside as fluid or extend to the frame-sides?\nDefault: true";
+        TANK_RENDER_INSIDE = tankRenderInside.getBoolean(true);
 
         if (config.hasChanged()) {
             config.save();

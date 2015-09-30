@@ -60,8 +60,8 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                 return;
 
             int height = topDiag.getY() - bottomDiag.getY();
-            int xSize = topDiag.getX() - bottomDiag.getX() + 1;
-            int zSize = topDiag.getZ() - bottomDiag.getZ() + 1;
+            int xSize = topDiag.getX() - bottomDiag.getX() + (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 0 : 1);
+            int zSize = topDiag.getZ() - bottomDiag.getZ() + (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 0 : 1);
 
             if (valve.getCapacity() == 0 || valve.getFluidAmount() == 0)
                 return;
@@ -102,15 +102,15 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                     if (renderHeight - rY < 1.0f)
                         flowMinV += (flowMaxV_ - flowMinV_) * (1.0f - (renderHeight - rY));
 
-                    for (int rX = 0; rX < xSize; rX++) {
-                        for (int rZ = 0; rZ < zSize; rZ++) {
+                    for (int rX = (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0); rX < xSize; rX++) {
+                        for (int rZ = (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0); rZ < zSize; rZ++) {
 
                             float zMinOffset = 0;
                             float zMaxOffset = 0;
                             float xMinOffset = 0;
                             float xMaxOffset = 0;
                             //North
-                            if (rZ == 0) {
+                            if (rZ == (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0)) {
                                 zMinOffset = 0.005f;
                                 t.addVertexWithUV(rX, rY, rZ + zMinOffset, flowMaxU, flowMaxV_);
                                 t.addVertexWithUV(rX, renderHeight, rZ + zMinOffset, flowMaxU, flowMinV);
@@ -128,7 +128,7 @@ public class ValveRenderer extends TileEntitySpecialRenderer implements ISimpleB
                             }
 
                             //West
-                            if (rX == 0) {
+                            if (rX == (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0)) {
                                 xMinOffset = 0.005f;
                                 t.addVertexWithUV(rX + xMinOffset, rY, rZ, flowMaxU, flowMaxV_);
                                 t.addVertexWithUV(rX + xMinOffset, rY, rZ + 1, flowMinU, flowMaxV_);
