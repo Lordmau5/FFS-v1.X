@@ -56,11 +56,11 @@ repositories {
     }
     ivy { // Remain In Motion
         name "RemainInMotion"
-        artifactPattern "http://addons-origin.cursecdn.com/files/2248/197/[module]-[revision].[ext]"
+        artifactPattern "http://addons-origin.cursecdn.com/files/2251/630/[module]-[revision].[ext]"
     }
     ivy { // PlanetguyLib (For RiM)
         name "PlanetguyLib"
-        artifactPattern "http://addons-origin.cursecdn.com/files/2248/190/[module]-[revision].[ext]"
+        artifactPattern "http://addons-origin.cursecdn.com/files/2255/580/[module]-[revision].[ext]"
     }
 }
 
