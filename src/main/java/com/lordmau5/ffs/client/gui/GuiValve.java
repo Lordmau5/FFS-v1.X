@@ -115,12 +115,12 @@ public class GuiValve extends GuiScreen {
         // call to super to draw buttons and other such fancy things
         super.drawScreen(x, y, partialTicks);
 
-        if(this.valve.getFluid() != null)
-            fluidHoveringText(fluid);
-
         if(!isFrame) {
             drawValveName(x, y);
         }
+
+        if(this.valve.getFluid() != null)
+            fluidHoveringText(fluid);
     }
 
     private void drawValveName(int x, int y) {
