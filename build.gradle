@@ -11,13 +11,16 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
 
+plugins {
+    id 'com.matthewprenger.cursegradle' version '1.0.5'
+}
+
 apply plugin: 'java'
-apply plugin: 'forge'
-apply plugin: 'curseforge'
+apply plugin: 'net.minecraftforge.gradle.forge'
 idea.module.inheritOutputDirs = true
 
 sourceSets {
@@ -74,7 +77,7 @@ dependencies {
     // Oh cool, it doesn't find CTMLib. Freaking useless.
     compile "com.cricketcraft.ctmlib:CTMLib:${ctmlib_version}:deobf"
 
-    compile "mcp.mobius.waila:Waila:${waila_version}_${minecraft_version}:dev"
+    compile "mcp.mobius.waila:Waila:${waila_version}:dev"
     // Apparently transitive dependency resolution doesn't want to find CCC
     compile "codechicken:CodeChickenCore:${minecraft_version}-${codechickencore_version}:dev"
     compile "codechicken:CodeChickenLib:${minecraft_version}-${codechickenlib_version}:dev"
@@ -94,6 +97,7 @@ targetCompatibility = 1.7
 minecraft {
     runDir = "runtime/client/assets"
     version = "$minecraft_version-$forge_version"
+    mappings = "snapshot_20160110"
 }
 
 processResources {
@@ -111,12 +115,7 @@ processResources {
     }
 }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-task deobfJar(type: Jar) {
+task deobfJar(type: Jar, dependsOn: 'jar') {
     from sourceSets.main.output
     classifier = 'deobf'
 }
@@ -125,12 +124,15 @@ artifacts {
     archives sourceJar, deobfJar
 }
 
-curse {
-    projectId='232683'
+curseforge {
     apiKey=System.env.CURSE_API_KEY != null ? "$System.env.CURSE_API_KEY" : ''
-    displayName="FFS v$project.mod_version"
-    changelog="https://github.com/Lordmau5/FFS/compare/$System.env.GIT_PREVIOUS_COMMIT...$System.env.GIT_COMMIT"
-    releaseType='alpha'
-
-    additionalArtifact deobfJar
+    project {
+      id='232683'
+      changelog="https://github.com/Lordmau5/FFS/compare/$System.env.GIT_PREVIOUS_COMMIT...$System.env.GIT_COMMIT"
+      releaseType='alpha'
+      mainArtifact(jar) {
+        displayName="FFS v$project.mod_version"
+      }
+      addArtifact deobfJar
+    }
 }
