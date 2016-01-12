@@ -18,7 +18,7 @@ public class UpdateAutoOutput_Server extends SimpleChannelInboundHandler<ffsPack
     protected void channelRead0(ChannelHandlerContext ctx, ffsPacket.Server.UpdateAutoOutput msg) throws Exception{
         World world = NetworkHandler.getPlayer(ctx).worldObj;
         if(world != null) {
-            TileEntity tile = world.getTileEntity(msg.x, msg.y, msg.z);
+            TileEntity tile = world.getTileEntity(msg.pos);
             if(tile != null && tile instanceof TileEntityValve) {
                 ((TileEntityValve) tile).setAutoOutput(msg.autoOutput);
             }

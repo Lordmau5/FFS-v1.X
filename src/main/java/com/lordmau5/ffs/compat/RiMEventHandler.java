@@ -2,12 +2,11 @@ package com.lordmau5.ffs.compat;
 
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import me.planetguy.remaininmotion.api.event.BlockPreMoveEvent;
 import me.planetguy.remaininmotion.api.event.BlockRotateEvent;
 import me.planetguy.remaininmotion.api.event.MotionFinalizeEvent;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * Created by Dustin on 21.07.2015.
@@ -48,8 +47,8 @@ public class RiMEventHandler {
         if(tile instanceof TileEntityValve) {
             TileEntityValve valve = (TileEntityValve) tile;
             if(valve.isMaster()) {
-                ForgeDirection rot = valve.getInside().getRotation(event.axis.getRotation(event.axis));
-                valve.setInside(rot);
+                //EnumFacing rot = valve.getInside().getRotation(event.axis.getRotation(event.axis));
+                //valve.setInside(rot);
             }
         }
         else if(tile instanceof TileEntityTankFrame) { // Necessary for the frames to "die"

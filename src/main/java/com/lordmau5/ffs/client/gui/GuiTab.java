@@ -9,34 +9,30 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 /**
- * Created by Max on 7/6/2015.
+ * Created by Dustin on 09.10.2015.
  */
-public class GuiToggle extends GuiButton {
+public class GuiTab extends GuiButton {
 
-    protected static final ResourceLocation toggleTexture = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
-    protected boolean state = false;
+    protected static final ResourceLocation tabTexture = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
     protected int textColor = 16777215;
+    protected boolean active = false;
 
-    public GuiToggle(int id, int x, int y, String title, boolean state, int textColor) {
-        super(id, x, y, 16, 8, title);
-        this.state = state;
-        this.textColor = textColor;
+    public GuiTab(int id, int x, int y, String title) {
+        super(id, x, y, 62, 15, title);
     }
 
     public void drawButton(Minecraft mc, int mouseX, int mouseY) {
         if (this.visible)
         {
             FontRenderer fontrenderer = mc.fontRendererObj;
-            mc.getTextureManager().bindTexture(toggleTexture);
+            mc.getTextureManager().bindTexture(tabTexture);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             GL11.glEnable(GL11.GL_BLEND);
             OpenGlHelper.glBlendFunc(770, 771, 1, 0);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            if (!state) {
-                this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 121, this.width, this.height);
-            } else {
-                this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 129, this.width, this.height);
-            }
+
+            this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 121, this.width, this.height + (isActive() ? 3 : 0));
+
             this.mouseDragged(mc, mouseX, mouseY);
 
             this.drawString(fontrenderer, this.displayString, this.xPosition + this.width + 4, this.yPosition, this.textColor);
@@ -44,17 +40,15 @@ public class GuiToggle extends GuiButton {
     }
 
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
-        boolean onMe = super.mousePressed(mc, mouseX, mouseY);
-        if (onMe) this.state = !this.state;
-        return onMe;
+        return super.mousePressed(mc, mouseX, mouseY);
     }
 
-    public boolean getState() {
-        return this.state;
+    public void setActive(boolean state) {
+        this.active = state;
     }
 
-    public void setState(boolean state) {
-        this.state = state;
+    public boolean isActive() {
+        return this.active;
     }
 
 }

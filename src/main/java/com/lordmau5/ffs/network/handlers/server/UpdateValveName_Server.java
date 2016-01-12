@@ -18,7 +18,7 @@ public class UpdateValveName_Server extends SimpleChannelInboundHandler<ffsPacke
     protected void channelRead0(ChannelHandlerContext ctx, ffsPacket.Server.UpdateValveName msg) throws Exception{
         World world = NetworkHandler.getPlayer(ctx).worldObj;
         if(world != null) {
-            TileEntity tile = world.getTileEntity(msg.x, msg.y, msg.z);
+            TileEntity tile = world.getTileEntity(msg.pos);
             if(tile != null && tile instanceof TileEntityValve) {
                 TileEntityValve valve = (TileEntityValve) tile;
                 valve.setValveName(msg.name);

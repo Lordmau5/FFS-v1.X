@@ -6,12 +6,14 @@ import com.lordmau5.ffs.tile.TileEntityValve;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGlass;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidContainerItem;
@@ -49,7 +51,7 @@ public class GenericUtil {
     }
 
     public static String getUniqueValveName(TileEntityValve valve) {
-        return "valve_" + Integer.toHexString(new Position3D(valve.xCoord, valve.yCoord, valve.zCoord).hashCode());
+        return "valve_" + Long.toHexString(valve.getPos().toLong());
     }
 
     public static boolean canAutoOutput(float height, int tankHeight, int valvePosition, boolean negativeDensity) {
@@ -80,16 +82,23 @@ public class GenericUtil {
         return false;
     }
 
-    public static boolean areTankBlocksValid(ExtendedBlock bottomBlock, ExtendedBlock topBlock, World world, Position3D bottomPos) {
+    public static boolean areTankBlocksValid(IBlockState bottomBlock, IBlockState topBlock, World world, BlockPos bottomPos) {
         if(!isValidTankBlock(world, bottomPos, bottomBlock))
             return false;
 
-        switch(FancyFluidStorage.instance.TANK_FRAME_MODE) {
-            case SAME_BLOCK: return bottomBlock.equals(topBlock);
-            case DIFFERENT_METADATA: return bottomBlock.equalsIgnoreMetadata(topBlock);
-            case DIFFERENT_BLOCK: return true;
+        if(true) return true;
+        else {
+            switch (FancyFluidStorage.instance.TANK_FRAME_MODE) {
+                case SAME_BLOCK:
+                    return bottomBlock.equals(topBlock);
+                case DIFFERENT_METADATA:
+                    return bottomBlock.getBlock() == topBlock.getBlock();
+                case DIFFERENT_BLOCK:
+                    return true;
 
-            default: return false;
+                default:
+                    return false;
+            }
         }
     }
 
@@ -102,11 +111,11 @@ public class GenericUtil {
         return false;
     }
 
-    public static boolean isValidTankBlock(World world, Position3D pos, ExtendedBlock extendedBlock) {
-        Block block = extendedBlock.getBlock();
+    public static boolean isValidTankBlock(World world, BlockPos pos, IBlockState state) {
+        Block block = state.getBlock();
 
-        if (block.hasTileEntity(extendedBlock.getMetadata())) {
-            TileEntity tile = world.getTileEntity(pos.getX(), pos.getY(), pos.getZ());
+        if (block.hasTileEntity(state)) {
+            TileEntity tile = world.getTileEntity(pos);
             if(tile != null) {
                 return tile instanceof TileEntityTankFrame || isTileEntityAcceptable(block, tile);
             }
@@ -122,16 +131,16 @@ public class GenericUtil {
             return false;
 
         if(!block.isOpaqueCube())
-            return false;
+            return true;
 
-        if(!block.renderAsNormalBlock())
-            return false;
+        //if(!block.renderAsNormalBlock())
+        //    return false;
 
         if(FancyFluidStorage.instance.TANK_FRAME_MODE == FancyFluidStorage.TankFrameMode.DIFFERENT_BLOCK)
             return true;
 
-        if(!block.func_149730_j())
-            return false;
+        //if(!block.func_149730_j())
+        //    return false;
 
         return true;
 
@@ -150,7 +159,7 @@ public class GenericUtil {
 
     }
 
-    public static boolean fluidContainerHandler(World world, int x, int y, int z, TileEntityValve valve, EntityPlayer player) {
+    public static boolean fluidContainerHandler(World world, BlockPos pos, TileEntityValve valve, EntityPlayer player, EnumFacing side) {
         ItemStack current = player.inventory.getCurrentItem();
 
         if (current != null) {
@@ -159,7 +168,7 @@ public class GenericUtil {
                 FluidStack liquid = FluidContainerRegistry.getFluidForFilledItem(current);
                 // Handle filled containers
                 if (liquid != null) {
-                    int qty = valve.fill(ForgeDirection.UNKNOWN, liquid, true);
+                    int qty = valve.fill(side, liquid, true);
 
                     if (qty != 0 && !player.capabilities.isCreativeMode) {
                         if (current.stackSize > 1) {
@@ -177,7 +186,7 @@ public class GenericUtil {
 
                     // Handle empty containers
                 } else {
-                    FluidStack available = valve.getTankInfo(ForgeDirection.UNKNOWN)[0].fluid;
+                    FluidStack available = valve.getTankInfo(side)[0].fluid;
 
                     if (available != null) {
                         ItemStack filled = FluidContainerRegistry.fillFluidContainer(available, current);
@@ -198,7 +207,7 @@ public class GenericUtil {
                                 }
                             }
 
-                            valve.drain(ForgeDirection.UNKNOWN, liquid.amount, true);
+                            valve.drain(side, liquid.amount, true);
 
                             return true;
                         }
@@ -212,19 +221,19 @@ public class GenericUtil {
                 if (!world.isRemote) {
                     IFluidContainerItem container = (IFluidContainerItem) current.getItem();
                     FluidStack liquid = container.getFluid(current);
-                    FluidStack tankLiquid = valve.getTankInfo(ForgeDirection.UNKNOWN)[0].fluid;
+                    FluidStack tankLiquid = valve.getTankInfo(EnumFacing.UP)[0].fluid;
                     boolean mustDrain = liquid == null || liquid.amount == 0;
                     boolean mustFill = tankLiquid == null || tankLiquid.amount == 0;
                     if (mustDrain && mustFill) {
                         // Both are empty, do nothing
                     } else if (mustDrain || !player.isSneaking()) {
-                        liquid = valve.drain(ForgeDirection.UNKNOWN, 1000, false);
+                        liquid = valve.drain(side, 1000, false);
                         int qtyToFill = container.fill(current, liquid, true);
-                        valve.drain(ForgeDirection.UNKNOWN, qtyToFill, true);
+                        valve.drain(side, qtyToFill, true);
                     } else {
                         if (liquid.amount > 0) {
-                            int qty = valve.fill(ForgeDirection.UNKNOWN, liquid, false);
-                            valve.fill(ForgeDirection.UNKNOWN, container.drain(current, qty, true), true);
+                            int qty = valve.fill(side, liquid, false);
+                            valve.fill(side, container.drain(current, qty, true), true);
                         }
                     }
                 }
@@ -250,10 +259,10 @@ public class GenericUtil {
         }
     }
 
-    private static Map<Position3D, ExtendedBlock> getBlocksBetweenPoints(World world, Position3D pos1, Position3D pos2) {
-        Map<Position3D, ExtendedBlock> blocks = new HashMap<>();
+    private static Map<BlockPos, IBlockState> getBlocksBetweenPoints(World world, BlockPos pos1, BlockPos pos2) {
+        Map<BlockPos, IBlockState> blocks = new HashMap<>();
 
-        Position3D distance = pos2.getDistance(pos1);
+        BlockPos distance = pos2.subtract(pos1);
         int dX, dY, dZ;
         dX = distance.getX();
         dY = distance.getY();
@@ -262,15 +271,16 @@ public class GenericUtil {
         for(int x=0; x<=dX; x++)
             for(int y=0; y<=dY; y++)
                 for(int z=0; z<=dZ; z++) {
-                    Position3D pos = new Position3D(pos1.getX() + x, pos1.getY() + y, pos1.getZ() + z);
-                    blocks.put(pos, new ExtendedBlock(world.getBlock(pos.getX(), pos.getY(), pos.getZ()), world.getBlockMetadata(pos.getX(), pos.getY(), pos.getZ())));
+                    BlockPos pos = pos1.add(x, y, z);
+                    BlockPos blockPos = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
+                    blocks.put(pos, world.getBlockState(blockPos));
                 }
 
         return blocks;
     }
 
-    public static Map<Position3D, ExtendedBlock>[] getTankFrame(World world, Position3D bottomDiag, Position3D topDiag) {
-        Map<Position3D, ExtendedBlock>[] maps = new HashMap[3];
+    public static Map<BlockPos, IBlockState>[] getTankFrame(World world, BlockPos bottomDiag, BlockPos topDiag) {
+        Map<BlockPos, IBlockState>[] maps = new HashMap[3];
         maps[0] = new HashMap<>(); // Frame Blocks
         maps[1] = new HashMap<>(); // Inside wall blocks
         maps[2] = new HashMap<>(); // Inside air
@@ -283,8 +293,8 @@ public class GenericUtil {
         int z2 = topDiag.getZ();
 
         // Calculate frames only
-        for(Map.Entry<Position3D, ExtendedBlock> e : getBlocksBetweenPoints(world, new Position3D(x1, y1, z1), new Position3D(x2, y2, z2)).entrySet()) {
-            Position3D p = e.getKey();
+        for(Map.Entry<BlockPos, IBlockState> e : getBlocksBetweenPoints(world, new BlockPos(x1, y1, z1), new BlockPos(x2, y2, z2)).entrySet()) {
+            BlockPos p = e.getKey();
             if(((p.getX() == x1 || p.getX() == x2) && (p.getY() == y1 || p.getY() == y2)) ||
                 ((p.getX() == x1 || p.getX() == x2) && (p.getZ() == z1 || p.getZ() == z2)) ||
                 ((p.getY() == y1 || p.getY() == y2) && (p.getZ() == z1 || p.getZ() == z2))) {

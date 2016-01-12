@@ -2,20 +2,21 @@ package com.lordmau5.ffs.compat;
 
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
-import com.lordmau5.ffs.util.ExtendedBlock;
 import com.lordmau5.ffs.util.GenericUtil;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.event.FMLInterModComms;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.api.IWailaRegistrar;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
 
 import java.util.List;
 
@@ -42,9 +43,9 @@ public class WailaPluginTank implements IWailaDataProvider {
     public ItemStack getWailaStack(IWailaDataAccessor iWailaDataAccessor, IWailaConfigHandler iWailaConfigHandler) {
         TileEntity te = iWailaDataAccessor.getTileEntity();
         if (te instanceof TileEntityTankFrame) {
-            ExtendedBlock eb = ((TileEntityTankFrame) te).getBlock();
+            IBlockState state = ((TileEntityTankFrame) te).getBlockState();
             try {
-                return new ItemStack(eb.getBlock(), 1, eb.getMetadata());
+                return new ItemStack(state.getBlock(), 1, state.getBlock().getMetaFromState(state));
             } catch (Exception e) {
                 return null; // Catch this just in case something goes bad here. It's pretty rare but possible.
             }
@@ -106,7 +107,7 @@ public class WailaPluginTank implements IWailaDataProvider {
 
     @Optional.Method(modid = "Waila")
     @Override
-    public NBTTagCompound getNBTData(EntityPlayerMP entityPlayerMP, TileEntity tileEntity, NBTTagCompound nbtTagCompound, World world, int i, int i1, int i2) {
+    public NBTTagCompound getNBTData(EntityPlayerMP entityPlayerMP, TileEntity tileEntity, NBTTagCompound nbtTagCompound, World world, BlockPos pos) {
         // Unused, implemented because of the interface
         return nbtTagCompound;
     }

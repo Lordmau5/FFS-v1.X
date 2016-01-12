@@ -1,8 +1,8 @@
 package com.lordmau5.ffs.network;
 
-import cpw.mods.fml.common.network.FMLIndexedMessageToMessageCodec;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import net.minecraftforge.fml.common.network.FMLIndexedMessageToMessageCodec;
 
 /**
  * Created by Dustin on 07.07.2015.

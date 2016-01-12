@@ -1,17 +1,17 @@
 package com.lordmau5.ffs.tile;
 
-import com.lordmau5.ffs.util.ExtendedBlock;
-import cpw.mods.fml.common.Optional;
-import framesapi.IMoveCheck;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
+import net.minecraftforge.fml.common.Optional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +23,12 @@ import java.util.List;
 @Optional.InterfaceList(value = {
         @Optional.Interface(iface = "framesapi.IMoveCheck", modid = "funkylocomotion")
 })
-public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
+public class TileEntityTankFrame extends TileEntity implements ITickable
+        //IMoveCheck
+{
 
-    private ExtendedBlock block;
-    public int valveX, valveY, valveZ;
+    public BlockPos valvePos;
+    private IBlockState blockState;
     private TileEntityValve masterValve;
     private boolean hasValve = false;
 
@@ -34,35 +36,53 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
         super();
     }
 
-    public TileEntityTankFrame(TileEntityValve masterValve, ExtendedBlock block) {
+    /*public TileEntityTankFrame(TileEntityValve masterValve, IBlockState blockState) {
         this.masterValve = masterValve;
-        this.block = block;
+        this.blockState = blockState;
+    }*/
+
+    public void initialize(TileEntityValve masterValve, IBlockState blockState) {
+        this.masterValve = masterValve;
+        this.blockState = blockState;
+    }
+
+    public void setBlockState(IBlockState blockState) {
+        this.blockState = blockState;
+    }
+
+    public IBlockState getBlockState() {
+        return blockState;
     }
 
     @Override
-    public void updateEntity() {
+    public void update() {
+        //worldObj.markBlockRangeForRenderUpdate(getPos(), getPos());
+        //IBlockState state = FancyFluidStorage.blockTankFrame.getExtendedState(worldObj.getBlockState(getPos()), worldObj, getPos());
+        //System.out.println((worldObj.isRemote ? "Client" : "Server") + " - " + ((state != null) ? state.toString() : "null"));
         if(masterValve == null && hasValve) {
-            TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
+            TileEntity tile = worldObj.getTileEntity(valvePos);
             if(tile != null && tile instanceof TileEntityValve)
                 setValve((TileEntityValve) tile);
         }
     }
 
     public boolean isFrameInvalid() {
-        TileEntity tile = worldObj.getTileEntity(xCoord, yCoord, zCoord);
+        TileEntity tile = worldObj.getTileEntity(getPos());
         return tile == null || !(tile instanceof TileEntityTankFrame) || tile != this;
     }
 
-    public List<ForgeDirection> getNeighborBlockOrAir(Block block) {
-        List<ForgeDirection> dirs = new ArrayList<>();
-        for(ForgeDirection dr : ForgeDirection.VALID_DIRECTIONS) {
+    public List<EnumFacing> getNeighborBlockOrAir(Block block) {
+        List<EnumFacing> dirs = new ArrayList<>();
+        BlockPos pos = getPos();
+        for(EnumFacing dr : EnumFacing.VALUES) {
             if(block == Blocks.air) {
-                if (worldObj.isAirBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ))
+                if (worldObj.isAirBlock(new BlockPos(pos.getX() + dr.getFrontOffsetX(), pos.getY() + dr.getFrontOffsetY(), pos.getZ() + dr.getFrontOffsetZ())))
                     dirs.add(dr);
             }
             else {
-                Block otherBlock = worldObj.getBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ);
-                if(block == otherBlock || worldObj.isAirBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ))
+                BlockPos oPos = new BlockPos(valvePos.getX() + dr.getFrontOffsetX(), valvePos.getY() + dr.getFrontOffsetY(), valvePos.getZ() + dr.getFrontOffsetZ());
+                IBlockState otherBlock = worldObj.getBlockState(new BlockPos(oPos));
+                if(block == otherBlock.getBlock() || worldObj.isAirBlock(oPos))
                     dirs.add(dr);
             }
         }
@@ -70,14 +90,14 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     }
 
     public boolean tryBurning() {
-        Block block = getBlock().getBlock();
+        Block block = getBlockState().getBlock();
         if(block == null)
             return false;
 
-        List<ForgeDirection> air = getNeighborBlockOrAir(Blocks.air);
-        for(ForgeDirection dr : air) {
-            if(block.isFlammable(worldObj, xCoord, yCoord, zCoord, dr)) {
-                worldObj.setBlock(xCoord + dr.offsetX, yCoord + dr.offsetY, zCoord + dr.offsetZ, Blocks.fire, 0, 3);
+        List<EnumFacing> air = getNeighborBlockOrAir(Blocks.air);
+        for(EnumFacing dr : air) {
+            if(block.isFlammable(worldObj, pos, dr)) {
+                worldObj.setBlockState(getPos(), Blocks.fire.getDefaultState());
                 return true;
             }
         }
@@ -85,14 +105,16 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     }
 
     public void breakFrame() {
-        if(isFrameInvalid())
+        if(isFrameInvalid()) {
+            worldObj.setBlockToAir(getPos());
             return;
+        }
 
-        worldObj.removeTileEntity(xCoord, yCoord, zCoord);
-        if(block != null && block.getBlock() != null)
-            worldObj.setBlock(xCoord, yCoord, zCoord, block.getBlock(), block.getMetadata(), 3);
+        worldObj.removeTileEntity(getPos());
+        if(getBlockState() != null)
+            worldObj.setBlockState(getPos(), getBlockState());
         else
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+            worldObj.setBlockToAir(getPos());
     }
 
     public void onBreak() {
@@ -107,19 +129,11 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
 
     public TileEntityValve getValve() {
         if(this.masterValve == null && hasValve) {
-            TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
+            TileEntity tile = worldObj.getTileEntity(valvePos);
             if(tile != null && tile instanceof TileEntityValve)
                 setValve((TileEntityValve) tile);
         }
         return this.masterValve;
-    }
-
-    public void setBlock(ExtendedBlock block) {
-        this.block = block;
-    }
-
-    public ExtendedBlock getBlock() {
-        return block;
     }
 
     @Override
@@ -127,13 +141,11 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
         super.readFromNBT(tag);
 
         if(tag.hasKey("valveX")) {
-            valveX = tag.getInteger("valveX");
-            valveY = tag.getInteger("valveY");
-            valveZ = tag.getInteger("valveZ");
+            valvePos = new BlockPos(tag.getInteger("valveX"), tag.getInteger("valveY"), tag.getInteger("valveZ"));
             hasValve = true;
         }
         if(tag.hasKey("blockId")) {
-            this.block = new ExtendedBlock(Block.getBlockById(tag.getInteger("blockId")), tag.getInteger("metadata"));
+            this.blockState = Block.getBlockById(tag.getInteger("blockId")).getStateFromMeta(tag.getInteger("metadata"));
         }
     }
 
@@ -142,19 +154,20 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
         super.writeToNBT(tag);
 
         if(getValve() != null) {
-            tag.setInteger("valveX", getValve().xCoord);
-            tag.setInteger("valveY", getValve().yCoord);
-            tag.setInteger("valveZ", getValve().zCoord);
+            BlockPos pos = getValve().getPos();
+            tag.setInteger("valveX", pos.getX());
+            tag.setInteger("valveY", pos.getY());
+            tag.setInteger("valveZ", pos.getZ());
         }
-        if(getBlock() != null) {
-            tag.setInteger("blockId", Block.getIdFromBlock(getBlock().getBlock()));
-            tag.setInteger("metadata", getBlock().getMetadata());
+        if(getBlockState() != null) {
+            tag.setInteger("blockId", Block.getIdFromBlock(getBlockState().getBlock()));
+            tag.setInteger("metadata", getBlockState().getBlock().getMetaFromState(getBlockState()));
         }
     }
 
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
-        readFromNBT(pkt.func_148857_g());
+        readFromNBT(pkt.getNbtCompound());
         markForUpdate();
     }
 
@@ -162,16 +175,18 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     public Packet getDescriptionPacket() {
         NBTTagCompound tag = new NBTTagCompound();
         writeToNBT(tag);
-        return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 0, tag);
+        return new S35PacketUpdateTileEntity(pos, 0, tag);
     }
 
     public void markForUpdate() {
-        worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+        worldObj.markBlockForUpdate(pos);
     }
 
+    /*
     @Optional.Method(modid = "funkylocomotion")
     @Override
     public boolean canMove(World worldObj, int x, int y, int z) {
         return false;
     }
+    */
 }

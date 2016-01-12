@@ -1,30 +1,35 @@
 package com.lordmau5.ffs.blocks;
 
-import com.cricketcraft.chisel.api.IFacade;
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.client.TankFrameRenderer;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
-import com.lordmau5.ffs.util.ExtendedBlock;
+import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
-import cpw.mods.fml.common.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.common.Optional;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -33,96 +38,116 @@ import java.util.Random;
  * Created by Dustin on 02.07.2015.
  */
 @Optional.Interface(iface = "com.cricketcraft.chisel.api.IFacade", modid = "chisel")
-public class BlockTankFrame extends Block implements IFacade {
+public class BlockTankFrame extends Block
+        //implements IFacade
+        {
 
     public BlockTankFrame() {
         super(Material.rock);
-        setBlockTextureName(FancyFluidStorage.modId + ":" + "blockValve");
+        setUnlocalizedName("blockTankFrame");
+        setRegistryName("blockTankFrame");
+        setDefaultState(((IExtendedBlockState) blockState.getBaseState())
+                .withProperty(FFSStateProps.FRAME_STATE, null));
     }
 
     @Override
-    public boolean hasTileEntity(int metadata) {
+    public BlockState createBlockState() {
+        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty[] { FFSStateProps.FRAME_STATE });
+    }
+
+    @Override
+    public boolean hasTileEntity(IBlockState state) {
         return true;
     }
 
     @Override
-    public TileEntity createTileEntity(World world, int metadata) {
+    public TileEntity createTileEntity(World world, IBlockState state) {
         return new TileEntityTankFrame();
     }
 
     @Override
-    public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
+        TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
-            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
-            frame.setBlock(null);
+            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
+            frame.setBlockState(null);
             frame.breakFrame();
             frame.onBreak();
         }
-        super.onBlockDestroyedByExplosion(world, x, y, z, explosion);
+        super.onBlockDestroyedByExplosion(world, pos, explosion);
     }
 
     @Override
-    public boolean removedByPlayer(World world, EntityPlayer player, int x, int y, int z, boolean willHarvest) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public boolean removedByPlayer(World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
-            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
+            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
             if(!player.capabilities.isCreativeMode) {
                 ArrayList<ItemStack> items = new ArrayList<>();
 
-                Block block = frame.getBlock().getBlock();
-                int meta = frame.getBlock().getMetadata();
+                IBlockState state = frame.getBlockState();
+                Block block = state.getBlock();
 
-                if(block.canSilkHarvest(world, player, x, y, z, meta) && EnchantmentHelper.getSilkTouchModifier(player)) {
-                    ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, true, player);
+                if(block.canSilkHarvest(world, pos, state, player) && EnchantmentHelper.getSilkTouchModifier(player)) {
+                    ForgeEventFactory.fireBlockHarvesting(items, world, pos, state, 0, 1.0f, true, player);
 
-                    ItemStack itemstack = new ItemStack(Item.getItemFromBlock(block), 1, meta);
+                    ItemStack itemstack = new ItemStack(Item.getItemFromBlock(block), 1, block.getMetaFromState(state));
                     items.add(itemstack);
 
                     for (ItemStack is : items)
                     {
-                        this.dropBlockAsItem(world, x, y, z, is);
+                        spawnAsEntity(world, pos, is);
                     }
                 }
                 else {
-                    ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0f, false, player);
+                    ForgeEventFactory.fireBlockHarvesting(items, world, pos, state, 0, 1.0f, false, player);
 
-                    items.addAll(block.getDrops(world, x, y, z, meta, 0));
+                    items.addAll(block.getDrops(world, pos, state, 0));
                     for (ItemStack is : items)
                     {
-                        this.dropBlockAsItem(world, x, y, z, is);
+                        spawnAsEntity(world, pos, is);
                     }
                 }
             }
             frame.onBreak();
         }
-        return super.removedByPlayer(world, player, x, y, z, willHarvest);
+        return super.removedByPlayer(world, pos, player, willHarvest);
     }
 
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    public Item getItemDropped(IBlockState block, Random rand, int fortune)
     {
         return null;
     }
 
     @Override
-    public float getPlayerRelativeBlockHardness(EntityPlayer player, World world, int x, int y, int z) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public float getPlayerRelativeBlockHardness(EntityPlayer player, World world, BlockPos pos) {
+        TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
-            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
-            return frame.getBlock().getBlock().getPlayerRelativeBlockHardness(player, world, x, y, z);
+            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
+            return frame.getBlockState().getBlock().getPlayerRelativeBlockHardness(player, world, pos);
         }
-        return super.getPlayerRelativeBlockHardness(player, world, x, y, z);
+        return super.getPlayerRelativeBlockHardness(player, world, pos);
     }
 
     @Override
-    public boolean addDestroyEffects(World world, int x, int y, int z, int meta, EffectRenderer effectRenderer) {
+    public boolean addDestroyEffects(World world, BlockPos pos, EffectRenderer effectRenderer) {
         return true;
     }
 
+     @Override
+     public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
+         return true;
+     }
+
     @Override
-    public int getRenderBlockPass() {
-        return 1;
+    public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+        if (world.getTileEntity(pos) instanceof TileEntityTankFrame) {
+            TileEntityTankFrame tile = ((TileEntityTankFrame) world.getTileEntity(pos));
+            return ((IExtendedBlockState) state).withProperty(FFSStateProps.FRAME_STATE, tile.getBlockState());
+        } else {
+            return ((IExtendedBlockState) state);
+        }
     }
 
     @Override
@@ -131,36 +156,20 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public boolean renderAsNormalBlock() {
-        return false;
-    }
-
-    @Override
-    public boolean canRenderInPass(int pass) {
-        ForgeHooksClient.setRenderPass(pass);
-        return true;
-    }
-
-    @Override
-    public int getRenderType() {
-        return TankFrameRenderer.id;
-    }
-
-    @Override
-    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-        if (super.onBlockActivated(world, x, y, z, player, side, hitX, hitY, hitZ)) {
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
+        if (super.onBlockActivated(world, pos, state, player, side, hitX, hitY, hitZ)) {
             return true;
         }
         if (player.isSneaking()) return false;
 
-        TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
+        TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
         if(frame != null && frame.getValve() != null) {
             TileEntityValve valve = frame.getValve();
             if (valve.isValid()) {
                 if(GenericUtil.isFluidContainer(player.getHeldItem()))
-                    return GenericUtil.fluidContainerHandler(world, x, y, z, valve, player);
+                    return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 
-                player.openGui(FancyFluidStorage.instance, 0, world, x, y, z);
+                player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
                 return true;
             }
         }
@@ -168,59 +177,59 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public boolean isNormalCube(IBlockAccess world, int x, int y, int z) {
+    public boolean isNormalCube(IBlockAccess world, BlockPos pos) {
         return true;
     }
 
     @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos, EntityPlayer player) {
+        TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
-            ExtendedBlock block = ((TileEntityTankFrame)tile).getBlock();
-            if(block != null)
-                return block.getBlock().getPickBlock(target, world, x, y, z, player);
+            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
+            return frame.getBlockState().getBlock().getPickBlock(target, world, pos, player);
         }
         return null;
     }
 
-    public int getFlammability(IBlockAccess world, int x, int y, int z, ForgeDirection face) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face) {
+        TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
-            if(frame.getBlock() != null) {
-                return frame.getBlock().getBlock().getFlammability(world, x, y, z, face);
+            if(frame.getBlockState() != null) {
+                return frame.getBlockState().getBlock().getFlammability(world, pos, face);
             }
         }
         return 0;
     }
 
     @Override
-    public float getExplosionResistance(Entity par1Entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public float getExplosionResistance(World world, BlockPos pos, Entity exploder, Explosion explosion) {
+        TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
-            if(frame.getBlock() != null) {
-                return frame.getBlock().getBlock().getExplosionResistance(par1Entity, world, x, y, z, explosionX, explosionY, explosionZ);
+            if(frame.getBlockState() != null) {
+                return frame.getBlockState().getBlock().getExplosionResistance(world, pos, exploder, explosion);
             }
         }
-        return super.getExplosionResistance(par1Entity);
+        return super.getExplosionResistance(exploder);
     }
 
     @Override
-    public void breakBlock(World world, int x, int y, int z, Block block, int metadata) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    public void breakBlock(World world, BlockPos pos, IBlockState state) {
+        TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
-            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(x, y, z);
+            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
             frame.onBreak();
         }
-        super.breakBlock(world, x, y, z, block, metadata);
+        super.breakBlock(world, pos, state);
     }
 
     @Override
-    public boolean canCreatureSpawn(EnumCreatureType type, IBlockAccess world, int x, int y, int z) {
+    public boolean canCreatureSpawn(IBlockAccess world, BlockPos pos, EntityLiving.SpawnPlacementType type) {
         return false;
     }
 
+    /*
     @Override
     @Optional.Method(modid = "chisel")
     public Block getFacade(IBlockAccess world, int x, int y, int z, int side) {
@@ -252,5 +261,6 @@ public class BlockTankFrame extends Block implements IFacade {
         }
         return 0;
     }
+    */
 
 }

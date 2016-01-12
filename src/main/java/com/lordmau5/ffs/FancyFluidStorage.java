@@ -2,25 +2,32 @@ package com.lordmau5.ffs;
 
 import com.lordmau5.ffs.blocks.BlockTankFrame;
 import com.lordmau5.ffs.blocks.BlockValve;
-import com.lordmau5.ffs.compat.FFSAnalytics;
+import com.lordmau5.ffs.client.FluidHelper;
+import com.lordmau5.ffs.client.TankFrameModel;
 import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.proxy.CommonProxy;
 import com.lordmau5.ffs.proxy.GuiHandler;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.GenericUtil;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Created by Dustin on 28.06.2015.
@@ -34,7 +41,7 @@ public class FancyFluidStorage {
     public static BlockTankFrame blockTankFrame;
 
     public static Configuration config;
-    public static FFSAnalytics analytics;
+    //public static FFSAnalytics analytics;
 
     @Mod.Instance(modId)
     public static FancyFluidStorage instance;
@@ -42,7 +49,7 @@ public class FancyFluidStorage {
     @SidedProxy(clientSide = "com.lordmau5.ffs.proxy.ClientProxy", serverSide = "com.lordmau5.ffs.proxy.CommonProxy")
     public static CommonProxy proxy;
 
-    public boolean ANONYMOUS_STATISTICS = true;
+    public boolean ANONYMOUS_STATISTICS = false;
 
     public int MB_PER_TANK_BLOCK = 16000;
     public boolean INSIDE_CAPACITY = false;
@@ -65,7 +72,7 @@ public class FancyFluidStorage {
 
         Property usageStatistics = config.get(Configuration.CATEGORY_GENERAL, "usageStatistics", true);
         usageStatistics.comment = "Should the mod send anonymous usage statistics to GameAnalytics?\nThis allows us to evaluate interesting statistics :)\nDefault: true";
-        ANONYMOUS_STATISTICS = usageStatistics.getBoolean(true);
+        //ANONYMOUS_STATISTICS = usageStatistics.getBoolean(true);
 
         Property mbPerTankProp = config.get(Configuration.CATEGORY_GENERAL, "mbPerVirtualTank", 16000);
         mbPerTankProp.comment = "How many millibuckets can each block within the tank store? (Has to be higher than 1!)\nDefault: 16000";
@@ -117,8 +124,6 @@ public class FancyFluidStorage {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        proxy.preInit();
-
         config = new Configuration(event.getSuggestedConfigurationFile());
         loadConfig();
 
@@ -132,7 +137,9 @@ public class FancyFluidStorage {
 
         NetworkHandler.registerChannels(event.getSide());
 
-        analytics = new FFSAnalytics();
+        proxy.preInit();
+
+        //analytics = new FFSAnalytics();
     }
 
     @Mod.EventHandler
@@ -149,6 +156,25 @@ public class FancyFluidStorage {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         GenericUtil.init();
+    }
+
+    /**
+     *
+     *
+     */
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void loadTextures(TextureStitchEvent.Post event) {
+        FluidHelper.initTextures(event.map);
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void bakeSweetModels(ModelBakeEvent event) {
+        System.out.println("In the model bakery!");
+        event.modelRegistry.putObject(new ModelResourceLocation("ffs:blockTankFrame", "normal"), new TankFrameModel());
+        //event.modelRegistry.putObject(new ModelResourceLocation("ffs:blockValve", "normal"), new TankValveModel());
     }
 
 }
