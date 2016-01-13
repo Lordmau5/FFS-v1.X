@@ -56,6 +56,11 @@ public class BlockTankFrame extends Block
     }
 
     @Override
+    public BlockState getBlockState() {
+        return super.getBlockState();
+    }
+
+    @Override
     public boolean hasTileEntity(IBlockState state) {
         return true;
     }
@@ -125,7 +130,8 @@ public class BlockTankFrame extends Block
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
-            return frame.getBlockState().getBlock().getPlayerRelativeBlockHardness(player, world, pos);
+            //return frame.getBlockState().getBlock().getPlayerRelativeBlockHardness(player, world, pos);
+            return super.getPlayerRelativeBlockHardness(player, world, pos);
         }
         return super.getPlayerRelativeBlockHardness(player, world, pos);
     }
@@ -135,7 +141,12 @@ public class BlockTankFrame extends Block
         return true;
     }
 
-     @Override
+    @Override
+    public EnumWorldBlockLayer getBlockLayer() {
+        return EnumWorldBlockLayer.CUTOUT;
+    }
+
+    @Override
      public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
          return true;
      }
@@ -182,11 +193,17 @@ public class BlockTankFrame extends Block
     }
 
     @Override
+    public boolean isFullCube() {
+        return false;
+    }
+
+    @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos, EntityPlayer player) {
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
-            return frame.getBlockState().getBlock().getPickBlock(target, world, pos, player);
+            //return frame.getBlockState().getBlock().getPickBlock(target, world, pos, player);
+            return null;
         }
         return null;
     }
@@ -196,7 +213,8 @@ public class BlockTankFrame extends Block
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
             if(frame.getBlockState() != null) {
-                return frame.getBlockState().getBlock().getFlammability(world, pos, face);
+                //return frame.getBlockState().getBlock().getFlammability(world, pos, face);
+                return 0;
             }
         }
         return 0;
@@ -208,7 +226,8 @@ public class BlockTankFrame extends Block
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
             if(frame.getBlockState() != null) {
-                return frame.getBlockState().getBlock().getExplosionResistance(world, pos, exploder, explosion);
+                //return frame.getBlockState().getBlock().getExplosionResistance(world, pos, exploder, explosion);
+                return super.getExplosionResistance(exploder);
             }
         }
         return super.getExplosionResistance(exploder);

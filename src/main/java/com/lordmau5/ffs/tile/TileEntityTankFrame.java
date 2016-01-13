@@ -30,7 +30,7 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
     public BlockPos valvePos;
     private IBlockState blockState;
     private TileEntityValve masterValve;
-    private boolean hasValve = false;
+    private boolean wantsUpdate = false;
 
     public TileEntityTankFrame() {
         super();
@@ -41,8 +41,8 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
         this.blockState = blockState;
     }*/
 
-    public void initialize(TileEntityValve masterValve, IBlockState blockState) {
-        this.masterValve = masterValve;
+    public void initialize(BlockPos valvePos, IBlockState blockState) {
+        this.valvePos = valvePos;
         this.blockState = blockState;
     }
 
@@ -56,13 +56,9 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
 
     @Override
     public void update() {
-        //worldObj.markBlockRangeForRenderUpdate(getPos(), getPos());
-        //IBlockState state = FancyFluidStorage.blockTankFrame.getExtendedState(worldObj.getBlockState(getPos()), worldObj, getPos());
-        //System.out.println((worldObj.isRemote ? "Client" : "Server") + " - " + ((state != null) ? state.toString() : "null"));
-        if(masterValve == null && hasValve) {
-            TileEntity tile = worldObj.getTileEntity(valvePos);
-            if(tile != null && tile instanceof TileEntityValve)
-                setValve((TileEntityValve) tile);
+        if(wantsUpdate) {
+            worldObj.markBlockForUpdate(getPos());
+            wantsUpdate = false;
         }
     }
 
@@ -73,15 +69,19 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
 
     public List<EnumFacing> getNeighborBlockOrAir(Block block) {
         List<EnumFacing> dirs = new ArrayList<>();
+
+        if(getValve() == null)
+            return dirs;
+
         BlockPos pos = getPos();
         for(EnumFacing dr : EnumFacing.VALUES) {
             if(block == Blocks.air) {
-                if (worldObj.isAirBlock(new BlockPos(pos.getX() + dr.getFrontOffsetX(), pos.getY() + dr.getFrontOffsetY(), pos.getZ() + dr.getFrontOffsetZ())))
+                if (worldObj.isAirBlock(pos.offset(dr)))
                     dirs.add(dr);
             }
             else {
-                BlockPos oPos = new BlockPos(valvePos.getX() + dr.getFrontOffsetX(), valvePos.getY() + dr.getFrontOffsetY(), valvePos.getZ() + dr.getFrontOffsetZ());
-                IBlockState otherBlock = worldObj.getBlockState(new BlockPos(oPos));
+                BlockPos oPos = getValve().getPos().offset(dr);
+                IBlockState otherBlock = worldObj.getBlockState(oPos);
                 if(block == otherBlock.getBlock() || worldObj.isAirBlock(oPos))
                     dirs.add(dr);
             }
@@ -96,7 +96,7 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
 
         List<EnumFacing> air = getNeighborBlockOrAir(Blocks.air);
         for(EnumFacing dr : air) {
-            if(block.isFlammable(worldObj, pos, dr)) {
+            if(block.isFlammable(worldObj, getPos(), dr)) {
                 worldObj.setBlockState(getPos(), Blocks.fire.getDefaultState());
                 return true;
             }
@@ -118,22 +118,23 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
     }
 
     public void onBreak() {
-        if(masterValve != null && !worldObj.isRemote) {
-            masterValve.breakTank(this);
+        if(getValve() != null && !worldObj.isRemote) {
+            getValve().breakTank(this);
         }
     }
 
-    public void setValve(TileEntityValve valve) {
-        this.masterValve = valve;
+    public void setValvePos(BlockPos valvePos) {
+        this.valvePos = valvePos;
+        this.masterValve = null;
     }
 
     public TileEntityValve getValve() {
-        if(this.masterValve == null && hasValve) {
-            TileEntity tile = worldObj.getTileEntity(valvePos);
-            if(tile != null && tile instanceof TileEntityValve)
-                setValve((TileEntityValve) tile);
+        if(masterValve == null && this.valvePos != null) {
+            TileEntity tile = worldObj.getTileEntity(this.valvePos);
+            masterValve = tile instanceof TileEntityValve ? (TileEntityValve) tile : null;
         }
-        return this.masterValve;
+
+        return masterValve;
     }
 
     @Override
@@ -142,17 +143,14 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
 
         if(tag.hasKey("valveX")) {
             valvePos = new BlockPos(tag.getInteger("valveX"), tag.getInteger("valveY"), tag.getInteger("valveZ"));
-            hasValve = true;
         }
-        if(tag.hasKey("blockId")) {
-            this.blockState = Block.getBlockById(tag.getInteger("blockId")).getStateFromMeta(tag.getInteger("metadata"));
+        if(tag.hasKey("blockName")) {
+            this.blockState = Block.getBlockFromName(tag.getString("blockName")).getStateFromMeta(tag.getInteger("metadata"));
         }
     }
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        super.writeToNBT(tag);
-
         if(getValve() != null) {
             BlockPos pos = getValve().getPos();
             tag.setInteger("valveX", pos.getX());
@@ -160,9 +158,11 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
             tag.setInteger("valveZ", pos.getZ());
         }
         if(getBlockState() != null) {
-            tag.setInteger("blockId", Block.getIdFromBlock(getBlockState().getBlock()));
+            tag.setString("blockName", getBlockState().getBlock().getRegistryName());
             tag.setInteger("metadata", getBlockState().getBlock().getMetaFromState(getBlockState()));
         }
+
+        super.writeToNBT(tag);
     }
 
     @Override
@@ -175,11 +175,14 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
     public Packet getDescriptionPacket() {
         NBTTagCompound tag = new NBTTagCompound();
         writeToNBT(tag);
-        return new S35PacketUpdateTileEntity(pos, 0, tag);
+        return new S35PacketUpdateTileEntity(getPos(), 0, tag);
     }
 
     public void markForUpdate() {
-        worldObj.markBlockForUpdate(pos);
+        if(worldObj != null && getPos() != null)
+            worldObj.markBlockForUpdate(getPos());
+        else
+            wantsUpdate = true;
     }
 
     /*

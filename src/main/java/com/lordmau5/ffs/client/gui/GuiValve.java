@@ -57,7 +57,7 @@ public class GuiValve extends GuiScreen {
             this.buttonList.add(new GuiToggle(AUTO_FLUID_OUTPUT_BTN_ID, this.left + 80, this.top + 20, "Auto fluid output", this.valve.getAutoOutput(), 16777215));
             valveName = new GuiTextField(0, this.fontRendererObj, this.left + 80, this.top + 100, 120, 10);
             valveName.setText(valve.getValveName());
-            valveName.setMaxStringLength(18);
+            valveName.setMaxStringLength(32);
         }
 
         //this.buttonList.add(new GuiTab(TAB_TANK, this.left + 10, this.top - 15, "Tank"));

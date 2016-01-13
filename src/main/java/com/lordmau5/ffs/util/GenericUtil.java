@@ -112,7 +112,13 @@ public class GenericUtil {
     }
 
     public static boolean isValidTankBlock(World world, BlockPos pos, IBlockState state) {
+        if(state == null)
+            return false;
+
         Block block = state.getBlock();
+
+        if(world.isAirBlock(pos))
+            return false;
 
         if (block.hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
@@ -124,8 +130,8 @@ public class GenericUtil {
         if(blacklistedBlocks.contains(block))
             return false;
 
-        //if(block.canProvidePower())
-        //    return false;
+        if(block.canProvidePower())
+            return false;
 
         if(block.getMaterial() == Material.sand)
             return false;
@@ -298,11 +304,20 @@ public class GenericUtil {
             if(((p.getX() == x1 || p.getX() == x2) && (p.getY() == y1 || p.getY() == y2)) ||
                 ((p.getX() == x1 || p.getX() == x2) && (p.getZ() == z1 || p.getZ() == z2)) ||
                 ((p.getY() == y1 || p.getY() == y2) && (p.getZ() == z1 || p.getZ() == z2))) {
+                    IBlockState state = e.getValue();
+                    TileEntity tile = world.getTileEntity(p);
+                    if(tile != null && tile instanceof TileEntityTankFrame)
+                        state = ((TileEntityTankFrame) tile).getBlockState();
 
-                    maps[0].put(p, e.getValue());
+                    maps[0].put(p, state);
             }
             else if(((p.getX() == x1 || p.getX() == x2) || (p.getY() == y1 || p.getY() == y2) || (p.getZ() == z1 || p.getZ() == z2))) {
-                maps[1].put(p, e.getValue());
+                IBlockState state = e.getValue();
+                TileEntity tile = world.getTileEntity(p);
+                if(tile != null && tile instanceof TileEntityTankFrame)
+                    state = ((TileEntityTankFrame) tile).getBlockState();
+
+                maps[1].put(p, state);
             }
             else {
                 maps[2].put(p, e.getValue());
