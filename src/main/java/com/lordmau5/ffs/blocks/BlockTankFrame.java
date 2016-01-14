@@ -184,7 +184,7 @@ public class BlockTankFrame extends Block
                 return true;
             }
         }
-        return false;
+        return true;
     }
 
     @Override

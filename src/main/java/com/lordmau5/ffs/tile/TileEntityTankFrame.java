@@ -56,8 +56,9 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
 
     @Override
     public void update() {
-        if(wantsUpdate) {
+        if(wantsUpdate && getWorld() != null) {
             worldObj.markBlockForUpdate(getPos());
+            markDirty();
             wantsUpdate = false;
         }
     }
@@ -138,19 +139,26 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tag) {
-        super.readFromNBT(tag);
+    public void readFromNBT(NBTTagCompound _tag) {
+        super.readFromNBT(_tag);
 
+        NBTTagCompound tag = getTileData();
         if(tag.hasKey("valveX")) {
-            valvePos = new BlockPos(tag.getInteger("valveX"), tag.getInteger("valveY"), tag.getInteger("valveZ"));
+            setValvePos(new BlockPos(tag.getInteger("valveX"), tag.getInteger("valveY"), tag.getInteger("valveZ")));
         }
+//        System.out.println("Reading nbt");
         if(tag.hasKey("blockName")) {
-            this.blockState = Block.getBlockFromName(tag.getString("blockName")).getStateFromMeta(tag.getInteger("metadata"));
+            setBlockState(Block.getBlockFromName(tag.getString("blockName")).getStateFromMeta(tag.getInteger("metadata")));
+//            System.out.println("Read: " + tag.getString("blockName") + " : " + tag.getInteger("metadata"));
         }
+
+        markForUpdate();
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag) {
+    public void writeToNBT(NBTTagCompound _tag) {
+        NBTTagCompound tag = getTileData();
+
         if(getValve() != null) {
             BlockPos pos = getValve().getPos();
             tag.setInteger("valveX", pos.getX());
@@ -160,15 +168,16 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
         if(getBlockState() != null) {
             tag.setString("blockName", getBlockState().getBlock().getRegistryName());
             tag.setInteger("metadata", getBlockState().getBlock().getMetaFromState(getBlockState()));
+
+//            System.out.println("Write: " + tag.getString("blockName") + " : " + tag.getInteger("metadata"));
         }
 
-        super.writeToNBT(tag);
+        super.writeToNBT(_tag);
     }
 
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
         readFromNBT(pkt.getNbtCompound());
-        markForUpdate();
     }
 
     @Override
@@ -179,8 +188,10 @@ public class TileEntityTankFrame extends TileEntity implements ITickable
     }
 
     public void markForUpdate() {
-        if(worldObj != null && getPos() != null)
-            worldObj.markBlockForUpdate(getPos());
+        if(getWorld() != null && getPos() != null) {
+            getWorld().markBlockForUpdate(getPos());
+            markDirty();
+        }
         else
             wantsUpdate = true;
     }
