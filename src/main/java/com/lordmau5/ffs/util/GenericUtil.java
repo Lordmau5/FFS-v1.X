@@ -174,7 +174,7 @@ public class GenericUtil {
                 FluidStack liquid = FluidContainerRegistry.getFluidForFilledItem(current);
                 // Handle filled containers
                 if (liquid != null) {
-                    int qty = valve.fill(side, liquid, true);
+                    int qty = valve.fillFromContainer(side, liquid, true);
 
                     if (qty != 0 && !player.capabilities.isCreativeMode) {
                         if (current.stackSize > 1) {

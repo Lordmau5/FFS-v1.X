@@ -983,6 +983,13 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         return Math.floor((double) getFluidAmount() / (double) getCapacity() * 100);
     }
 
+    public int fillFromContainer(EnumFacing from, FluidStack resource, boolean doFill) {
+        if(!canFillIncludingContainers(from, resource.getFluid()))
+            return 0;
+
+        return getMaster() == this ? fill(resource, doFill) : getMaster().fill(resource, doFill);
+    }
+
     @Override
     public int fill(EnumFacing from, FluidStack resource, boolean doFill) {
         if(!canFill(from, resource.getFluid()))
@@ -1001,8 +1008,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         return getMaster() == this ? drain(maxDrain, doDrain) : getMaster().drain(maxDrain, doDrain);
     }
 
-    @Override
-    public boolean canFill(EnumFacing from, Fluid fluid) {
+    public boolean canFillIncludingContainers(EnumFacing from, Fluid fluid) {
         if (!isValid())
             return false;
 
@@ -1025,7 +1031,16 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             return false;
         }
 
+        return true;
+    }
+
+    @Override
+    public boolean canFill(EnumFacing from, Fluid fluid) {
+        if(!canFillIncludingContainers(from, fluid))
+            return false;
+
         return !getAutoOutput() || valveHeightPosition > getTankHeight() || valveHeightPosition + 0.5f >= getTankHeight() * getFillPercentage();
+
     }
 
     @Override
