@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Dustin on 16.01.2016.
+ * Created by Vexatos
+ * Adjusted to suit FFS.
  */
 public class OCCompatibility {
 

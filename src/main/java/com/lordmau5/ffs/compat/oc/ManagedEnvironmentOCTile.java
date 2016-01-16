@@ -1,7 +1,8 @@
 package com.lordmau5.ffs.compat.oc;
 
 /**
- * Created by Dustin on 16.01.2016.
+ * Created by Vexatos
+ * Adjusted to suit FFS.
  */
 
 import li.cil.oc.api.Network;
