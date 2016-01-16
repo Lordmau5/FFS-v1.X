@@ -54,8 +54,8 @@ public class OCCompatibility {
                 return new Object[]{tile.getCapacity()};
             }
 
-            @Callback(doc = "function():number;  Returns the tank capacity.")
-            public Object[] getAutoOutput(Context context, Arguments args) throws Exception {
+            @Callback(doc = "unction([valveName:string]):object;  Returns the valves with their auto-output state in a list. If a valveName is supplied, it'll return a list of those with that name.")
+            public Object[] setAutoOutput(Context context, Arguments args) throws Exception {
                 if(args.count() == 1) {
                     if(!(args.isBoolean(0))) {
                         throw new Exception("expected argument 1 to be of type \"boolean\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");

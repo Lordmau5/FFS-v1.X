@@ -2,6 +2,7 @@ package com.lordmau5.ffs.proxy;
 
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.compat.CCPeripheralProvider;
+import com.lordmau5.ffs.compat.oc.OCCompatibility;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 
@@ -25,10 +26,9 @@ public class CommonProxy {
             new CCPeripheralProvider().register();
         }
 
-        // Temporarily disabled :)
-        /*if(Loader.isModLoaded("OpenComputers")) {
+        if(Loader.isModLoaded("OpenComputers")) {
             new OCCompatibility().init();
-        }*/
+        }
 
         /*if(Loader.isModLoaded("JAKJ_RedstoneInMotion")) {
             EventManager.registerEventHandler(new RiMEventHandler());
