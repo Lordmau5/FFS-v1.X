@@ -142,8 +142,6 @@ public class FancyFluidStorage {
         NetworkHandler.registerChannels(event.getSide());
 
         proxy.preInit();
-
-        //analytics = new FFSAnalytics();
     }
 
     @Mod.EventHandler
@@ -183,9 +181,7 @@ public class FancyFluidStorage {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public void bakeSweetModels(ModelBakeEvent event) {
-        System.out.println("In the model bakery!");
         event.modelRegistry.putObject(new ModelResourceLocation("ffs:blockTankFrame", "normal"), new TankFrameModel());
-        //event.modelRegistry.putObject(new ModelResourceLocation("ffs:blockValve", "normal"), new TankValveModel());
     }
 
 }

@@ -8,6 +8,12 @@
     }
   },
   "variants": {
+      "inventory": [{
+        "model": "minecraft:cube_all",
+        "textures": {
+          "all": "ffs:blocks/blockValve_Invalid"
+        }
+      }],
       "valve_valid": {
           "true": {},
           "false": {

@@ -11,43 +11,27 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
+import net.minecraft.util.*;
 import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fluids.*;
-import net.minecraftforge.fml.common.Optional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by Dustin on 28.06.2015.
  */
 
-@Optional.InterfaceList(value = {
-        @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|Transport"),
-
-        @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"),
-
-        @Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "OpenComputers"),
-        @Optional.Interface(iface = "li.cil.oc.api.network.ManagedPeripheral", modid = "OpenComputers"),
-        @Optional.Interface(iface = "framesapi.IMoveCheck", modid = "funkylocomotion")
-})
-public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHandler, ITickable
-        //IPipeConnection // BuildCraft
-        //IPeripheral, // ComputerCraft
-        //SimpleComponent, ManagedPeripheral, // OpenComputers
-        //IMoveCheck // Funky Locomotion
-{
+public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHandler, ITickable {
 
     private final int maxSize = FancyFluidStorage.instance.MAX_SIZE;
     protected int mbPerVirtualTank = FancyFluidStorage.instance.MB_PER_TANK_BLOCK;
     protected int minBurnableTemp = FancyFluidStorage.instance.MIN_BURNABLE_TEMPERATURE;
-
-    private int frameBurnability = 0;
 
     private boolean wantsUpdate;
     private String valveName = "";
@@ -56,19 +40,16 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     private BlockPos masterValvePos;
     public boolean initiated;
 
-    private int updateTicks;
-    private boolean needsUpdate;
+    private int frameBurnability = 0;
 
     public int tankHeight = 0;
     public int valveHeightPosition = 0;
     private boolean autoOutput;
 
-    private int fluidIntake, fluidOuttake, rainIntake;
+    private EnumFacing inside = EnumFacing.UP;
 
     private int randomBurnTicks = 20 * 5; // Every 5 seconds
     private int randomLeakTicks = 20 * 60; // Every minute
-
-    private EnumFacing inside = EnumFacing.UP;
 
     private TileEntityValve master;
     public List<TileEntityTankFrame> tankFrames;
@@ -110,29 +91,35 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     @Override
-    public void update() {
-        if(wantsUpdate && getWorld() != null) {
-            getWorld().markBlockForUpdate(getPos());
-            markDirty();
-            wantsUpdate = false;
-        }
+    public void onLoad() {
+        super.onLoad();
 
-        if(worldObj.isRemote)
+        wantsUpdate = true;
+    }
+
+    @Override
+    public void update() {
+        if(getWorld().isRemote)
             return;
+
+        if(wantsUpdate) {
+            wantsUpdate = false;
+            markForUpdate(false);
+        }
 
         if(initiated) {
             if (isMaster()) {
-                if(bottomDiagFrame != null && topDiagFrame != null) { // Potential fix for huge-ass tanks not loading properly on master-valve chunk load.
-                    Chunk chunkBottom = worldObj.getChunkFromBlockCoords(bottomDiagFrame);
-                    Chunk chunkTop = worldObj.getChunkFromBlockCoords(topDiagFrame);
+                if (bottomDiagFrame != null && topDiagFrame != null) { // Potential fix for huge-ass tanks not loading properly on master-valve chunk load.
+                    Chunk chunkBottom = getWorld().getChunkFromBlockCoords(bottomDiagFrame);
+                    Chunk chunkTop = getWorld().getChunkFromBlockCoords(topDiagFrame);
 
                     BlockPos pos_chunkBottom = new BlockPos(chunkBottom.xPosition, 0, chunkBottom.zPosition);
                     BlockPos pos_chunkTop = new BlockPos(chunkTop.xPosition, 0, chunkTop.zPosition);
 
                     BlockPos diff = pos_chunkTop.subtract(pos_chunkBottom);
-                    for(int x = 0; x <= diff.getX(); x++) {
-                        for(int z = 0; z <= diff.getZ(); z++) {
-                            ForgeChunkManager.forceChunk(ForgeChunkManager.requestTicket(FancyFluidStorage.instance, worldObj, ForgeChunkManager.Type.NORMAL), new ChunkCoordIntPair(pos_chunkTop.getX() + x, pos_chunkTop.getZ() + z));
+                    for (int x = 0; x <= diff.getX(); x++) {
+                        for (int z = 0; z <= diff.getZ(); z++) {
+                            ForgeChunkManager.forceChunk(ForgeChunkManager.requestTicket(FancyFluidStorage.instance, getWorld(), ForgeChunkManager.Type.NORMAL), new ChunkCoordIntPair(pos_chunkTop.getX() + x, pos_chunkTop.getZ() + z));
                         }
                     }
 
@@ -152,31 +139,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(!isMaster() && getMaster() == null) {
             setValid(false);
             updateBlockAndNeighbors();
-            return;
-        }
-
-        if(updateTicks-- == 0) {
-            updateTicks = 20;
-
-            if(needsUpdate) {
-                getMaster().markForUpdate(false);
-                needsUpdate = false;
-
-                /*
-                if(fluidIntake != 0) {
-                    FancyFluidStorage.analytics.event(FFSAnalytics.Category.TANK, FFSAnalytics.Event.FLUID_INTAKE, fluidIntake);
-                    fluidIntake = 0;
-                }
-                if(fluidOuttake != 0) {
-                    FancyFluidStorage.analytics.event(FFSAnalytics.Category.TANK, FFSAnalytics.Event.FLUID_OUTTAKE, fluidOuttake);
-                    fluidOuttake = 0;
-                }
-                if(rainIntake != 0) {
-                    FancyFluidStorage.analytics.event(FFSAnalytics.Category.TANK, FFSAnalytics.Event.RAIN_INTAKE, rainIntake);
-                    rainIntake = 0;
-                }
-                */
-            }
         }
 
         if(getFluid() == null)
@@ -187,8 +149,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 float height = (float) getFluidAmount() / (float) getCapacity();
                 boolean isNegativeDensity = getFluid().getFluid().getDensity(getFluid()) < 0 ;
                 if (GenericUtil.canAutoOutput(height, getTankHeight(), valveHeightPosition, isNegativeDensity)) { // Valves can output until the liquid is at their halfway point.
-                    EnumFacing out = inside.getOpposite();
-                    TileEntity tile = worldObj.getTileEntity(new BlockPos(getPos().getX() + out.getFrontOffsetX(), getPos().getY() + out.getFrontOffsetY(), getPos().getZ() + out.getFrontOffsetZ()));
+                    EnumFacing out = getInside().getOpposite();
+                    TileEntity tile = getWorld().getTileEntity(new BlockPos(getPos().getX() + out.getFrontOffsetX(), getPos().getY() + out.getFrontOffsetY(), getPos().getZ() + out.getFrontOffsetZ()));
                     if(tile != null) {
                         if(!(tile instanceof TileEntityValve) && !getAutoOutput() && valveHeightPosition == 0) {}
                         else {
@@ -202,8 +164,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                                 IFluidHandler handler = (IFluidHandler) tile;
                                 FluidStack fillStack = getFluid().copy();
                                 fillStack.amount = Math.min(getFluidAmount(), maxAmount);
-                                if (handler.fill(inside, fillStack, false) > 0) {
-                                    drain(handler.fill(inside, fillStack, true), true);
+                                if (handler.fill(getInside(), fillStack, false) > 0) {
+                                    drain(handler.fill(getInside(), fillStack, true), true);
                                 }
                             }
                         }
@@ -212,13 +174,13 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             }
         }
 
-        if(getFluid() != null && getFluid().getFluid() == FluidRegistry.WATER) {
-            if(worldObj.isRaining()) {
-                int rate = (int) Math.floor(worldObj.rainingStrength * 5 * worldObj.getBiomeGenForCoords(getPos()).rainfall);
-                if (getPos().getY() == worldObj.getPrecipitationHeight(getPos()).getY() - 1) {
+        if(getFluid().getFluid() == FluidRegistry.WATER) {
+            if(getWorld().isRaining()) {
+                int rate = (int) Math.floor(getWorld().rainingStrength * 5 * worldObj.getBiomeGenForCoords(getPos()).rainfall);
+                if (getPos().getY() == getWorld().getPrecipitationHeight(getPos()).getY() - 1) {
                     FluidStack waterStack = getFluid().copy();
                     waterStack.amount = rate * 10;
-                    rainIntake += waterStack.amount;
+                    //rainIntake += waterStack.amount;
                     fill(waterStack, true);
                 }
             }
@@ -267,7 +229,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
                                 int id = random.nextInt(remainingFrames.size());
                                 TileEntityTankFrame frame = remainingFrames.get(id);
-                                if(frame.getBlockState().getBlock().isFlammable(worldObj, frame.getPos(), EnumFacing.UP)) {
+                                if(frame.getBlockState().getBlock().isFlammable(getWorld(), frame.getPos(), EnumFacing.UP)) {
                                     firePos.add(frame.getPos());
                                     i++;
                                 }
@@ -275,23 +237,20 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                                     remainingFrames.remove(id);
                             }
                             for(BlockPos pos : firePos) {
-                                // TODO: Is this really necessary?
-                                // if(worldObj.getBlock(pos.getX(), pos.getY(), pos.getZ()).isFlammable(worldObj, pos.getX(), pos.getY(), pos.getZ(), ForgeDirection.UNKNOWN))
-
-                                worldObj.setBlockState(pos, Blocks.fire.getDefaultState());
+                                getWorld().setBlockState(pos, Blocks.fire.getDefaultState());
                             }
                         }
 
                         frameBurnability = 0;
 
                         if(FancyFluidStorage.instance.SET_WORLD_ON_FIRE)
-                            worldObj.playSoundEffect(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D, FancyFluidStorage.modId + ":fire", 1.0F, worldObj.rand.nextFloat() * 0.1F + 0.9F);
+                            getWorld().playSoundEffect(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D, FancyFluidStorage.modId + ":fire", 1.0F, worldObj.rand.nextFloat() * 0.1F + 0.9F);
                     }
                 }
             }
 
             if(FancyFluidStorage.instance.SHOULD_TANKS_LEAK) {
-                if(randomLeakTicks-- <= 0 && fluidStack != null && fluidStack.getFluid().canBePlacedInWorld()) {
+                if(randomLeakTicks-- <= 0 && getFluid().getFluid().canBePlacedInWorld()) {
                     randomLeakTicks = 20 * 60;
 
                     Random random = new Random();
@@ -309,7 +268,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                         int id = random.nextInt(remainingFrames.size());
                         TileEntityTankFrame frame = remainingFrames.get(id);
                         Block block = frame.getBlockState().getBlock();
-                        if (GenericUtil.canBlockLeak(block) && !frame.getNeighborBlockOrAir(fluidStack.getFluid().getBlock()).isEmpty() && block.getBlockHardness(worldObj, frame.getPos()) <= 1.0F) {
+                        if (GenericUtil.canBlockLeak(block) && !frame.getNeighborBlockOrAir(getFluid().getFluid().getBlock()).isEmpty() && block.getBlockHardness(worldObj, frame.getPos()) <= 1.0F) {
                             validFrames.add(frame);
                             i++;
                         } else
@@ -318,12 +277,12 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
                     for (TileEntityTankFrame frame : validFrames) {
                         Block block = frame.getBlockState().getBlock();
-                        int hardness = (int) Math.ceil(block.getBlockHardness(worldObj, frame.getPos()) * 100);
+                        int hardness = (int) Math.ceil(block.getBlockHardness(getWorld(), frame.getPos()) * 100);
                         int rand = random.nextInt(hardness) + 1;
                         int diff = (int) Math.ceil(50 * ((float) getFluidAmount() / (float) getCapacity()));
                         if (rand >= hardness - diff) {
                             EnumFacing leakDir;
-                            List<EnumFacing> dirs = frame.getNeighborBlockOrAir(fluidStack.getFluid().getBlock());
+                            List<EnumFacing> dirs = frame.getNeighborBlockOrAir(getFluid().getFluid().getBlock());
                             if (dirs.size() == 0)
                                 continue;
 
@@ -337,9 +296,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                             if (maps[2].containsKey(leakPos))
                                 continue;
 
-                            if (fluidStack.amount >= FluidContainerRegistry.BUCKET_VOLUME) {
-                                worldObj.setBlockState(leakPos, fluidStack.getFluid().getBlock().getDefaultState());
-                                worldObj.notifyBlockOfStateChange(leakPos, fluidStack.getFluid().getBlock());
+                            if (getFluid().amount >= FluidContainerRegistry.BUCKET_VOLUME) {
+                                getWorld().setBlockState(leakPos, getFluid().getFluid().getBlock().getDefaultState());
+                                getWorld().notifyBlockOfStateChange(leakPos, getFluid().getFluid().getBlock());
                                 drain(FluidContainerRegistry.BUCKET_VOLUME, true);
                             }
                         }
@@ -365,6 +324,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         return valves;
     }
 
+    // Used by CC and OC
     private List<TileEntityValve> getValvesByName(String name) {
         if(!isMaster())
             return getMaster().getValvesByName(name);
@@ -392,7 +352,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     public void setNeedsUpdate() {
-        needsUpdate = true;
+        wantsUpdate = true;
     }
 
     public int getTankHeight() {
@@ -412,7 +372,10 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
      * @param inside - The direction of the inside of the tank
      */
     public void buildTank(EnumFacing inside) {
-        if (worldObj.isRemote)
+        /**
+         * Don't build if it's on the client!
+         */
+        if (getWorld().isRemote)
             return;
 
         /**
@@ -447,7 +410,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
          * Also, update our neighbor blocks, e.g. pipes or similar.
          */
         initiated = false;
-        updateBlockAndNeighbors();
+        updateBlockAndNeighbors(); // https://i.lordmau5.com/1452891623-558
     }
 
     /**
@@ -461,14 +424,12 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         for(EnumFacing dr : EnumFacing.VALUES) {
             for(int i=0; i<maxSize; i++) {
                 BlockPos offsetPos = insidePos.offset(dr, i);
-                if(!worldObj.isAirBlock(offsetPos)) {
+                if(!getWorld().isAirBlock(offsetPos)) {
                     length[dr.ordinal()] = i - 1;
                     break;
                 }
             }
         }
-
-        System.out.println(Arrays.toString(length));
 
         for(int i=0; i<6; i += 2) {
             if(length[i] + length[i + 1] > maxSize)
@@ -480,7 +441,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     private void setSlaveValveInside(Map<BlockPos, IBlockState> airBlocks, TileEntityValve slave) {
         List<BlockPos> possibleAirBlocks = new ArrayList<>();
         for(EnumFacing dr : EnumFacing.VALUES) {
-            if(worldObj.isAirBlock(slave.getPos().offset(dr)))
+            if(getWorld().isAirBlock(slave.getPos().offset(dr)))
                 possibleAirBlocks.add(slave.getPos().offset(dr));
         }
 
@@ -525,7 +486,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
      * inner frame
      */
     private void fetchMaps() {
-        maps = GenericUtil.getTankFrame(worldObj, bottomDiagFrame, topDiagFrame);
+        maps = GenericUtil.getTankFrame(getWorld(), bottomDiagFrame, topDiagFrame);
     }
 
     private boolean setupTank() {
@@ -538,41 +499,16 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         valveHeightPosition = Math.abs(bottomDiagFrame.subtract(getPos()).getY());
         tankHeight = topDiagFrame.subtract(bottomDiagFrame).getY() - 1;
 
-        IBlockState bottomDiagBlock = worldObj.getBlockState(bottomDiagFrame);
-        IBlockState topDiagBlock = worldObj.getBlockState(topDiagFrame);
+        IBlockState bottomDiagBlock = getWorld().getBlockState(bottomDiagFrame);
+        IBlockState topDiagBlock = getWorld().getBlockState(topDiagFrame);
 
-        frameBurnability = bottomDiagBlock.getBlock().getFlammability(worldObj, bottomDiagFrame, EnumFacing.UP);
-
-        /*
-        if(bottomDiagBlock.getBlock() instanceof BlockTankFrame) {
-            TileEntity tile = worldObj.getTileEntity(bottomDiagFrame);
-            if(tile != null && tile instanceof TileEntityTankFrame)
-                bottomDiagBlock = ((TileEntityTankFrame) tile).getBlockState();
-        }
-
-        if(topDiagBlock.getBlock() instanceof BlockTankFrame) {
-            TileEntity tile = worldObj.getTileEntity(topDiagFrame);
-            if(tile != null && tile instanceof TileEntityTankFrame)
-                topDiagBlock = ((TileEntityTankFrame) tile).getBlockState();
-        }
-        */
-
-        if(!GenericUtil.isValidTankBlock(worldObj, bottomDiagFrame, bottomDiagBlock))
+        if(!GenericUtil.isValidTankBlock(getWorld(), bottomDiagFrame, bottomDiagBlock))
             return false;
 
-        if (!GenericUtil.areTankBlocksValid(bottomDiagBlock, topDiagBlock, worldObj, bottomDiagFrame))
+        if (!GenericUtil.areTankBlocksValid(bottomDiagBlock, topDiagBlock, getWorld(), bottomDiagFrame))
             return false;
 
         BlockPos pos;
-        for (Map.Entry<BlockPos, IBlockState> airCheck : maps[2].entrySet()) {
-            pos = airCheck.getKey();
-            if (!worldObj.isAirBlock(pos)) {
-                if (airCheck.getValue().getBlock().getUnlocalizedName().equals("railcraft.residual.heat"))
-                    continue; // Just to be /sure/ that railcraft isn't messing with us
-
-                return false;
-            }
-        }
 
         if (FancyFluidStorage.instance.INSIDE_CAPACITY) {
             fluidCapacity = (maps[2].size()) * mbPerVirtualTank;
@@ -583,17 +519,11 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         for (Map.Entry<BlockPos, IBlockState> frameCheck : maps[0].entrySet()) {
             pos = frameCheck.getKey();
             IBlockState fBlock = frameCheck.getValue();
-            int burnability = fBlock.getBlock().getFlammability(worldObj, pos, EnumFacing.UP);
+            int burnability = fBlock.getBlock().getFlammability(getWorld(), pos, EnumFacing.UP);
             if(burnability > frameBurnability)
                 frameBurnability = burnability;
 
-            /*if(fBlock.getBlock() instanceof BlockTankFrame) {
-                TileEntity tile = worldObj.getTileEntity(pos);
-                if(tile != null && tile instanceof TileEntityTankFrame)
-                    fBlock = ((TileEntityTankFrame) tile).getBlockState();
-            }*/
-
-            if (!GenericUtil.areTankBlocksValid(fBlock, bottomDiagBlock, worldObj, pos))
+            if (!GenericUtil.areTankBlocksValid(fBlock, bottomDiagBlock, getWorld(), pos))
                 return false;
         }
 
@@ -601,14 +531,14 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         for (Map.Entry<BlockPos, IBlockState> insideFrameCheck : maps[1].entrySet()) {
             pos = insideFrameCheck.getKey();
             IBlockState check = insideFrameCheck.getValue();
-            int burnability = check.getBlock().getFlammability(worldObj, pos, EnumFacing.UP);
+            int burnability = check.getBlock().getFlammability(getWorld(), pos, EnumFacing.UP);
             if(burnability > frameBurnability)
                 frameBurnability = burnability;
 
-            if (GenericUtil.areTankBlocksValid(check, bottomDiagBlock, worldObj, pos) || GenericUtil.isBlockGlass(check.getBlock(), check.getBlock().getMetaFromState(check)))
+            if (GenericUtil.areTankBlocksValid(check, bottomDiagBlock, getWorld(), pos) || GenericUtil.isBlockGlass(check.getBlock(), check.getBlock().getMetaFromState(check)))
                 continue;
 
-            TileEntity tile = worldObj.getTileEntity(pos);
+            TileEntity tile = getWorld().getTileEntity(pos);
             if (tile != null) {
                 if (tile instanceof TileEntityValve) {
                     TileEntityValve valve = (TileEntityValve) tile;
@@ -649,20 +579,16 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             pos = setTiles.getKey();
             TileEntityTankFrame tankFrame;
             if (setTiles.getValue().getBlock() != FancyFluidStorage.blockTankFrame) {
-                worldObj.setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
-                tankFrame = (TileEntityTankFrame) worldObj.getTileEntity(pos);
-                tankFrame.initialize(getPos(), setTiles.getValue());
-                tankFrame.markForUpdate();
-            } else {
-                tankFrame = (TileEntityTankFrame) worldObj.getTileEntity(pos);
-                tankFrame.initialize(getPos(), setTiles.getValue());
+                getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
             }
+            tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
+            tankFrame.initialize(getPos(), setTiles.getValue());
             tankFrames.add(tankFrame);
         }
 
         for (Map.Entry<BlockPos, IBlockState> setTiles : maps[1].entrySet()) {
             pos = setTiles.getKey();
-            TileEntity tile = worldObj.getTileEntity(pos);
+            TileEntity tile = getWorld().getTileEntity(pos);
             if (tile != null) {
                 if (tile instanceof TileEntityValve && tile != this)
                     otherValves.add((TileEntityValve) tile);
@@ -672,17 +598,15 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     tankFrames.add((TileEntityTankFrame) tile);
                 }
                 else if (GenericUtil.isTileEntityAcceptable(setTiles.getValue().getBlock(), tile)) {
-                    worldObj.setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
-                    TileEntityTankFrame tankFrame = (TileEntityTankFrame) worldObj.getTileEntity(pos);
+                    getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
+                    TileEntityTankFrame tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
                     tankFrame.initialize(getPos(), setTiles.getValue());
-//                    tankFrame.markForUpdate();
                     tankFrames.add(tankFrame);
                 }
             } else {
-                worldObj.setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
-                TileEntityTankFrame tankFrame = (TileEntityTankFrame) worldObj.getTileEntity(pos);
+                getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
+                TileEntityTankFrame tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
                 tankFrame.initialize(getPos(), setTiles.getValue());
-//                tankFrame.markForUpdate();
                 tankFrames.add(tankFrame);
             }
         }
@@ -692,7 +616,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     public void breakTank(TileEntity frame) {
-        if (worldObj.isRemote)
+        if (getWorld().isRemote)
             return;
 
         if(!isMaster() && getMaster() != null) {
@@ -729,7 +653,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     public boolean isValid() {
-        return isValid;
+        return getMaster() != null && getMaster().isValid;
+
     }
 
     public void updateBlockAndNeighbors() {
@@ -737,14 +662,13 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     public void updateBlockAndNeighbors(boolean onlyThis) {
-        if(worldObj.isRemote)
+        if(getWorld().isRemote)
             return;
 
         this.markForUpdate(onlyThis);
 
         if(otherValves != null) {
             for(TileEntityValve otherValve : otherValves) {
-                otherValve.setValid(isValid());
                 otherValve.markForUpdate(true);
             }
         }
@@ -758,11 +682,16 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     ((IPipeTile) outsideTile).scheduleNeighborChange();
             }
         }
-        // notify change for comparators
-        //worldObj.notifyBlockOfStateChange(getPos(), FancyFluidStorage.blockValve);
-        worldObj.markBlockForUpdate(getPos());
-        worldObj.markBlockForUpdate(getPos().offset(outside));
-        markDirty();
+    }
+
+    private void markForUpdate(boolean onlyThis) {
+        if (!onlyThis) {
+            for (TileEntityTankFrame frame : tankFrames) {
+                frame.markForUpdate();
+            }
+        }
+
+        getWorld().markBlockForUpdate(getPos());
     }
 
     public boolean isMaster() {
@@ -774,7 +703,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             return this;
 
         if(masterValvePos != null) {
-            TileEntity tile = worldObj.getTileEntity(masterValvePos);
+            TileEntity tile = getWorld().getTileEntity(masterValvePos);
             master = tile instanceof TileEntityValve ? (TileEntityValve) tile : null;
         }
 
@@ -796,23 +725,24 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound _tag) {
-        super.readFromNBT(_tag);
+    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+        return oldState.getBlock() != newState.getBlock();
+    }
 
-        NBTTagCompound tag = getTileData();
-        setValid(tag.getBoolean("isValid"));
+    @Override
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+
         setInside(EnumFacing.getFront(tag.getInteger("inside")));
 
         isMaster = tag.getBoolean("master");
         if(isMaster()) {
-            if(tag.hasKey("masterValve")) {
-                int[] masterValveP = tag.getIntArray("masterValve");
-                setMasterPos(new BlockPos(masterValveP[0], masterValveP[1], masterValveP[2]));
-            }
+            setValid(tag.getBoolean("isValid"));
 
             if(tag.getBoolean("hasFluid")) {
                 if(tag.hasKey("fluidName"))
                     fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getString("fluidName")), tag.getInteger("fluidAmount"));
+
                 updateFluidTemperature();
             }
             else {
@@ -841,19 +771,15 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             bottomDiagFrame = new BlockPos(bottomDiagF[0], bottomDiagF[1], bottomDiagF[2]);
             topDiagFrame = new BlockPos(topDiagF[0], topDiagF[1], topDiagF[2]);
         }
-
-        markForUpdate(true);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound _tag) {
-        NBTTagCompound tag = getTileData();
-
-        tag.setBoolean("isValid", isValid());
+    public void writeToNBT(NBTTagCompound tag) {
         tag.setInteger("inside", getInside().ordinal());
 
         tag.setBoolean("master", isMaster());
         if(isMaster()) {
+            tag.setBoolean("isValid", isValid());
             tag.setBoolean("hasFluid", fluidStack != null);
             if(fluidStack != null) {
                 tag.setString("fluidName", FluidRegistry.getFluidName(fluidStack));
@@ -880,7 +806,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             tag.setIntArray("topDiagF", new int[]{topDiagFrame.getX(), topDiagFrame.getY(), topDiagFrame.getZ()});
         }
 
-        super.writeToNBT(_tag);
+        super.writeToNBT(tag);
     }
 
     @Override
@@ -893,26 +819,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         NBTTagCompound tag = new NBTTagCompound();
         writeToNBT(tag);
         return new S35PacketUpdateTileEntity(getPos(), 0, tag);
-    }
-
-    private void markForUpdate(boolean onlyThis) {
-        if(!onlyThis || this.lastComparatorOut != getComparatorOutput()) {
-            this.lastComparatorOut = getComparatorOutput();
-            for (TileEntityValve valve : otherValves) {
-                valve.updateBlockAndNeighbors();
-            }
-        }
-        if (!onlyThis) {
-            for (TileEntityTankFrame frame : tankFrames) {
-                frame.markForUpdate();
-            }
-        }
-        if(getWorld() != null && getPos() != null) {
-            getWorld().markBlockForUpdate(getPos());
-            markDirty();
-        }
-        else
-            wantsUpdate = true;
     }
 
     @Override
@@ -938,7 +844,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     public void updateFluidTemperature() {
-        FluidStack fstack = fluidStack;
+        FluidStack fstack = getFluid();
         if(fstack == null)
             return;
 
@@ -967,7 +873,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public int getCapacity() {
-        System.out.println("GetCapacity");
         if(!isValid())
             return 0;
             
@@ -984,7 +889,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public int fill(FluidStack resource, boolean doFill) {
-        System.out.println("Fill");
         if(getMaster() == this) {
             if (!isValid() || fluidStack != null && !fluidStack.isFluidEqual(resource))
                 return 0;
@@ -995,7 +899,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                         continue;
 
                     EnumFacing outside = valve.getInside().getOpposite();
-                    TileEntity tile = worldObj.getTileEntity(valve.getPos().offset(outside));
+                    TileEntity tile = getWorld().getTileEntity(valve.getPos().offset(outside));
                     if (tile != null && tile instanceof TileEntityValve) {
                         return ((TileEntityValve) tile).fill(getInside(), resource, doFill);
                     }
@@ -1014,9 +918,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             if (fluidStack == null)
             {
                 fluidStack = new FluidStack(resource, Math.min(fluidCapacity, resource.amount));
-                updateFluidTemperature();
                 setNeedsUpdate();
-                fluidIntake += fluidStack.amount;
                 return fluidStack.amount;
             }
 
@@ -1028,12 +930,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             else {
                 fluidStack.amount = fluidCapacity;
             }
-
-            fluidIntake += filled;
-
-            getMaster().setNeedsUpdate();
-            //getMaster().markForUpdate(true);
-
+            setNeedsUpdate();
             return filled;
         }
         else
@@ -1042,7 +939,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public FluidStack drain(int maxDrain, boolean doDrain) {
-        System.out.println("Drain");
         if(getMaster() == this) {
             if(!isValid() || fluidStack == null)
                 return null;
@@ -1057,11 +953,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                 fluidStack.amount -= drained;
                 if (fluidStack.amount <= 0) {
                     fluidStack = null;
-                    updateFluidTemperature();
                 }
-                fluidOuttake += drained;
-                getMaster().setNeedsUpdate();
-                //getMaster().markForUpdate(true);
+                setNeedsUpdate();
             }
             return stack;
         }
@@ -1075,7 +968,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
      * @return 0-100 in % of how much is filled
      */
     public double getFillPercentage() {
-        System.out.println("FillPercentage");
         if(!isValid() || getFluid() == null)
             return 0;
 
@@ -1102,21 +994,20 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public boolean canFill(EnumFacing from, Fluid fluid) {
-        System.out.println("CanFill");
-        if(!isValid())
+        if (!isValid())
             return false;
 
-        if(getFluid() != null && getFluid().getFluid() != fluid)
+        if (getFluid() != null && getFluid().getFluid() != fluid)
             return false;
 
-        if(getFluidAmount() >= getCapacity()) {
-            for(TileEntityValve valve : getAllValves()) {
-                if(valve == this)
+        if (getFluidAmount() >= getCapacity()) {
+            for (TileEntityValve valve : getAllValves()) {
+                if (valve == this)
                     continue;
 
                 if (valve.valveHeightPosition > getTankHeight()) {
                     EnumFacing outside = valve.getInside().getOpposite();
-                    TileEntity tile = worldObj.getTileEntity(valve.getPos().offset(outside));
+                    TileEntity tile = getWorld().getTileEntity(valve.getPos().offset(outside));
                     if (tile != null && tile instanceof TileEntityValve) {
                         return ((TileEntityValve) tile).canFill(valve.getInside(), fluid);
                     }
@@ -1125,33 +1016,28 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             return false;
         }
 
-        if(getAutoOutput()) {
-            return valveHeightPosition > getTankHeight() || valveHeightPosition + 0.5f >= getTankHeight() * getFillPercentage();
-        }
-        return true;
+        return !getAutoOutput() || valveHeightPosition > getTankHeight() || valveHeightPosition + 0.5f >= getTankHeight() * getFillPercentage();
     }
 
     @Override
     public boolean canDrain(EnumFacing from, Fluid fluid) {
-        System.out.println("CanDrain");
-        if(!isValid())
-            return false;
+        return isValid() && getFluid() != null && getFluid().getFluid() == fluid && getFluidAmount() > 0;
 
-        if(getFluid() == null)
-            return false;
-
-        return getFluid().getFluid() == fluid && getFluidAmount() > 0;
     }
 
     @Override
     public FluidTankInfo[] getTankInfo(EnumFacing from) {
-        System.out.println("GetTankInfo");
         if(!isValid())
             return null;
 
         return getMaster() == this ? new FluidTankInfo[]{ getInfo() } : getMaster().getTankInfo(from);
     }
 
+    public int getComparatorOutput() {
+        return MathHelper.floor_float(((float) this.getFluidAmount() / this.getCapacity()) * 14.0F);
+    }
+
+    // BC
     /*
     @Optional.Method(modid = "BuildCraftAPI|Transport")
     @Override
@@ -1163,11 +1049,12 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
     */
 
+    // CC / OC
+    /*
     public String[] methodNames() {
         return new String[]{"getFluidName", "getFluidAmount", "getFluidCapacity", "setAutoOutput", "doesAutoOutput"};
     }
 
-    /*
     @Optional.Method(modid = "ComputerCraft")
     @Override
     public String getType() {
@@ -1392,10 +1279,4 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         return false;
     }
     */
-
-    public int getComparatorOutput() {
-        //System.out.println("ComparatorOutput");
-        //return MathHelper.floor_float(((float) this.getFluidAmount() / this.getCapacity()) * 14.0F);
-        return 0;
-    }
 }

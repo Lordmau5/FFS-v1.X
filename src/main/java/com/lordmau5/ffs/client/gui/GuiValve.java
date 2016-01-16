@@ -153,7 +153,7 @@ public class GuiValve extends GuiScreen {
                 mouseY >= top + 10 && mouseY < top + 10 + 101) {
             List<String> texts = new ArrayList<>();
             texts.add(fluid);
-            texts.add("\u00A7" + EnumChatFormatting.GRAY.name() + (GenericUtil.intToFancyNumber(this.valve.getFluidAmount()) + " / " + GenericUtil.intToFancyNumber(this.valve.getCapacity())) + " mB");
+            texts.add(EnumChatFormatting.GRAY + (GenericUtil.intToFancyNumber(this.valve.getFluidAmount()) + " / " + GenericUtil.intToFancyNumber(this.valve.getCapacity())) + " mB");
 
             GL11.glPushMatrix();
             GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);

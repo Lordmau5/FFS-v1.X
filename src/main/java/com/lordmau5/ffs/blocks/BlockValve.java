@@ -33,12 +33,11 @@ public class BlockValve extends Block {
         super(Material.iron);
         setUnlocalizedName("blockValve");
         setRegistryName("blockValve");
-        //setBlockTextureName(FancyFluidStorage.modId + ":" + "blockValve");
         setCreativeTab(CreativeTabs.tabRedstone);
         setHardness(5.0F); // Same hardness as an iron block
         setResistance(10.0F); // Same as hardness
 
-        setDefaultState((blockState.getBaseState())
+        setDefaultState(blockState.getBaseState()
                 .withProperty(FFSStateProps.VALVE_VALID, false)
                 .withProperty(FFSStateProps.VALVE_MASTER, false)
                 .withProperty(FFSStateProps.VALVE_INSIDE, EnumFacing.Axis.X));
@@ -76,9 +75,6 @@ public class BlockValve extends Block {
 
     @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
-        if (super.onBlockActivated(world, pos, state, player, side, hitX, hitY, hitZ)) {
-            return true;
-        }
         if (player.isSneaking()) return false;
 
         TileEntityValve valve = (TileEntityValve) world.getTileEntity(pos);
@@ -92,9 +88,6 @@ public class BlockValve extends Block {
         }
         else {
             valve.buildTank(side.getOpposite());
-            if(valve.isValid()) {
-                //#FancyFluidStorage.analytics.event(FFSAnalytics.Category.TANK, FFSAnalytics.Event.TANK_BUILD);
-            }
         }
         return true;
     }

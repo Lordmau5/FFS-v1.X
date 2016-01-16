@@ -30,6 +30,8 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -130,7 +132,6 @@ public class BlockTankFrame extends Block
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
-            //return frame.getBlockState().getBlock().getPlayerRelativeBlockHardness(player, world, pos);
             return super.getPlayerRelativeBlockHardness(player, world, pos);
         }
         return super.getPlayerRelativeBlockHardness(player, world, pos);
@@ -162,22 +163,31 @@ public class BlockTankFrame extends Block
     }
 
     @Override
+    public int getLightValue(IBlockAccess world, BlockPos pos) {
+        int lightValue = super.getLightValue(world, pos);
+
+        TileEntity tile = world.getTileEntity(pos);
+        if(tile != null && (tile instanceof TileEntityTankFrame)) {
+            lightValue = ((TileEntityTankFrame)tile).lightValue;
+        }
+
+        return lightValue;
+    }
+
+    @Override
     public boolean isOpaqueCube() {
         return false;
     }
 
     @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
-        if (super.onBlockActivated(world, pos, state, player, side, hitX, hitY, hitZ)) {
-            return true;
-        }
         if (player.isSneaking()) return false;
 
         TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
-        if(frame != null && frame.getValve() != null) {
+        if (frame != null && frame.getValve() != null) {
             TileEntityValve valve = frame.getValve();
             if (valve.isValid()) {
-                if(GenericUtil.isFluidContainer(player.getHeldItem()))
+                if (GenericUtil.isFluidContainer(player.getHeldItem()))
                     return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 
                 player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
@@ -188,13 +198,38 @@ public class BlockTankFrame extends Block
     }
 
     @Override
-    public boolean isNormalCube(IBlockAccess world, BlockPos pos) {
-        return true;
+    public boolean isFullCube() {
+        return false;
     }
 
     @Override
-    public boolean isFullCube() {
-        return false;
+    @SideOnly(Side.CLIENT)
+    public int colorMultiplier(IBlockAccess par1World, BlockPos pos, int pass) {
+        TileEntity tile = par1World.getTileEntity(pos);
+        if(tile instanceof TileEntityTankFrame) {
+            TileEntityTankFrame camo = (TileEntityTankFrame) tile;
+            IBlockState state = camo.getBlockState();
+            if(state != null)
+                return state.getBlock() instanceof BlockTankFrame ? 0xFFFFFF : state.getBlock().getRenderColor(state);
+        }
+        return 0xFFFFFF;
+    }
+
+    @Override
+    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
+        TileEntity tile = worldIn.getTileEntity(pos);
+        if(tile == null || !(tile instanceof TileEntityTankFrame))
+            return true;
+
+        TileEntityTankFrame myFrame = (TileEntityTankFrame) tile;
+
+        tile = worldIn.getTileEntity(pos.offset(side.getOpposite()));
+        if(tile == null || !(tile instanceof TileEntityTankFrame))
+            return true;
+
+        TileEntityTankFrame otherFrame = (TileEntityTankFrame) tile;
+
+        return myFrame.getBlockState() != otherFrame.getBlockState();
     }
 
     @Override

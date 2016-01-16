@@ -2,6 +2,7 @@ package com.lordmau5.ffs.compat;
 
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.util.GenericUtil;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
@@ -12,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
@@ -65,10 +67,9 @@ public class WailaPluginTank implements IWailaDataProvider {
 
         if (valve == null) return list;
 
-        //int fluidAmount = valve.getFluidAmount();
-        //int capacity = valve.getCapacity();
-        return list;
-        /*
+        int fluidAmount = valve.getFluidAmount();
+        int capacity = valve.getCapacity();
+
         if (!valve.isValid()) {
             list.add("Invalid tank");
             return list;
@@ -89,7 +90,6 @@ public class WailaPluginTank implements IWailaDataProvider {
             list.add("Amount: " + GenericUtil.intToFancyNumber(fluidAmount) + "/" + GenericUtil.intToFancyNumber(capacity) + " mB");
         }
         return list;
-        */
     }
 
     @Optional.Method(modid = "Waila")
