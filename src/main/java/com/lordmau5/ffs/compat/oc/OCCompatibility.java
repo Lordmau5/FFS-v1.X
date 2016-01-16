@@ -54,7 +54,7 @@ public class OCCompatibility {
                 return new Object[]{tile.getCapacity()};
             }
 
-            @Callback(doc = "unction([valveName:string]):object;  Returns the valves with their auto-output state in a list. If a valveName is supplied, it'll return a list of those with that name.")
+            @Callback(doc = "function([valveName:string]):object;  Returns the valves with their auto-output state in a list. If a valveName is supplied, it'll return a list of those with that name.")
             public Object[] setAutoOutput(Context context, Arguments args) throws Exception {
                 if(args.count() == 1) {
                     if(!(args.isBoolean(0))) {
