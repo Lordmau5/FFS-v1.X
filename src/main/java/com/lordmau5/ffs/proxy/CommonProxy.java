@@ -1,6 +1,7 @@
 package com.lordmau5.ffs.proxy;
 
 import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.compat.CCPeripheralProvider;
 import com.lordmau5.ffs.compat.RiMEventHandler;
 import me.planetguy.remaininmotion.api.event.EventManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,9 +23,9 @@ public class CommonProxy {
         MinecraftForge.EVENT_BUS.register(new FancyFluidStorage());
 
         BUILDCRAFT_LOADED = Loader.isModLoaded("BuildCraftAPI|Transport");
-        //if(Loader.isModLoaded("ComputerCraft")) {
-            //new CCPeripheralProvider().register();
-        //}
+        if(Loader.isModLoaded("ComputerCraft")) {
+            new CCPeripheralProvider().register();
+        }
 
         if(Loader.isModLoaded("JAKJ_RedstoneInMotion")) {
             EventManager.registerEventHandler(new RiMEventHandler());

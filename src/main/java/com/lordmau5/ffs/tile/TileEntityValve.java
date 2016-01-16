@@ -3,6 +3,10 @@ package com.lordmau5.ffs.tile;
 import buildcraft.api.transport.IPipeTile;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.util.GenericUtil;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -17,17 +21,22 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fluids.*;
+import net.minecraftforge.fml.common.Optional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by Dustin on 28.06.2015.
  */
 
-public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHandler, ITickable {
+@Optional.InterfaceList(value = {
+        @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|Transport"),
+
+        @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft")
+})
+public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHandler, ITickable,
+        IPeripheral
+    {
 
     private final int maxSize = FancyFluidStorage.instance.MAX_SIZE;
     protected int mbPerVirtualTank = FancyFluidStorage.instance.MB_PER_TANK_BLOCK;
@@ -1050,7 +1059,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     */
 
     // CC / OC
-    /*
     public String[] methodNames() {
         return new String[]{"getFluidName", "getFluidAmount", "getFluidCapacity", "setAutoOutput", "doesAutoOutput"};
     }
@@ -1170,7 +1178,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     public boolean equals(IPeripheral other) {
         return false;
     }
-    */
 
     /*
     @Optional.Method(modid = "OpenComputers")
