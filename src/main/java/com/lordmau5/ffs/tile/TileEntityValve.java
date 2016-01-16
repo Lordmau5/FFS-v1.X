@@ -113,7 +113,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
         if(wantsUpdate) {
             wantsUpdate = false;
-            markForUpdate(false);
+            markForUpdate(true);
         }
 
         if(initiated) {
@@ -419,7 +419,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
          * Also, update our neighbor blocks, e.g. pipes or similar.
          */
         initiated = false;
-        updateBlockAndNeighbors(); // https://i.lordmau5.com/1452891623-558
+        updateBlockAndNeighbors();
     }
 
     /**
