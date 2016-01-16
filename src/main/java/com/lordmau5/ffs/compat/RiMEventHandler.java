@@ -1,18 +1,13 @@
 package com.lordmau5.ffs.compat;
 
-import com.lordmau5.ffs.tile.TileEntityTankFrame;
-import com.lordmau5.ffs.tile.TileEntityValve;
-import me.planetguy.remaininmotion.api.event.BlockPreMoveEvent;
-import me.planetguy.remaininmotion.api.event.BlockRotateEvent;
-import me.planetguy.remaininmotion.api.event.MotionFinalizeEvent;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
 /**
  * Created by Dustin on 21.07.2015.
  */
 public class RiMEventHandler {
 
+    // Disabled up until RiM is updated for 1.8.9
+
+    /*
     @SubscribeEvent
     public void motionFinalize(MotionFinalizeEvent event) {
         TileEntity tile = event.location.entity();
@@ -56,5 +51,6 @@ public class RiMEventHandler {
             frame.breakFrame();
         }
     }
+    */
 
 }

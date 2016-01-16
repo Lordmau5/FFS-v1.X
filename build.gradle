@@ -21,7 +21,6 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'net.minecraftforge.gradle.forge'
-idea.module.inheritOutputDirs = true
 
 sourceSets {
   main {
@@ -45,48 +44,52 @@ repositories {
         name "profmobius"
         url "http://mobiusstrip.eu/maven"
     }
-    maven { // NEI/CCC
-        name 'chickenbones'
-        url "http://chickenbones.net/maven/"
-    }
-    maven { // Chisel 2
-        name 'chisel'
-        url "http://coloredlightscore.us.to/maven/chisel-2"
-    }
+    //maven { // NEI/CCC
+    //    name 'chickenbones'
+    //    url "http://chickenbones.net/maven/"
+    //}
+    //maven { // Chisel 2
+    //    name 'chisel'
+    //    url "http://coloredlightscore.us.to/maven/chisel-2"
+    //}
     maven { // OpenComputers
         name 'opencomputers'
         url "http://maven.cil.li"
     }
-    ivy { // Buildcraft
-        name "BuildCraft"
-        artifactPattern "http://www.mod-buildcraft.com/releases/BuildCraft/[revision]/[module]-[revision]-dev.[ext]"
-    }
-    ivy { // Remain In Motion
-        name "RemainInMotion"
-        artifactPattern "http://addons-origin.cursecdn.com/files/2251/630/[module]-[revision].[ext]"
-    }
-    ivy { // PlanetguyLib (For RiM)
-        name "PlanetguyLib"
-        artifactPattern "http://addons-origin.cursecdn.com/files/2255/580/[module]-[revision].[ext]"
+    //ivy { // Buildcraft
+    //    name "BuildCraft"
+    //    artifactPattern "http://www.mod-buildcraft.com/releases/BuildCraft/[revision]/[module]-[revision]-dev.[ext]"
+    //}
+    //ivy { // Remain In Motion
+    //    name "RemainInMotion"
+    //    artifactPattern "http://addons-origin.cursecdn.com/files/2251/630/[module]-[revision].[ext]"
+    //}
+    //ivy { // PlanetguyLib (For RiM)
+    //    name "PlanetguyLib"
+    //    artifactPattern "http://addons-origin.cursecdn.com/files/2255/580/[module]-[revision].[ext]"
+    //}
+    flatDir {
+      dirs 'libs'
     }
 }
 
 dependencies {
-    compile name: "buildcraft", version: "${buildcraft_version}"
-    compile name: "PlanetguyLib", version: "${pglib_version}"
-    compile name: "RemainInMotion", version: "${rim_version}"
-    compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev:dev"
+    compile name: "buildcraft-7.2.0-pre6"
+    //compile name: "buildcraft", version: "${buildcraft_version}"
+    //compile name: "PlanetguyLib", version: "${pglib_version}"
+    //compile name: "RemainInMotion", version: "${rim_version}"
+    compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev"
 
-    compile "com.cricketcraft.chisel:Chisel2:${chisel_version}:deobf"
+    //compile "com.cricketcraft.chisel:Chisel2:${chisel_version}:deobf"
     // Oh cool, it doesn't find CTMLib. Freaking useless.
-    compile "com.cricketcraft.ctmlib:CTMLib:${ctmlib_version}:deobf"
+    //compile "com.cricketcraft.ctmlib:CTMLib:${ctmlib_version}:deobf"
 
     compile "mcp.mobius.waila:Waila:${waila_version}:dev"
     // Apparently transitive dependency resolution doesn't want to find CCC
-    compile "codechicken:CodeChickenCore:${minecraft_version}-${codechickencore_version}:dev"
-    compile "codechicken:CodeChickenLib:${minecraft_version}-${codechickenlib_version}:dev"
+    //compile "codechicken:CodeChickenCore:${minecraft_version}-${codechickencore_version}:dev"
+    //compile "codechicken:CodeChickenLib:${minecraft_version}-${codechickenlib_version}:dev"
     // Or freaking NEI. Thanks a lot codechicken.
-    compile "codechicken:NotEnoughItems:${minecraft_version}-${nei_version}:dev"
+    //compile "codechicken:NotEnoughItems:${minecraft_version}-${nei_version}:dev"
 }
 
 if (System.env.BUILD_NUMBER != null) mod_version = "$mod_version.$System.env.BUILD_NUMBER"

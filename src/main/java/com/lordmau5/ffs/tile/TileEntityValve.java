@@ -36,7 +36,7 @@ import java.util.*;
 })
 public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHandler, ITickable,
         IPeripheral
-    {
+{
 
     private final int maxSize = FancyFluidStorage.instance.MAX_SIZE;
     protected int mbPerVirtualTank = FancyFluidStorage.instance.MB_PER_TANK_BLOCK;
@@ -317,7 +317,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         }
     }
 
-    private List<TileEntityValve> getAllValves() {
+    public List<TileEntityValve> getAllValves() {
         if(!isMaster() && getMaster() != this)
             return getMaster().getAllValves();
 
@@ -334,7 +334,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     // Used by CC and OC
-    private List<TileEntityValve> getValvesByName(String name) {
+    public List<TileEntityValve> getValvesByName(String name) {
         if(!isMaster())
             return getMaster().getValvesByName(name);
 
@@ -1058,7 +1058,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
     */
 
-    // CC / OC
+    // ComputerCraft
     public String[] methodNames() {
         return new String[]{"getFluidName", "getFluidAmount", "getFluidCapacity", "setAutoOutput", "doesAutoOutput"};
     }
@@ -1178,106 +1178,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     public boolean equals(IPeripheral other) {
         return false;
     }
-
-    /*
-    @Optional.Method(modid = "OpenComputers")
-    @Override
-    public String getComponentName() {
-        return "ffs_valve";
-    }
-
-    @Optional.Method(modid = "OpenComputers")
-    @Override
-    public String[] methods() {
-        return methodNames();
-    }
-
-    @Optional.Method(modid = "OpenComputers")
-    @Override
-    public Object[] invoke(String method, Context context, Arguments args) throws Exception {
-        switch(method) {
-            case "getFluidName": { // getFluidName
-                if(this.getFluid() == null)
-                    return null;
-                return new Object[]{this.getFluid().getLocalizedName()};
-            }
-            case "getFluidAmount": { // getFluidAmount
-                return new Object[]{this.getFluidAmount()};
-            }
-            case "getFluidCapacity": { // getCapacity
-                return new Object[]{this.getCapacity()};
-            }
-            case "setAutoOutput": { // setAutoOutput
-                if(args.count() == 1) {
-                    if(!(args.isBoolean(0))) {
-                        throw new Exception("expected argument 1 to be of type \"boolean\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
-                    }
-
-                    for(TileEntityValve valve : getAllValves())
-                        valve.setAutoOutput(args.checkBoolean(0));
-
-                    return new Object[]{args.checkBoolean(0)};
-                }
-                else if(args.count() == 2) {
-                    if(!(args.isString(0))) {
-                        throw new Exception("expected argument 1 to be of type \"String\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
-                    }
-
-                    if(!(args.isBoolean(1))) {
-                        throw new Exception("expected argument 2 to be of type \"boolean\", found \"" + args.checkAny(1).getClass().getSimpleName() + "\"");
-                    }
-
-                    List<TileEntityValve> valves = getValvesByName(args.checkString(0));
-                    if(valves.isEmpty()) {
-                        throw new Exception("no valves found");
-                    }
-
-                    List<String> valveNames = new ArrayList<>();
-                    for(TileEntityValve valve : valves) {
-                        valve.setAutoOutput(args.checkBoolean(1));
-                        valveNames.add(valve.getValveName());
-                    }
-                    return new Object[]{valveNames};
-                }
-                else {
-                    throw new Exception("insufficient number of arguments found - expected 1 or 2, got " + args.count());
-                }
-            }
-            case "doesAutoOutput": { // doesAutoOutput
-                if(args.count() == 0) {
-                    Map<String, Boolean> valveOutputs = new HashMap<>();
-                    for(TileEntityValve valve : getAllValves()) {
-                        valveOutputs.put(valve.getValveName(), valve.getAutoOutput());
-                    }
-
-                    return new Object[]{valveOutputs};
-                }
-                else if(args.count() == 1) {
-                    if(!(args.isString(0))) {
-                        throw new Exception("expected argument 1 to be of type \"String\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
-                    }
-
-                    List<TileEntityValve> valves = getValvesByName(args.checkString(0));
-                    if(valves.isEmpty()) {
-                        throw new Exception("no valves found");
-                    }
-
-                    Map<String, Boolean> valveOutputs = new HashMap<>();
-                    for(TileEntityValve valve : valves) {
-                        valveOutputs.put(valve.getValveName(), valve.getAutoOutput());
-                    }
-
-                    return new Object[]{valveOutputs};
-                }
-                else {
-                    throw new Exception("insufficient number of arguments found - expected 1, got " + args.count());
-                }
-            }
-            default:
-        }
-        return null;
-    }
-    */
 
     /*
     @Optional.Method(modid = "funkylocomotion")
