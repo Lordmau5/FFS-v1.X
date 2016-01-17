@@ -159,7 +159,7 @@ public class GenericUtil {
                 FluidStack liquid = FluidContainerRegistry.getFluidForFilledItem(current);
                 // Handle filled containers
                 if (liquid != null) {
-                    int qty = valve.fill(ForgeDirection.UNKNOWN, liquid, true);
+                    int qty = valve.fillFromContainer(ForgeDirection.UNKNOWN, liquid, true);
 
                     if (qty != 0 && !player.capabilities.isCreativeMode) {
                         if (current.stackSize > 1) {
