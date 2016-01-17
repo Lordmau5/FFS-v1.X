@@ -169,7 +169,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(updateTicks-- == 0) {
             updateTicks = 20;
             if(needsUpdate) {
-                getMaster().markForUpdate(false);
+                getMaster().markForUpdate(true);
                 needsUpdate = false;
 
                 if(fluidIntake != 0) {
