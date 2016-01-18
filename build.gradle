@@ -140,6 +140,5 @@ curseforge {
       mainArtifact(jar) {
         displayName="FFS v$project.mod_version"
       }
-      addArtifact deobfJar
     }
 }
