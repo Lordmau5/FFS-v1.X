@@ -1,6 +1,7 @@
 package com.lordmau5.ffs.tile;
 
 import com.lordmau5.ffs.util.ExtendedBlock;
+import com.lordmau5.ffs.util.Position3D;
 import cpw.mods.fml.common.Optional;
 import framesapi.IMoveCheck;
 import net.minecraft.block.Block;
@@ -26,26 +27,13 @@ import java.util.List;
 public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
 
     private ExtendedBlock block;
-    public int valveX, valveY, valveZ;
+    private Position3D valvePos;
     private TileEntityValve masterValve;
-    private boolean hasValve = false;
+    private boolean wantsUpdate = false;
 
-    public TileEntityTankFrame() {
-        super();
-    }
-
-    public TileEntityTankFrame(TileEntityValve masterValve, ExtendedBlock block) {
+    public void initialize(TileEntityValve masterValve, ExtendedBlock block) {
         this.masterValve = masterValve;
         this.block = block;
-    }
-
-    @Override
-    public void updateEntity() {
-        if(masterValve == null && hasValve) {
-            TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
-            if(tile != null && tile instanceof TileEntityValve)
-                setValve((TileEntityValve) tile);
-        }
     }
 
     public boolean isFrameInvalid() {
@@ -96,22 +84,23 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     }
 
     public void onBreak() {
-        if(masterValve != null && !worldObj.isRemote) {
+        if(worldObj != null && !worldObj.isRemote && getValve() != null) {
             masterValve.breakTank(this);
         }
     }
 
-    public void setValve(TileEntityValve valve) {
-        this.masterValve = valve;
+    public void setValvePos(Position3D valvePos) {
+        this.valvePos = valvePos;
+        this.masterValve = null;
     }
 
     public TileEntityValve getValve() {
-        if(this.masterValve == null && hasValve) {
-            TileEntity tile = worldObj.getTileEntity(valveX, valveY, valveZ);
-            if(tile != null && tile instanceof TileEntityValve)
-                setValve((TileEntityValve) tile);
+        if(masterValve == null && this.valvePos != null) {
+            TileEntity tile = worldObj.getTileEntity(valvePos.getX(), valvePos.getY(), valvePos.getZ());
+            masterValve = tile instanceof TileEntityValve ? (TileEntityValve) tile : null;
         }
-        return this.masterValve;
+
+        return masterValve;
     }
 
     public void setBlock(ExtendedBlock block) {
@@ -127,10 +116,7 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
         super.readFromNBT(tag);
 
         if(tag.hasKey("valveX")) {
-            valveX = tag.getInteger("valveX");
-            valveY = tag.getInteger("valveY");
-            valveZ = tag.getInteger("valveZ");
-            hasValve = true;
+            setValvePos(new Position3D(tag.getInteger("valveX"), tag.getInteger("valveY"), tag.getInteger("valveZ")));
         }
         if(tag.hasKey("blockId")) {
             this.block = new ExtendedBlock(Block.getBlockById(tag.getInteger("blockId")), tag.getInteger("metadata"));
@@ -155,7 +141,6 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
         readFromNBT(pkt.func_148857_g());
-        markForUpdate();
     }
 
     @Override
@@ -166,7 +151,20 @@ public class TileEntityTankFrame extends TileEntity implements IMoveCheck {
     }
 
     public void markForUpdate() {
+        if(worldObj == null) {
+            wantsUpdate = true;
+            return;
+        }
+
         worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+    }
+
+    @Override
+    public void updateEntity() {
+        if (wantsUpdate) {
+            markForUpdate();
+            wantsUpdate = false;
+        }
     }
 
     @Optional.Method(modid = "funkylocomotion")
