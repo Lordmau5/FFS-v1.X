@@ -420,6 +420,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
          */
         initiated = false;
         updateBlockAndNeighbors();
+
+        updateComparatorOutput();
     }
 
     /**
@@ -635,6 +637,8 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             return;
         }
 
+        setValid(false);
+
         for(TileEntityValve valve : otherValves) {
             valve.fluidStack = getFluid();
             valve.updateFluidTemperature();
@@ -651,8 +655,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         }
         tankFrames.clear();
         otherValves.clear();
-
-        setValid(false);
 
         this.updateBlockAndNeighbors();
     }
@@ -693,7 +695,21 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         }
     }
 
+    private void updateComparatorOutput() {
+        if(this.lastComparatorOut != getComparatorOutput()) {
+            this.lastComparatorOut = getComparatorOutput();
+            if(isMaster()) {
+                for(TileEntityValve otherValve : otherValves) {
+                    getWorld().updateComparatorOutputLevel(otherValve.getPos(), otherValve.getBlockType());
+                }
+            }
+            getWorld().updateComparatorOutputLevel(getPos(), getBlockType());
+        }
+    }
+
     private void markForUpdate(boolean onlyThis) {
+        updateComparatorOutput();
+
         if (!onlyThis) {
             for (TileEntityTankFrame frame : tankFrames) {
                 frame.markForUpdate();
@@ -874,7 +890,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public int getFluidAmount() {
-        if(!isValid() || getFluid() == null)
+        if(getFluid() == null)
             return 0;
 
         return getFluid().amount;
@@ -977,7 +993,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
      * @return 0-100 in % of how much is filled
      */
     public double getFillPercentage() {
-        if(!isValid() || getFluid() == null)
+        if(getFluid() == null)
             return 0;
 
         return Math.floor((double) getFluidAmount() / (double) getCapacity() * 100);
@@ -1009,9 +1025,6 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     public boolean canFillIncludingContainers(EnumFacing from, Fluid fluid) {
-        if (!isValid())
-            return false;
-
         if (getFluid() != null && getFluid().getFluid() != fluid)
             return false;
 
@@ -1045,7 +1058,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
     @Override
     public boolean canDrain(EnumFacing from, Fluid fluid) {
-        return isValid() && getFluid() != null && getFluid().getFluid() == fluid && getFluidAmount() > 0;
+        return getFluid() != null && getFluid().getFluid() == fluid && getFluidAmount() > 0;
 
     }
 
@@ -1058,6 +1071,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     }
 
     public int getComparatorOutput() {
+        if(!isValid())
+            return 0;
+
         return MathHelper.floor_float(((float) this.getFluidAmount() / this.getCapacity()) * 14.0F);
     }
 
