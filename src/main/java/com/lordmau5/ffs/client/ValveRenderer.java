@@ -19,6 +19,7 @@ import org.lwjgl.opengl.GL11;
 public class ValveRenderer extends TileEntitySpecialRenderer {
 
     private int red, green, blue, alpha;
+    private int lightmap_X, lightmap_Y;
 
     private void preGL() {
         GlStateManager.pushMatrix();
@@ -72,6 +73,11 @@ public class ValveRenderer extends TileEntitySpecialRenderer {
             if (fillPercentage > 0 && valve.getFluid() != null) {
                 FluidStack fluid = valve.getFluid();
 
+                int i = valve.getFluidLuminosity();
+                i = (i << 20 | i << 4);
+                lightmap_X = i >> 16 & 65535;
+                lightmap_Y = i & 65535;
+
                 int c = fluid.getFluid().getColor();
                 red = c & 0xFF;
                 green = (c >> 8) & 0xFF;
@@ -89,7 +95,7 @@ public class ValveRenderer extends TileEntitySpecialRenderer {
                 GlStateManager.translate((float) x, (float) y, (float) z);
                 GlStateManager.translate((float) (bottomDiag.getX() - valvePos.getX()), (float) bottomDiag.getY() - valvePos.getY() + 1, (float) (bottomDiag.getZ() - valvePos.getZ()));
 
-                t.getWorldRenderer().begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+                t.getWorldRenderer().begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 
                 float pureRenderHeight = (height - 1) * fillPercentage;
                 boolean isNegativeDensity = fluid.getFluid().getDensity(fluid) < 0;
@@ -197,6 +203,6 @@ public class ValveRenderer extends TileEntitySpecialRenderer {
     }
 
     private void addVertexWithUV(Tessellator t, double x, double y, double z, double u, double v) {
-        t.getWorldRenderer().pos(x, y, z).tex(u, v).color(red, green, blue, alpha).endVertex();
+        t.getWorldRenderer().pos(x, y, z).color(red, green, blue, alpha).tex(u, v).lightmap(lightmap_X, lightmap_Y).endVertex();
     }
 }

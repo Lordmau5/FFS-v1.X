@@ -16,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
@@ -46,8 +47,12 @@ public class BlockTankFrame extends Block
 
     public BlockTankFrame() {
         super(Material.rock);
-        setUnlocalizedName("blockTankFrame");
-        setRegistryName("blockTankFrame");
+    }
+
+    public BlockTankFrame(String name) {
+        this();
+        setUnlocalizedName(name);
+        setRegistryName(name);
         setDefaultState(((IExtendedBlockState) blockState.getBaseState())
                 .withProperty(FFSStateProps.FRAME_STATE, null));
     }
@@ -132,7 +137,7 @@ public class BlockTankFrame extends Block
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
-            return super.getPlayerRelativeBlockHardness(player, world, pos);
+            return net.minecraftforge.common.ForgeHooks.blockStrength(frame.getBlockState(), player, world, pos);
         }
         return super.getPlayerRelativeBlockHardness(player, world, pos);
     }
@@ -164,11 +169,11 @@ public class BlockTankFrame extends Block
 
     @Override
     public int getLightValue(IBlockAccess world, BlockPos pos) {
-        int lightValue = super.getLightValue(world, pos);
+        int lightValue = 0;
 
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && (tile instanceof TileEntityTankFrame)) {
-            lightValue = ((TileEntityTankFrame)tile).lightValue;
+            lightValue = ((TileEntityTankFrame)tile).getLightValue();
         }
 
         return lightValue;
@@ -237,8 +242,15 @@ public class BlockTankFrame extends Block
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
-            //return frame.getBlockState().getBlock().getPickBlock(target, world, pos, player);
-            return null;
+            Item item = Item.getItemFromBlock(frame.getBlockState().getBlock());
+
+            if (item == null)
+            {
+                return null;
+            }
+
+            Block block = item instanceof ItemBlock && !isFlowerPot() ? Block.getBlockFromItem(item) : this;
+            return new ItemStack(item, 1, block.damageDropped(frame.getBlockState()));
         }
         return null;
     }
@@ -248,8 +260,7 @@ public class BlockTankFrame extends Block
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
             if(frame.getBlockState() != null) {
-                //return frame.getBlockState().getBlock().getFlammability(world, pos, face);
-                return 0;
+                return frame.getBlockState().getBlock().getFlammability(world, pos, face);
             }
         }
         return 0;
@@ -261,8 +272,7 @@ public class BlockTankFrame extends Block
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
             if(frame.getBlockState() != null) {
-                //return frame.getBlockState().getBlock().getExplosionResistance(world, pos, exploder, explosion);
-                return super.getExplosionResistance(exploder);
+                return frame.getBlockState().getBlock().getExplosionResistance(world, pos, exploder, explosion);
             }
         }
         return super.getExplosionResistance(exploder);

@@ -1,6 +1,7 @@
 package com.lordmau5.ffs;
 
 import com.lordmau5.ffs.blocks.BlockTankFrame;
+import com.lordmau5.ffs.blocks.BlockTankFrameOpaque;
 import com.lordmau5.ffs.blocks.BlockValve;
 import com.lordmau5.ffs.client.FluidHelper;
 import com.lordmau5.ffs.client.TankFrameModel;
@@ -43,6 +44,7 @@ public class FancyFluidStorage {
 
     public static BlockValve blockValve;
     public static BlockTankFrame blockTankFrame;
+    public static BlockTankFrameOpaque blockTankFrameOpaque;
 
     public static Configuration config;
     //public static FFSAnalytics analytics;
@@ -132,7 +134,8 @@ public class FancyFluidStorage {
         loadConfig();
 
         GameRegistry.registerBlock(blockValve = new BlockValve(), "blockValve");
-        GameRegistry.registerBlock(blockTankFrame = new BlockTankFrame(), "blockTankFrame");
+        GameRegistry.registerBlock(blockTankFrame = new BlockTankFrame("blockTankFrame"), "blockTankFrame");
+        GameRegistry.registerBlock(blockTankFrameOpaque = new BlockTankFrameOpaque(), "blockTankFrameOpaque");
 
         GameRegistry.registerTileEntity(TileEntityValve.class, "tileEntityValve");
         GameRegistry.registerTileEntity(TileEntityTankFrame.class, "tileEntityTankFrame");
@@ -182,6 +185,7 @@ public class FancyFluidStorage {
     @SideOnly(Side.CLIENT)
     public void bakeSweetModels(ModelBakeEvent event) {
         event.modelRegistry.putObject(new ModelResourceLocation("ffs:blockTankFrame", "normal"), new TankFrameModel());
+        event.modelRegistry.putObject(new ModelResourceLocation("ffs:blockTankFrameOpaque", "normal"), new TankFrameModel());
     }
 
 }

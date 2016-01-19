@@ -2,6 +2,7 @@ package com.lordmau5.ffs.tile;
 
 import buildcraft.api.transport.IPipeTile;
 import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.blocks.BlockTankFrame;
 import com.lordmau5.ffs.util.GenericUtil;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
@@ -43,6 +44,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
     protected int minBurnableTemp = FancyFluidStorage.instance.MIN_BURNABLE_TEMPERATURE;
 
     private boolean wantsUpdate;
+    private int oldLuminosity;
     private String valveName = "";
     private boolean isValid;
     private boolean isMaster;
@@ -513,6 +515,17 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         IBlockState bottomDiagBlock = getWorld().getBlockState(bottomDiagFrame);
         IBlockState topDiagBlock = getWorld().getBlockState(topDiagFrame);
 
+        if(bottomDiagBlock.getBlock() instanceof BlockTankFrame) {
+            TileEntity tile = getWorld().getTileEntity(bottomDiagFrame);
+            if(tile != null && tile instanceof TileEntityTankFrame)
+                bottomDiagBlock = ((TileEntityTankFrame) tile).getBlockState();
+        }
+        if(topDiagBlock.getBlock() instanceof BlockTankFrame) {
+            TileEntity tile = getWorld().getTileEntity(topDiagFrame);
+            if(tile != null && tile instanceof TileEntityTankFrame)
+                topDiagBlock = ((TileEntityTankFrame) tile).getBlockState();
+        }
+
         if(!GenericUtil.isValidTankBlock(getWorld(), bottomDiagFrame, bottomDiagBlock))
             return false;
 
@@ -534,8 +547,9 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
             if(burnability > frameBurnability)
                 frameBurnability = burnability;
 
-            if (!GenericUtil.areTankBlocksValid(fBlock, bottomDiagBlock, getWorld(), pos))
+            if (!GenericUtil.areTankBlocksValid(fBlock, bottomDiagBlock, getWorld(), pos)) {
                 return false;
+            }
         }
 
         List<TileEntityValve> valves = new ArrayList<>();
@@ -588,11 +602,14 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
 
         for (Map.Entry<BlockPos, IBlockState> setTiles : maps[0].entrySet()) {
             pos = setTiles.getKey();
-            TileEntityTankFrame tankFrame;
-            if (setTiles.getValue().getBlock() != FancyFluidStorage.blockTankFrame) {
+            Block block = setTiles.getValue().getBlock();
+            if (!block.isOpaqueCube() && block != FancyFluidStorage.blockTankFrame) {
                 getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
             }
-            tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
+            else if(block.isOpaqueCube() && block != FancyFluidStorage.blockTankFrameOpaque) {
+                getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrameOpaque.getDefaultState());
+            }
+            TileEntityTankFrame tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
             tankFrame.initialize(getPos(), setTiles.getValue());
             tankFrames.add(tankFrame);
         }
@@ -609,13 +626,25 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
                     tankFrames.add((TileEntityTankFrame) tile);
                 }
                 else if (GenericUtil.isTileEntityAcceptable(setTiles.getValue().getBlock(), tile)) {
-                    getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
+                    Block block = setTiles.getValue().getBlock();
+                    if (!block.isOpaqueCube() && block != FancyFluidStorage.blockTankFrame) {
+                        getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
+                    }
+                    else if(block.isOpaqueCube() && block != FancyFluidStorage.blockTankFrameOpaque) {
+                        getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrameOpaque.getDefaultState());
+                    }
                     TileEntityTankFrame tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
                     tankFrame.initialize(getPos(), setTiles.getValue());
                     tankFrames.add(tankFrame);
                 }
             } else {
-                getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
+                Block block = setTiles.getValue().getBlock();
+                if (!block.isOpaqueCube() && block != FancyFluidStorage.blockTankFrame) {
+                    getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
+                }
+                else if(block.isOpaqueCube() && block != FancyFluidStorage.blockTankFrameOpaque) {
+                    getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrameOpaque.getDefaultState());
+                }
                 TileEntityTankFrame tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
                 tankFrame.initialize(getPos(), setTiles.getValue());
                 tankFrames.add(tankFrame);
@@ -711,6 +740,14 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         updateComparatorOutput();
 
         if (!onlyThis) {
+            for (TileEntityTankFrame frame : tankFrames) {
+                frame.markForUpdate();
+            }
+        }
+
+        // Do Luminosity update
+        if (getFluidLuminosity() != oldLuminosity) {
+            oldLuminosity = getFluidLuminosity();
             for (TileEntityTankFrame frame : tankFrames) {
                 frame.markForUpdate();
             }
@@ -865,7 +902,7 @@ public class TileEntityValve extends TileEntity implements IFluidTank, IFluidHan
         if(fluid == null)
             return 0;
 
-        return fluid.getLuminosity(fstack);
+        return Math.max(0, fluid.getLuminosity(fstack) - 1);
     }
 
     public void updateFluidTemperature() {

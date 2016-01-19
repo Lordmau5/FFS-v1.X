@@ -31,7 +31,7 @@ public class TileEntityTankFrame extends TileEntity implements ITickable {
     private TileEntityValve masterValve;
     private boolean wantsUpdate = false;
 
-    public int oldLightValue, lightValue;
+    public int lightValue;
 
     public void initialize(BlockPos valvePos, IBlockState camoBlockState) {
         this.valvePos = valvePos;
@@ -145,12 +145,10 @@ public class TileEntityTankFrame extends TileEntity implements ITickable {
             setBlockState(Block.getBlockFromName(tag.getString("blockName")).getStateFromMeta(tag.getInteger("metadata")));
         }
 
-        if(tag.hasKey("fluidLuminosity")) {
-            lightValue = tag.getInteger("fluidLuminosity");
-            if(oldLightValue != lightValue) {
-                markForUpdate();
-                oldLightValue = lightValue;
-            }
+        int newLightValue = tag.getInteger("fluidLuminosity");
+        if(newLightValue != lightValue) {
+            lightValue = newLightValue;
+            markForUpdate();
         }
     }
 
@@ -184,6 +182,17 @@ public class TileEntityTankFrame extends TileEntity implements ITickable {
         return new S35PacketUpdateTileEntity(getPos(), 0, tag);
     }
 
+    public int getLightValue() {
+        if(getBlockState() == null)
+            return 0;
+
+        Block block = getBlockState().getBlock();
+        if(block.isOpaqueCube())
+            return 0;
+
+        return lightValue;
+    }
+
     public void markForUpdate() {
         if(getWorld() == null) {
             wantsUpdate = true;
@@ -191,8 +200,9 @@ public class TileEntityTankFrame extends TileEntity implements ITickable {
         }
 
         getWorld().markBlockForUpdate(getPos());
-        if(getWorld().isRemote)
-            getWorld().markBlockRangeForRenderUpdate(getPos(), getPos());
+        if(getWorld().isRemote) {
+            getWorld().checkLight(getPos());
+        }
     }
 
     @Override

@@ -19,8 +19,6 @@ import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Random;
 
@@ -130,25 +128,10 @@ public class BlockValve extends Block {
         return 0;
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
-    public int getRenderType() {
-        return 3;
-    }
-
-    @Override
-    public boolean isOpaqueCube() {
-        return false;
-    }
-
-    @Override
-    public boolean isNormalCube(IBlockAccess world, BlockPos pos) {
-        return true;
-    }
-
-    @Override
-    public boolean isNormalCube() {
-        return true;
+    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
+        IBlockState otherState = worldIn.getBlockState(pos.offset(side));
+        return otherState != getBlockState();
     }
 
     @Override
