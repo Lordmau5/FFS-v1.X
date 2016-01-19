@@ -86,19 +86,16 @@ public class GenericUtil {
         if(!isValidTankBlock(world, bottomPos, bottomBlock))
             return false;
 
-        if(true) return true;
-        else {
-            switch (FancyFluidStorage.instance.TANK_FRAME_MODE) {
-                case SAME_BLOCK:
-                    return bottomBlock.equals(topBlock);
-                case DIFFERENT_METADATA:
-                    return bottomBlock.getBlock() == topBlock.getBlock();
-                case DIFFERENT_BLOCK:
-                    return true;
+        switch (FancyFluidStorage.instance.TANK_FRAME_MODE) {
+            case SAME_BLOCK:
+                return bottomBlock.equals(topBlock);
+            case DIFFERENT_METADATA:
+                return bottomBlock.getBlock() == topBlock.getBlock();
+            case DIFFERENT_BLOCK:
+                return true;
 
-                default:
-                    return false;
-            }
+            default:
+                return false;
         }
     }
 
