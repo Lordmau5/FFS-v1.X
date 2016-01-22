@@ -1,8 +1,9 @@
 package com.lordmau5.ffs.blocks;
 
 import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.tile.ITankTile;
+import com.lordmau5.ffs.tile.ITankValve;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
-import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
@@ -121,7 +122,6 @@ public class BlockTankFrame extends Block
                     }
                 }
             }
-            frame.onBreak();
         }
         return super.removedByPlayer(world, pos, player, willHarvest);
     }
@@ -188,9 +188,9 @@ public class BlockTankFrame extends Block
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
-        TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
-        if (frame != null && frame.getValve() != null) {
-            TileEntityValve valve = frame.getValve();
+        ITankTile tile = (ITankTile) world.getTileEntity(pos);
+        if (tile != null && tile.getMasterValve() != null) {
+            ITankValve valve = tile.getMasterValve();
             if (valve.isValid()) {
                 if (GenericUtil.isFluidContainer(player.getHeldItem()))
                     return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);

@@ -1,6 +1,6 @@
 package com.lordmau5.ffs.compat;
 
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.TileEntityTankComputer;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
@@ -24,7 +24,7 @@ public class CCPeripheralProvider implements IPeripheralProvider {
     @Override
     public IPeripheral getPeripheral(World world, BlockPos pos, EnumFacing side) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityValve)
+        if(tile != null && tile instanceof TileEntityTankComputer)
             return (IPeripheral) tile;
         return null;
     }

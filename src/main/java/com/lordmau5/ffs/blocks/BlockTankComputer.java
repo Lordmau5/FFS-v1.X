@@ -1,8 +1,9 @@
 package com.lordmau5.ffs.blocks;
 
 import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.tile.ITankTile;
 import com.lordmau5.ffs.tile.ITankValve;
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.TileEntityTankComputer;
 import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
@@ -26,20 +27,19 @@ import java.util.Random;
 /**
  * Created by Dustin on 28.06.2015.
  */
-public class BlockValve extends Block {
+public class BlockTankComputer extends Block {
 
-    public BlockValve() {
+    public BlockTankComputer() {
         super(Material.iron);
-        setUnlocalizedName("blockValve");
-        setRegistryName("blockValve");
+        setUnlocalizedName("blockTankComputer");
+        setRegistryName("blockTankComputer");
         setCreativeTab(CreativeTabs.tabRedstone);
         setHardness(5.0F); // Same hardness as an iron block
         setResistance(10.0F); // Same as hardness
 
         setDefaultState(blockState.getBaseState()
                 .withProperty(FFSStateProps.TILE_VALID, false)
-                .withProperty(FFSStateProps.TILE_MASTER, false)
-                .withProperty(FFSStateProps.TILE_INSIDE_DUAL, EnumFacing.Axis.X));
+                .withProperty(FFSStateProps.TILE_INSIDE, EnumFacing.DOWN));
     }
 
     @Override
@@ -49,25 +49,23 @@ public class BlockValve extends Block {
 
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TileEntityValve();
+        return new TileEntityTankComputer();
     }
 
     @Override
     public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityValve) {
-            TileEntityValve valve = (TileEntityValve) world.getTileEntity(pos);
-            valve.breakTank(null);
+        if(tile != null && tile instanceof ITankTile && ((ITankTile) tile).getMasterValve() != null) {
+            ((ITankTile) tile).getMasterValve().breakTank(null);
         }
         super.onBlockDestroyedByExplosion(world, pos, explosion);
     }
 
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
-        if(!world.isRemote) {
-            ITankValve valve = (ITankValve) world.getTileEntity(pos);
-            if(valve.isValid())
-                valve.breakTank(null);
+        TileEntity tile = world.getTileEntity(pos);
+        if(!world.isRemote && tile != null && tile instanceof ITankTile && ((ITankTile) tile).getMasterValve() != null) {
+            ((ITankTile) tile).getMasterValve().breakTank(null);
         }
 
         super.breakBlock(world, pos, state);
@@ -77,24 +75,21 @@ public class BlockValve extends Block {
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
-        TileEntityValve valve = (TileEntityValve) world.getTileEntity(pos);
-
-        if(valve.isValid()) {
+        ITankTile tile = (ITankTile) world.getTileEntity(pos);
+        if (tile != null && tile.getMasterValve() != null) {
+            ITankValve valve = tile.getMasterValve();
             if(GenericUtil.isFluidContainer(player.getHeldItem()))
                 return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 
             player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
             return true;
         }
-        else {
-            valve.buildTank(side.getOpposite());
-        }
         return true;
     }
 
     @Override
     public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-        return Item.getItemFromBlock(FancyFluidStorage.blockValve);
+        return Item.getItemFromBlock(FancyFluidStorage.blockTankComputer);
     }
 
     @Override
@@ -104,18 +99,17 @@ public class BlockValve extends Block {
 
     @Override
     protected BlockState createBlockState() {
-        return new BlockState(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_MASTER, FFSStateProps.TILE_INSIDE_DUAL);
+        return new BlockState(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_INSIDE);
     }
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityValve) {
-            TileEntityValve valve = (TileEntityValve) tile;
+        if(tile != null && tile instanceof TileEntityTankComputer) {
+            TileEntityTankComputer valve = (TileEntityTankComputer) tile;
 
             state = state.withProperty(FFSStateProps.TILE_VALID, valve.isValid())
-                    .withProperty(FFSStateProps.TILE_MASTER, valve.isMaster())
-                    .withProperty(FFSStateProps.TILE_INSIDE_DUAL, (valve.getTileFacing() == null) ? EnumFacing.Axis.X : valve.getTileFacing().getAxis());
+                    .withProperty(FFSStateProps.TILE_INSIDE, (valve.getTileFacing() == null) ? EnumFacing.DOWN : valve.getTileFacing().getOpposite());
         }
         return state;
     }
@@ -134,21 +128,6 @@ public class BlockValve extends Block {
     public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
         IBlockState otherState = worldIn.getBlockState(pos.offset(side));
         return otherState != getBlockState();
-    }
-
-    @Override
-    public boolean hasComparatorInputOverride() {
-        return true;
-    }
-
-    @Override
-    public int getComparatorInputOverride(World world, BlockPos pos) {
-        TileEntity te = world.getTileEntity(pos);
-        if(te instanceof TileEntityValve) {
-            TileEntityValve valve = (TileEntityValve)te;
-            return valve.getComparatorOutput();
-        }
-        return 0;
     }
 
     @Override

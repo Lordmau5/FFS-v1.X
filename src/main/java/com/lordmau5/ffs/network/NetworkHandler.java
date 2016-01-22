@@ -1,7 +1,8 @@
 package com.lordmau5.ffs.network;
 
 import com.lordmau5.ffs.network.handlers.server.UpdateAutoOutput_Server;
-import com.lordmau5.ffs.network.handlers.server.UpdateValveName_Server;
+import com.lordmau5.ffs.network.handlers.server.UpdateFluidLock_Server;
+import com.lordmau5.ffs.network.handlers.server.UpdateTileName_Server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,7 +31,8 @@ public class NetworkHandler {
         String targetName = channels.get(Side.SERVER).findChannelHandlerNameForType(PacketCodec.class);
 
         pipeline.addAfter(targetName, "UpdateAutoOutput_Server", new UpdateAutoOutput_Server());
-        pipeline.addAfter(targetName, "UpdateValveName_Server", new UpdateValveName_Server());
+        pipeline.addAfter(targetName, "UpdateTileName_Server", new UpdateTileName_Server());
+        pipeline.addAfter(targetName, "UpdateFluidLock_Server", new UpdateFluidLock_Server());
 
         if(side.isClient()){
             registerClientHandlers();

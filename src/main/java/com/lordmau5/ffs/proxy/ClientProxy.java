@@ -22,6 +22,7 @@ public class ClientProxy extends CommonProxy {
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityValve.class, new ValveRenderer());
 
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockValve), 0, new ModelResourceLocation("ffs:blockValve", "inventory"));
+        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockTankComputer), 0, new ModelResourceLocation("ffs:blockTankComputer", "inventory"));
         ModelLoader.setCustomStateMapper(new BlockTankFrame(), new StateMapperBase(){
             protected ModelResourceLocation getModelResourceLocation(IBlockState p_178132_1_)
             {

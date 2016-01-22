@@ -42,8 +42,8 @@ public class RiMEventHandler {
         if(tile instanceof TileEntityValve) {
             TileEntityValve valve = (TileEntityValve) tile;
             if(valve.isMaster()) {
-                //EnumFacing rot = valve.getInside().getRotation(event.axis.getRotation(event.axis));
-                //valve.setInside(rot);
+                EnumFacing rot = valve.getInside().getRotation(event.axis.getRotation(event.axis));
+                valve.setInside(rot);
             }
         }
         else if(tile instanceof TileEntityTankFrame) { // Necessary for the frames to "die"

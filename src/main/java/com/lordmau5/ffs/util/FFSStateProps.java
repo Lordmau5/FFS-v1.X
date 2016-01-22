@@ -12,8 +12,9 @@ public class FFSStateProps {
 
     public static final PropertyState FRAME_STATE = new PropertyState("frame_state");
 
-    public static final PropertyBool VALVE_VALID = PropertyBool.create("valve_valid");
-    public static final PropertyBool VALVE_MASTER = PropertyBool.create("valve_master");
-    public static final PropertyEnum<EnumFacing.Axis> VALVE_INSIDE = PropertyEnum.create("valve_inside", EnumFacing.Axis.class);
+    public static final PropertyBool TILE_VALID = PropertyBool.create("tile_valid");
+    public static final PropertyBool TILE_MASTER = PropertyBool.create("tile_master");
+    public static final PropertyEnum<EnumFacing> TILE_INSIDE = PropertyEnum.create("tile_inside", EnumFacing.class);
+    public static final PropertyEnum<EnumFacing.Axis> TILE_INSIDE_DUAL = PropertyEnum.create("tile_inside", EnumFacing.Axis.class);
 
 }

@@ -14,7 +14,7 @@
           "all": "ffs:blocks/blockValve_Invalid"
         }
       }],
-      "valve_valid": {
+      "tile_valid": {
           "true": {},
           "false": {
               "model": "minecraft:cube_all",
@@ -23,7 +23,7 @@
               }
           }
       },
-      "valve_inside": {
+      "tile_inside": {
           "x": {
               "x": 90,
               "y": 90
@@ -33,7 +33,7 @@
               "x": 90
           }
       },
-      "valve_master": {
+      "tile_master": {
           "true": {
               "textures": {
                   "end": "ffs:blocks/blockValve_Master_Valid"

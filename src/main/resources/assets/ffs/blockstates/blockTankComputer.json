@@ -1,0 +1,79 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "minecraft:cube",
+    "textures": {
+      "down": "ffs:blocks/blockValve",
+      "up": "ffs:blocks/blockValve",
+      "north": "ffs:blocks/blockValve",
+      "south": "ffs:blocks/blockValve",
+      "west": "ffs:blocks/blockValve",
+      "east": "ffs:blocks/blockValve"
+    }
+  },
+  "variants": {
+    "inventory": [{
+      "model": "minecraft:cube",
+      "textures": {
+        "down": "ffs:blocks/computer/blockTankComputer_Invalid",
+        "up": "ffs:blocks/computer/blockTankComputer_Invalid",
+        "north": "ffs:blocks/computer/blockTankComputer_Invalid",
+        "south": "ffs:blocks/computer/blockTankComputer_Invalid",
+        "west": "ffs:blocks/computer/blockTankComputer_Invalid",
+        "east": "ffs:blocks/computer/blockTankComputer_Invalid"
+      }
+    }],
+    "tile_inside": {
+      "down": {
+        "model": "minecraft:cube",
+        "textures": {
+          "down": "ffs:blocks/computer/blockTankComputer_Valid"
+        }
+      },
+      "up": {
+        "model": "minecraft:cube",
+        "textures": {
+          "up": "ffs:blocks/computer/blockTankComputer_Valid"
+        }
+      },
+      "north": {
+        "model": "minecraft:cube",
+        "textures": {
+          "north": "ffs:blocks/computer/blockTankComputer_Valid"
+        }
+      },
+      "south": {
+        "model": "minecraft:cube",
+        "textures": {
+          "south": "ffs:blocks/computer/blockTankComputer_Valid"
+        }
+      },
+      "west": {
+        "model": "minecraft:cube",
+        "textures": {
+          "west": "ffs:blocks/computer/blockTankComputer_Valid"
+        }
+      },
+      "east": {
+        "model": "minecraft:cube",
+        "textures": {
+          "east": "ffs:blocks/computer/blockTankComputer_Valid"
+        }
+      }
+    },
+    "tile_valid": {
+      "true": {},
+      "false": {
+        "model": "minecraft:cube",
+        "textures": {
+          "down": "ffs:blocks/computer/blockTankComputer_Invalid",
+          "up": "ffs:blocks/computer/blockTankComputer_Invalid",
+          "north": "ffs:blocks/computer/blockTankComputer_Invalid",
+          "south": "ffs:blocks/computer/blockTankComputer_Invalid",
+          "west": "ffs:blocks/computer/blockTankComputer_Invalid",
+          "east": "ffs:blocks/computer/blockTankComputer_Invalid"
+        }
+      }
+    }
+  }
+}

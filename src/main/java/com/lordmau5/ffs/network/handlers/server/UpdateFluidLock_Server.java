@@ -12,17 +12,16 @@ import net.minecraft.world.World;
 /**
  * Created by Dustin on 07.07.2015.
  */
-public class UpdateValveName_Server extends SimpleChannelInboundHandler<ffsPacket.Server.UpdateValveName> {
+public class UpdateFluidLock_Server extends SimpleChannelInboundHandler<ffsPacket.Server.UpdateFluidLock> {
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ffsPacket.Server.UpdateValveName msg) throws Exception{
+    protected void channelRead0(ChannelHandlerContext ctx, ffsPacket.Server.UpdateFluidLock msg) throws Exception{
         World world = NetworkHandler.getPlayer(ctx).worldObj;
         if(world != null) {
             TileEntity tile = world.getTileEntity(msg.pos);
             if(tile != null && tile instanceof TileEntityValve) {
                 TileEntityValve valve = (TileEntityValve) tile;
-                valve.setValveName(msg.name);
-                valve.updateBlockAndNeighbors(true);
+                valve.toggleFluidLock(msg.fluidLock);
             }
         }
     }

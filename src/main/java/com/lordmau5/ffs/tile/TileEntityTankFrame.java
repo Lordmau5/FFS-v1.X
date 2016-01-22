@@ -4,14 +4,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 
 import java.util.ArrayList;
@@ -24,25 +19,15 @@ import java.util.List;
 @Optional.InterfaceList(value = {
         @Optional.Interface(iface = "framesapi.IMoveCheck", modid = "funkylocomotion")
 })
-public class TileEntityTankFrame extends TileEntity implements ITickable {
+public class TileEntityTankFrame extends ITankTile {
 
-    private BlockPos valvePos;
     private IBlockState camoBlockState;
-    private TileEntityValve masterValve;
-    private boolean wantsUpdate = false;
 
     public int lightValue;
 
     public void initialize(BlockPos valvePos, IBlockState camoBlockState) {
-        this.valvePos = valvePos;
+        setValvePos(valvePos);
         this.camoBlockState = camoBlockState;
-    }
-
-    @Override
-    public void onLoad() {
-        super.onLoad();
-
-        wantsUpdate = true;
     }
 
     public void setBlockState(IBlockState blockState) {
@@ -61,7 +46,7 @@ public class TileEntityTankFrame extends TileEntity implements ITickable {
     public List<EnumFacing> getNeighborBlockOrAir(Block block) {
         List<EnumFacing> dirs = new ArrayList<>();
 
-        if(getValve() == null)
+        if(getMasterValve() == null)
             return dirs;
 
         BlockPos pos = getPos();
@@ -71,7 +56,7 @@ public class TileEntityTankFrame extends TileEntity implements ITickable {
                     dirs.add(dr);
             }
             else {
-                BlockPos oPos = getValve().getPos().offset(dr);
+                BlockPos oPos = getMasterValve().getPos().offset(dr);
                 IBlockState otherBlock = getWorld().getBlockState(oPos);
                 if(block == otherBlock.getBlock() || getWorld().isAirBlock(oPos))
                     dirs.add(dr);
@@ -109,43 +94,20 @@ public class TileEntityTankFrame extends TileEntity implements ITickable {
     }
 
     public void onBreak() {
-        if(getWorld() != null && !getWorld().isRemote && getValve() != null) {
-            getValve().breakTank(this);
+        if(getWorld() != null && !getWorld().isRemote && getMasterValve() != null) {
+            getMasterValve().breakTank(this);
         }
-    }
-
-    public void setValvePos(BlockPos valvePos) {
-        this.valvePos = valvePos;
-        this.masterValve = null;
-    }
-
-    public TileEntityValve getValve() {
-        if(masterValve == null && this.valvePos != null) {
-            TileEntity tile = getWorld().getTileEntity(this.valvePos);
-            masterValve = tile instanceof TileEntityValve ? (TileEntityValve) tile : null;
-        }
-
-        return masterValve;
-    }
-
-    @Override
-    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
-        return oldState.getBlock() != newState.getBlock();
     }
 
     @Override
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
-        if(tag.hasKey("valveX")) {
-            setValvePos(new BlockPos(tag.getInteger("valveX"), tag.getInteger("valveY"), tag.getInteger("valveZ")));
-        }
-
         if(tag.hasKey("blockName")) {
             setBlockState(Block.getBlockFromName(tag.getString("blockName")).getStateFromMeta(tag.getInteger("metadata")));
         }
 
-        int newLightValue = tag.getInteger("fluidLuminosity");
+        int newLightValue = (getMasterValve() != null ? getMasterValve().getFluidLuminosity() : 0);
         if(newLightValue != lightValue) {
             lightValue = newLightValue;
             markForUpdate();
@@ -154,32 +116,12 @@ public class TileEntityTankFrame extends TileEntity implements ITickable {
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        if(getValve() != null) {
-            BlockPos pos = getValve().getPos();
-            tag.setInteger("valveX", pos.getX());
-            tag.setInteger("valveY", pos.getY());
-            tag.setInteger("valveZ", pos.getZ());
-
-            tag.setInteger("fluidLuminosity", getValve().getFluidLuminosity());
-        }
         if(getBlockState() != null) {
             tag.setString("blockName", getBlockState().getBlock().getRegistryName());
             tag.setInteger("metadata", getBlockState().getBlock().getMetaFromState(getBlockState()));
         }
 
         super.writeToNBT(tag);
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
-        readFromNBT(pkt.getNbtCompound());
-    }
-
-    @Override
-    public Packet getDescriptionPacket() {
-        NBTTagCompound tag = new NBTTagCompound();
-        writeToNBT(tag);
-        return new S35PacketUpdateTileEntity(getPos(), 0, tag);
     }
 
     public int getLightValue() {
@@ -191,25 +133,5 @@ public class TileEntityTankFrame extends TileEntity implements ITickable {
             return 0;
 
         return lightValue;
-    }
-
-    public void markForUpdate() {
-        if(getWorld() == null) {
-            wantsUpdate = true;
-            return;
-        }
-
-        getWorld().markBlockForUpdate(getPos());
-        if(getWorld().isRemote) {
-            getWorld().checkLight(getPos());
-        }
-    }
-
-    @Override
-    public void update() {
-        if (wantsUpdate) {
-            markForUpdate();
-            wantsUpdate = false;
-        }
     }
 }

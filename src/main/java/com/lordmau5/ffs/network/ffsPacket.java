@@ -1,5 +1,7 @@
 package com.lordmau5.ffs.network;
 
+import com.lordmau5.ffs.tile.ITankTile;
+import com.lordmau5.ffs.tile.ITankValve;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.BlockPos;
@@ -24,14 +26,9 @@ public abstract class ffsPacket {
             public UpdateAutoOutput(){
             }
 
-            public UpdateAutoOutput(TileEntityValve valve, boolean autoOutput) {
+            public UpdateAutoOutput(TileEntityValve valve) {
                 this.pos = valve.getPos();
-                this.autoOutput = autoOutput;
-            }
-
-            public UpdateAutoOutput(BlockPos pos, boolean autoOutput) {
-                this.pos = pos;
-                this.autoOutput = autoOutput;
+                this.autoOutput = valve.getAutoOutput();
             }
 
             @Override
@@ -49,20 +46,15 @@ public abstract class ffsPacket {
             }
         }
 
-        public static class UpdateValveName extends ffsPacket {
+        public static class UpdateTileName extends ffsPacket {
             public BlockPos pos;
             public String name;
 
-            public UpdateValveName(){
+            public UpdateTileName(){
             }
 
-            public UpdateValveName(TileEntityValve valve, String name) {
-                this.pos = valve.getPos();
-                this.name = name;
-            }
-
-            public UpdateValveName(BlockPos pos, String name) {
-                this.pos = pos;
+            public UpdateTileName(ITankTile tankTile, String name) {
+                this.pos = tankTile.getPos();
                 this.name = name;
             }
 
@@ -78,6 +70,33 @@ public abstract class ffsPacket {
             public void decode(ByteBuf buffer) {
                 this.pos = new BlockPos(buffer.readInt(), buffer.readInt(), buffer.readInt());
                 this.name = ByteBufUtils.readUTF8String(buffer);
+            }
+        }
+
+        public static class UpdateFluidLock extends ffsPacket {
+            public BlockPos pos;
+            public boolean fluidLock;
+
+            public UpdateFluidLock(){
+            }
+
+            public UpdateFluidLock(ITankValve valve) {
+                this.pos = valve.getPos();
+                this.fluidLock = valve.getTankConfig().isFluidLocked();
+            }
+
+            @Override
+            public void encode(ByteBuf buffer) {
+                buffer.writeInt(this.pos.getX());
+                buffer.writeInt(this.pos.getY());
+                buffer.writeInt(this.pos.getZ());
+                buffer.writeBoolean(this.fluidLock);
+            }
+
+            @Override
+            public void decode(ByteBuf buffer) {
+                this.pos = new BlockPos(buffer.readInt(), buffer.readInt(), buffer.readInt());
+                this.fluidLock = buffer.readBoolean();
             }
         }
     }

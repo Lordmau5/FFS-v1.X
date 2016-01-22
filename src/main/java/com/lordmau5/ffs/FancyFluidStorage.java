@@ -1,5 +1,6 @@
 package com.lordmau5.ffs;
 
+import com.lordmau5.ffs.blocks.BlockTankComputer;
 import com.lordmau5.ffs.blocks.BlockTankFrame;
 import com.lordmau5.ffs.blocks.BlockTankFrameOpaque;
 import com.lordmau5.ffs.blocks.BlockValve;
@@ -8,6 +9,7 @@ import com.lordmau5.ffs.client.TankFrameModel;
 import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.proxy.CommonProxy;
 import com.lordmau5.ffs.proxy.GuiHandler;
+import com.lordmau5.ffs.tile.TileEntityTankComputer;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.GenericUtil;
@@ -37,17 +39,17 @@ import java.util.List;
 /**
  * Created by Dustin on 28.06.2015.
  */
-@Mod(modid = FancyFluidStorage.modId, name = "Fancy Fluid Storage", dependencies="after:waila;after:chisel;after:OpenComputers;after:ComputerCraft;after:BuildCraftAPI|Transport;after:funkylocomotion")
+@Mod(modid = FancyFluidStorage.modId, name = "Fancy Fluid Storage", dependencies="after:waila;after:chisel;after:OpenComputers;after:ComputerCraft;after:BuildCraftAPI|transport;after:funkylocomotion")
 public class FancyFluidStorage {
 
     public static final String modId = "FFS";
 
     public static BlockValve blockValve;
+    public static BlockTankComputer blockTankComputer;
     public static BlockTankFrame blockTankFrame;
     public static BlockTankFrameOpaque blockTankFrameOpaque;
 
     public static Configuration config;
-    //public static FFSAnalytics analytics;
 
     @Mod.Instance(modId)
     public static FancyFluidStorage instance;
@@ -55,11 +57,9 @@ public class FancyFluidStorage {
     @SidedProxy(clientSide = "com.lordmau5.ffs.proxy.ClientProxy", serverSide = "com.lordmau5.ffs.proxy.CommonProxy")
     public static CommonProxy proxy;
 
-    public boolean ANONYMOUS_STATISTICS = false;
-
     public int MB_PER_TANK_BLOCK = 16000;
     public boolean INSIDE_CAPACITY = false;
-    public int MAX_SIZE = 13;
+    public int MAX_SIZE = 7;
     public int MIN_BURNABLE_TEMPERATURE = 1300;
     public boolean SET_WORLD_ON_FIRE = true;
     public boolean SHOULD_TANKS_LEAK = true;
@@ -76,10 +76,6 @@ public class FancyFluidStorage {
     public void loadConfig() {
         config.load();
 
-        Property usageStatistics = config.get(Configuration.CATEGORY_GENERAL, "usageStatistics", true);
-        usageStatistics.comment = "Should the mod send anonymous usage statistics to GameAnalytics?\nThis allows us to evaluate interesting statistics :)\nDefault: true";
-        //ANONYMOUS_STATISTICS = usageStatistics.getBoolean(true);
-
         Property mbPerTankProp = config.get(Configuration.CATEGORY_GENERAL, "mbPerVirtualTank", 16000);
         mbPerTankProp.comment = "How many millibuckets can each block within the tank store? (Has to be higher than 1!)\nDefault: 16000";
         MB_PER_TANK_BLOCK = Math.max(1, Math.min(Integer.MAX_VALUE, mbPerTankProp.getInt(16000)));
@@ -91,10 +87,10 @@ public class FancyFluidStorage {
         INSIDE_CAPACITY = insideCapacityProp.getBoolean(true);
 
         Property maxSizeProp = config.get(Configuration.CATEGORY_GENERAL, "maxSize", 13);
-        maxSizeProp.comment = "Define the maximum size a tank can have. This includes the whole tank, including the frame!\nMinimum: 3, Maximum: 32\nDefault: 13";
-        MAX_SIZE = Math.max(3, Math.min(maxSizeProp.getInt(13), 32));
-        if(maxSizeProp.getInt(13) < 3 || maxSizeProp.getInt(13) > 32)
-            maxSizeProp.set(13);
+        maxSizeProp.comment = "Define the maximum size a tank can have. This includes the whole tank, including the frame!\nMinimum: 3, Maximum: 13\nDefault: 7";
+        MAX_SIZE = Math.max(3, Math.min(maxSizeProp.getInt(7), 13));
+        if(maxSizeProp.getInt(7) < 3 || maxSizeProp.getInt(7) > 13)
+            maxSizeProp.set(7);
 
         Property tankFrameModeProp = config.get(Configuration.CATEGORY_GENERAL, "tankFrameMode", 1);
         tankFrameModeProp.comment = "Declare which mode you want the tank frames to be.\n0 = Only the same block with the same metadata is allowed\n1 = Only the same block is allowed, but the metadata can be different\n2 = Allow any block\nDefault: 1";
@@ -134,10 +130,12 @@ public class FancyFluidStorage {
         loadConfig();
 
         GameRegistry.registerBlock(blockValve = new BlockValve(), "blockValve");
+        GameRegistry.registerBlock(blockTankComputer = new BlockTankComputer(), "blockTankComputer");
         GameRegistry.registerBlock(blockTankFrame = new BlockTankFrame("blockTankFrame"), "blockTankFrame");
         GameRegistry.registerBlock(blockTankFrameOpaque = new BlockTankFrameOpaque(), "blockTankFrameOpaque");
 
         GameRegistry.registerTileEntity(TileEntityValve.class, "tileEntityValve");
+        GameRegistry.registerTileEntity(TileEntityTankComputer.class, "tileEntityTankComputer");
         GameRegistry.registerTileEntity(TileEntityTankFrame.class, "tileEntityTankFrame");
 
         NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
@@ -155,6 +153,11 @@ public class FancyFluidStorage {
                 'G', Blocks.iron_bars,
                 'B', Items.bucket);
 
+        GameRegistry.addRecipe(new ItemStack(blockTankComputer), "IGI", "GBG", "IGI",
+                'I', Items.iron_ingot,
+                'G', Blocks.iron_bars,
+                'B', Items.comparator);
+
         proxy.init();
     }
 
@@ -169,11 +172,6 @@ public class FancyFluidStorage {
             }
         });
     }
-
-    /**
-     *
-     *
-     */
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)

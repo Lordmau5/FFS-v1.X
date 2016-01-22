@@ -98,8 +98,8 @@ group = 'lordmau5.ffs'
 version = "$minecraft_version-$mod_version"
 archivesBaseName = "Fancy Fluid Storage"
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 minecraft {
     runDir = "runtime/client/assets"

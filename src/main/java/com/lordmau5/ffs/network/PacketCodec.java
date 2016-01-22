@@ -13,7 +13,8 @@ public class PacketCodec extends FMLIndexedMessageToMessageCodec<ffsPacket> {
 
     public PacketCodec(){
         addPacket(ffsPacket.Server.UpdateAutoOutput.class);
-        addPacket(ffsPacket.Server.UpdateValveName.class);
+        addPacket(ffsPacket.Server.UpdateTileName.class);
+        addPacket(ffsPacket.Server.UpdateFluidLock.class);
     }
 
     void addPacket(Class<? extends ffsPacket> type) {

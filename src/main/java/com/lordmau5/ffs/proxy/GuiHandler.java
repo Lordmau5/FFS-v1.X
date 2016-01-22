@@ -1,8 +1,7 @@
 package com.lordmau5.ffs.proxy;
 
 import com.lordmau5.ffs.client.gui.GuiValve;
-import com.lordmau5.ffs.tile.TileEntityTankFrame;
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.ITankTile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
@@ -22,14 +21,10 @@ public class GuiHandler implements IGuiHandler {
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
-        if(tile == null)
+        if(tile == null || !(tile instanceof ITankTile))
             return null;
 
-        if(tile instanceof TileEntityValve)
-            return new GuiValve((TileEntityValve) tile, false); // Open the GUI for the corresponding Valve, show corresponding button-states
-        else if(tile instanceof TileEntityTankFrame)
-            return new GuiValve(((TileEntityTankFrame) tile).getValve(), true); // Open the GUI for the master valve, disable buttons
-        return null;
+        return new GuiValve((ITankTile) tile);
     }
 
 }

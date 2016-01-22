@@ -1,7 +1,7 @@
 package com.lordmau5.ffs.compat;
 
-import com.lordmau5.ffs.tile.TileEntityTankFrame;
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.*;
+import com.lordmau5.ffs.tile.ifaces.INameableTile;
 import com.lordmau5.ffs.util.GenericUtil;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
@@ -34,8 +34,8 @@ public class WailaPluginTank implements IWailaDataProvider {
     public static void registerPlugin(IWailaRegistrar registrar) {
         WailaPluginTank instance = new WailaPluginTank();
         registrar.registerStackProvider(instance, TileEntityTankFrame.class);
-        registrar.registerBodyProvider(instance, TileEntityValve.class);
-        registrar.registerBodyProvider(instance, TileEntityTankFrame.class);
+
+        registrar.registerBodyProvider(instance, ITankTile.class);
     }
 
     @Optional.Method(modid = "Waila")
@@ -57,12 +57,14 @@ public class WailaPluginTank implements IWailaDataProvider {
     @Override
     public List<String> getWailaBody(ItemStack itemStack, List<String> list, IWailaDataAccessor iWailaDataAccessor, IWailaConfigHandler iWailaConfigHandler) {
         TileEntity te = iWailaDataAccessor.getTileEntity();
-        TileEntityValve valve;
-        if (te instanceof TileEntityValve) {
+        ITankValve valve = null;
+        if (te instanceof TileEntityValve) { // Continue with Valve stuff
             valve = (TileEntityValve) te;
-        } else {
-            valve = ((TileEntityTankFrame) te).getValve();
-            list.add("Part of a tank");
+        }
+        else if(te instanceof ITankTile) {
+            valve = ((ITankTile) te).getMasterValve();
+            if(valve != null && valve.isValid())
+                list.add("Part of a tank");
         }
 
         if (valve == null) return list;
@@ -75,19 +77,26 @@ public class WailaPluginTank implements IWailaDataProvider {
             return list;
         }
 
+        if(te instanceof INameableTile)
+            list.add("Name: " + EnumChatFormatting.ITALIC + ((INameableTile)te).getTileName() + EnumChatFormatting.RESET);
+
         if(te instanceof TileEntityValve) {
-            list.add("Name: " + EnumChatFormatting.ITALIC + valve.getValveName() + EnumChatFormatting.RESET);
-            String autoOutput = valve.getAutoOutput() ? "true" : "false";
-            list.add("Auto Output: " + (valve.getAutoOutput() ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + EnumChatFormatting.ITALIC + autoOutput + EnumChatFormatting.RESET);
+            TileEntityValve t_Valve = (TileEntityValve) te;
+            String autoOutput = t_Valve.getAutoOutput() ? "true" : "false";
+            list.add("Auto Output: " + (t_Valve.getAutoOutput() ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + EnumChatFormatting.ITALIC + autoOutput + EnumChatFormatting.RESET);
         }
 
         if (fluidAmount == 0) {
             list.add("Fluid: None");
             list.add("Amount: 0/" + GenericUtil.intToFancyNumber(capacity) + " mB");
         } else {
-            String fluid = valve.getFluid().getFluid().getLocalizedName(valve.getFluid());
+            String fluid = valve.getFluid().getLocalizedName();
             list.add("Fluid: " + fluid);
             list.add("Amount: " + GenericUtil.intToFancyNumber(fluidAmount) + "/" + GenericUtil.intToFancyNumber(capacity) + " mB");
+        }
+
+        if(valve.getTankConfig().isFluidLocked()) {
+            list.add("Fluid locked to: " + valve.getTankConfig().getLockedFluid().getLocalizedName());
         }
         return list;
     }

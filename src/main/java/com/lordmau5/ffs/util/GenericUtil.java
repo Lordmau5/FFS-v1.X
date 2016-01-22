@@ -1,8 +1,9 @@
 package com.lordmau5.ffs.util;
 
 import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.tile.ITankTile;
+import com.lordmau5.ffs.tile.ITankValve;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
-import com.lordmau5.ffs.tile.TileEntityValve;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGlass;
 import net.minecraft.block.material.Material;
@@ -50,8 +51,8 @@ public class GenericUtil {
         validTiles.add("blockFusedQuartz");
     }
 
-    public static String getUniqueValveName(TileEntityValve valve) {
-        return "valve_" + Long.toHexString(valve.getPos().toLong());
+    public static String getUniquePositionName(ITankValve valve) {
+        return "tile_" + Long.toHexString(valve.getPos().toLong());
     }
 
     public static boolean canAutoOutput(float height, int tankHeight, int valvePosition, boolean negativeDensity) {
@@ -120,7 +121,7 @@ public class GenericUtil {
         if (block.hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             if(tile != null) {
-                return tile instanceof TileEntityTankFrame || isTileEntityAcceptable(block, tile);
+                return tile instanceof ITankTile || isTileEntityAcceptable(block, tile);
             }
         }
 
@@ -156,7 +157,7 @@ public class GenericUtil {
 
     }
 
-    public static boolean fluidContainerHandler(World world, BlockPos pos, TileEntityValve valve, EntityPlayer player, EnumFacing side) {
+    public static boolean fluidContainerHandler(World world, BlockPos pos, ITankValve valve, EntityPlayer player, EnumFacing side) {
         ItemStack current = player.inventory.getCurrentItem();
 
         if (current != null) {
@@ -183,7 +184,7 @@ public class GenericUtil {
 
                     // Handle empty containers
                 } else {
-                    FluidStack available = valve.getTankInfo(side)[0].fluid;
+                    FluidStack available = valve.getInfo().fluid;
 
                     if (available != null) {
                         ItemStack filled = FluidContainerRegistry.fillFluidContainer(available, current);
@@ -204,7 +205,7 @@ public class GenericUtil {
                                 }
                             }
 
-                            valve.drain(side, liquid.amount, true);
+                            valve.drain(liquid.amount, true);
 
                             return true;
                         }
@@ -218,19 +219,19 @@ public class GenericUtil {
                 if (!world.isRemote) {
                     IFluidContainerItem container = (IFluidContainerItem) current.getItem();
                     FluidStack liquid = container.getFluid(current);
-                    FluidStack tankLiquid = valve.getTankInfo(EnumFacing.UP)[0].fluid;
+                    FluidStack tankLiquid = valve.getInfo().fluid;
                     boolean mustDrain = liquid == null || liquid.amount == 0;
                     boolean mustFill = tankLiquid == null || tankLiquid.amount == 0;
                     if (mustDrain && mustFill) {
                         // Both are empty, do nothing
                     } else if (mustDrain || !player.isSneaking()) {
-                        liquid = valve.drain(side, 1000, false);
+                        liquid = valve.drain(1000, false);
                         int qtyToFill = container.fill(current, liquid, true);
-                        valve.drain(side, qtyToFill, true);
+                        valve.drain(qtyToFill, true);
                     } else {
                         if (liquid.amount > 0) {
-                            int qty = valve.fill(side, liquid, false);
-                            valve.fill(side, container.drain(current, qty, true), true);
+                            int qty = valve.fill(liquid, false);
+                            valve.fill(container.drain(current, qty, true), true);
                         }
                     }
                 }
