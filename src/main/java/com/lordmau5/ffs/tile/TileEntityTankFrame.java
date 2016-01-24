@@ -35,7 +35,14 @@ public class TileEntityTankFrame extends ITankTile {
     }
 
     public IBlockState getBlockState() {
-        return camoBlockState;
+        IBlockState state = null;
+        if(camoBlockState != null)
+            state = camoBlockState.getBlock().getActualState(camoBlockState, getWorld(), getPos());
+
+        if(camoBlockState != null && getWorld().isRemote)
+            state = camoBlockState.getBlock().getExtendedState(state, getWorld(), getPos());
+
+        return state;
     }
 
     public boolean isFrameInvalid() {

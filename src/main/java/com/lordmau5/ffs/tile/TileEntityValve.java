@@ -81,7 +81,7 @@ public class TileEntityValve extends ITankValve implements IFluidHandler,
 
     public void setAutoOutput(boolean autoOutput) {
         this.autoOutput = autoOutput;
-        updateBlockAndNeighbors(true);
+        markForUpdate();
     }
 
     @Override

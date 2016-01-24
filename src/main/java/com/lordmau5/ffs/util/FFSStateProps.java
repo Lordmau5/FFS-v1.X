@@ -1,6 +1,6 @@
 package com.lordmau5.ffs.util;
 
-import com.lordmau5.ffs.util.state.PropertyState;
+import com.lordmau5.ffs.util.state.PropertyModel;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.util.EnumFacing;
@@ -10,7 +10,7 @@ import net.minecraft.util.EnumFacing;
  */
 public class FFSStateProps {
 
-    public static final PropertyState FRAME_STATE = new PropertyState("frame_state");
+    public static final PropertyModel FRAME_MODEL = new PropertyModel("frame_model");
 
     public static final PropertyBool TILE_VALID = PropertyBool.create("tile_valid");
     public static final PropertyBool TILE_MASTER = PropertyBool.create("tile_master");

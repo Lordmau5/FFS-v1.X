@@ -3,7 +3,6 @@ package com.lordmau5.ffs.client;
 import com.google.common.collect.ImmutableList;
 import com.lordmau5.ffs.util.FFSStateProps;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -23,20 +22,14 @@ public class TankFrameModel implements ISmartBlockModel {
 
     @Override
     public IBakedModel handleBlockState(IBlockState state) {
-        EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
-        IBlockState frameState = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_STATE);
+        IBakedModel frameModel = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_MODEL);
 
-        Minecraft mc = Minecraft.getMinecraft();
-        if(frameState != null) {
-            if(frameState.getBlock().canRenderInLayer(layer)) {
-                IBakedModel model = mc.getBlockRendererDispatcher().getBlockModelShapes().getModelForState(frameState);
-
-                if (model instanceof ISmartBlockModel) {
-                    model = ((ISmartBlockModel) model).handleBlockState(frameState);
-                }
-
-                return model;
+        if(frameModel != null) {
+            if(frameModel instanceof ISmartBlockModel) {
+                return ((ISmartBlockModel)frameModel).handleBlockState(state);
             }
+            if(MinecraftForgeClient.getRenderLayer() == EnumWorldBlockLayer.TRANSLUCENT)
+                return frameModel;
         }
 
         return this;
@@ -74,6 +67,6 @@ public class TankFrameModel implements ISmartBlockModel {
 
     @Override
     public ItemCameraTransforms getItemCameraTransforms() {
-        return null;
+        return ItemCameraTransforms.DEFAULT;
     }
 }

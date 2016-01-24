@@ -1,6 +1,7 @@
 package com.lordmau5.ffs.blocks;
 
 import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.client.FrameBlockAccessWrapper;
 import com.lordmau5.ffs.tile.ITankTile;
 import com.lordmau5.ffs.tile.ITankValve;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
@@ -11,7 +12,9 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
+import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -41,10 +44,10 @@ import java.util.Random;
 /**
  * Created by Dustin on 02.07.2015.
  */
-@Optional.Interface(iface = "com.cricketcraft.chisel.api.IFacade", modid = "chisel")
-public class BlockTankFrame extends Block
-        //implements IFacade
-        {
+@Optional.InterfaceList(
+        @Optional.Interface(iface = "team.chisel.api.IFacade", modid = "chisel")
+)
+public class BlockTankFrame extends Block { //implements IFacade {
 
     public BlockTankFrame() {
         super(Material.rock);
@@ -55,12 +58,12 @@ public class BlockTankFrame extends Block
         setUnlocalizedName(name);
         setRegistryName(name);
         setDefaultState(((IExtendedBlockState) blockState.getBaseState())
-                .withProperty(FFSStateProps.FRAME_STATE, null));
+                .withProperty(FFSStateProps.FRAME_MODEL, null));
     }
 
     @Override
     public BlockState createBlockState() {
-        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty[] { FFSStateProps.FRAME_STATE });
+        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty[] { FFSStateProps.FRAME_MODEL });
     }
 
     @Override
@@ -157,11 +160,15 @@ public class BlockTankFrame extends Block
          return true;
      }
 
+
+
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
         if (world.getTileEntity(pos) instanceof TileEntityTankFrame) {
-            TileEntityTankFrame tile = ((TileEntityTankFrame) world.getTileEntity(pos));
-            return ((IExtendedBlockState) state).withProperty(FFSStateProps.FRAME_STATE, tile.getBlockState());
+            FrameBlockAccessWrapper wrapper = new FrameBlockAccessWrapper(world);
+            IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelFromBlockState(wrapper.getBlockState(pos), wrapper, pos);
+            System.out.println(model.toString());
+            return ((IExtendedBlockState) getDefaultState()).withProperty(FFSStateProps.FRAME_MODEL, model);
         } else {
             return ((IExtendedBlockState) state);
         }
@@ -293,38 +300,21 @@ public class BlockTankFrame extends Block
         return false;
     }
 
-    /*
-    @Override
-    @Optional.Method(modid = "chisel")
-    public Block getFacade(IBlockAccess world, int x, int y, int z, int side) {
-        TileEntity tile = world.getTileEntity(x, y, z);
+    /**
+     * Chisel!
+     */
+    /*@Override
+    public IBlockState getFacade(IBlockAccess world, BlockPos blockPos, EnumFacing enumFacing) {
+        TileEntity tile = world.getTileEntity(blockPos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
-            if(frame.getValve() == null)
+            if(frame.getMasterValve() == null)
                 return null;
 
-            ExtendedBlock block = frame.getBlock();
-            if(block != null)
-                return block.getBlock();
+            IBlockState blockState = new FrameBlockAccessWrapper(world).getBlockState(blockPos);
+            if(blockState != null)
+                return blockState;
         }
         return null;
-    }
-
-    @Override
-    @Optional.Method(modid = "chisel")
-    public int getFacadeMetadata(IBlockAccess world, int x, int y, int z, int side) {
-        TileEntity tile = world.getTileEntity(x, y, z);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
-            if(frame.getValve() == null)
-                return 0;
-
-            ExtendedBlock block = frame.getBlock();
-            if(block != null)
-                return block.getMetadata();
-        }
-        return 0;
-    }
-    */
-
+    }*/
 }
