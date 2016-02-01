@@ -12,9 +12,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
-import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -58,12 +56,13 @@ public class BlockTankFrame extends Block { //implements IFacade {
         setUnlocalizedName(name);
         setRegistryName(name);
         setDefaultState(((IExtendedBlockState) blockState.getBaseState())
-                .withProperty(FFSStateProps.FRAME_MODEL, null));
+                .withProperty(FFSStateProps.FRAME_STATE, null)
+                .withProperty(FFSStateProps.BLOCK_POS, null));
     }
 
     @Override
     public BlockState createBlockState() {
-        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty[] { FFSStateProps.FRAME_MODEL });
+        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty[] { FFSStateProps.FRAME_STATE, FFSStateProps.BLOCK_POS });
     }
 
     @Override
@@ -156,21 +155,21 @@ public class BlockTankFrame extends Block { //implements IFacade {
     }
 
     @Override
-     public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
+    public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
          return true;
      }
 
-
-
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
-        if (world.getTileEntity(pos) instanceof TileEntityTankFrame) {
+        TileEntity tile = world.getTileEntity(pos);
+        if (tile != null && tile instanceof TileEntityTankFrame) {
+            if(((TileEntityTankFrame) tile).getBlockState() == null)
+                return state;
+
             FrameBlockAccessWrapper wrapper = new FrameBlockAccessWrapper(world);
-            IBakedModel model = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelFromBlockState(wrapper.getBlockState(pos), wrapper, pos);
-            System.out.println(model.toString());
-            return ((IExtendedBlockState) getDefaultState()).withProperty(FFSStateProps.FRAME_MODEL, model);
+            return ((IExtendedBlockState) state).withProperty(FFSStateProps.FRAME_STATE, wrapper.getBlockState(pos)).withProperty(FFSStateProps.BLOCK_POS, pos);
         } else {
-            return ((IExtendedBlockState) state);
+            return state;
         }
     }
 

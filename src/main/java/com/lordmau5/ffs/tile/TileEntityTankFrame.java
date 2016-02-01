@@ -34,6 +34,10 @@ public class TileEntityTankFrame extends ITankTile {
         this.camoBlockState = blockState;
     }
 
+    private IBlockState getBlockStateForNBT() {
+        return camoBlockState;
+    }
+
     public IBlockState getBlockState() {
         IBlockState state = null;
         if(camoBlockState != null)
@@ -123,19 +127,19 @@ public class TileEntityTankFrame extends ITankTile {
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        if(getBlockState() != null) {
-            tag.setString("blockName", getBlockState().getBlock().getRegistryName());
-            tag.setInteger("metadata", getBlockState().getBlock().getMetaFromState(getBlockState()));
+        if(getBlockStateForNBT() != null) {
+            tag.setString("blockName", getBlockStateForNBT().getBlock().getRegistryName());
+            tag.setInteger("metadata", getBlockStateForNBT().getBlock().getMetaFromState(getBlockStateForNBT()));
         }
 
         super.writeToNBT(tag);
     }
 
     public int getLightValue() {
-        if(getBlockState() == null)
+        if(getBlockStateForNBT() == null)
             return 0;
 
-        Block block = getBlockState().getBlock();
+        Block block = getBlockStateForNBT().getBlock();
         if(block.isOpaqueCube())
             return 0;
 

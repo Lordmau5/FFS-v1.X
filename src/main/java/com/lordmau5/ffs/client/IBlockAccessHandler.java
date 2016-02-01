@@ -38,11 +38,7 @@ public class IBlockAccessHandler implements IBlockAccess {
 
     @Override
     public TileEntity getTileEntity(BlockPos pos) {
-        if (pos.getY() >= 0 && pos.getY() < 256) {
-            return ba.getTileEntity(pos);
-        } else {
-            return null;
-        }
+        return ba.getTileEntity(pos);
     }
 
     @Override

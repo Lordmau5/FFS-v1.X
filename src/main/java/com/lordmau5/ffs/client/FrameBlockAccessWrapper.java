@@ -17,16 +17,13 @@ public class FrameBlockAccessWrapper extends IBlockAccessHandler {
 
     @Override
     public IBlockState getBlockState(BlockPos pos) {
-        IBlockState block = super.getBlockState(pos);
+        IBlockState state = super.getBlockState(pos);
         TileEntity tile = getTileEntity(pos);
-        if(tile instanceof TileEntityTankFrame) {
+        if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) tile;
-            if(frame.getBlockState() == null)
-                return block;
-
-            return frame.getBlockState();
+            state = frame.getBlockState();
         }
-        return block;
+        return state;
     }
 
 }
