@@ -1,12 +1,16 @@
 package com.lordmau5.ffs.tile;
 
+import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.client.FrameBlockAccessWrapper;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.fml.common.Optional;
 
 import java.util.ArrayList;
@@ -22,11 +26,15 @@ import java.util.List;
 public class TileEntityTankFrame extends ITankTile {
 
     private IBlockState camoBlockState;
+    public IBakedModel fake_model;
+
+    public boolean needsNewModel;
 
     public int lightValue;
 
     public void initialize(BlockPos valvePos, IBlockState camoBlockState) {
         setValvePos(valvePos);
+        this.fake_model = null;
         this.camoBlockState = camoBlockState;
     }
 
@@ -38,13 +46,29 @@ public class TileEntityTankFrame extends ITankTile {
         return camoBlockState;
     }
 
+    public IBakedModel getFakeModel() {
+        //if(fake_model == null) {
+            IBakedModel fake_model = FancyFluidStorage.minecraft.getBlockRendererDispatcher().getModelFromBlockState(getBlockState(), new FrameBlockAccessWrapper(getWorld()), getPos());
+            if(fake_model instanceof ISmartBlockModel) {
+                fake_model = ((ISmartBlockModel) fake_model).handleBlockState(getExtendedBlockState());
+            }
+        //}
+        return fake_model;
+    }
+
     public IBlockState getBlockState() {
         IBlockState state = null;
         if(camoBlockState != null)
-            state = camoBlockState.getBlock().getActualState(camoBlockState, getWorld(), getPos());
+            state = camoBlockState.getBlock().getActualState(camoBlockState,  new FrameBlockAccessWrapper(getWorld()), getPos());
+
+        return state;
+    }
+
+    public IBlockState getExtendedBlockState() {
+        IBlockState state = getBlockState();
 
         if(camoBlockState != null && getWorld().isRemote)
-            state = camoBlockState.getBlock().getExtendedState(state, getWorld(), getPos());
+            state = camoBlockState.getBlock().getExtendedState(state, new FrameBlockAccessWrapper(getWorld()), getPos());
 
         return state;
     }
@@ -114,6 +138,9 @@ public class TileEntityTankFrame extends ITankTile {
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
+        if(tag.hasKey("needsNewModel"))
+            fake_model = null;
+
         if(tag.hasKey("blockName")) {
             setBlockState(Block.getBlockFromName(tag.getString("blockName")).getStateFromMeta(tag.getInteger("metadata")));
         }
@@ -127,6 +154,11 @@ public class TileEntityTankFrame extends ITankTile {
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
+        if(needsNewModel) {
+            tag.setBoolean("needsNewModel", true);
+            needsNewModel = false;
+        }
+
         if(getBlockStateForNBT() != null) {
             tag.setString("blockName", getBlockStateForNBT().getBlock().getRegistryName());
             tag.setInteger("metadata", getBlockStateForNBT().getBlock().getMetaFromState(getBlockStateForNBT()));

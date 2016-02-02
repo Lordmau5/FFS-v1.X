@@ -25,5 +25,4 @@ public class FrameBlockAccessWrapper extends IBlockAccessHandler {
         }
         return state;
     }
-
 }

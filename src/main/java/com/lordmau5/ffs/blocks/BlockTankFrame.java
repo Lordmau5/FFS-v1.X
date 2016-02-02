@@ -1,7 +1,6 @@
 package com.lordmau5.ffs.blocks;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.client.FrameBlockAccessWrapper;
 import com.lordmau5.ffs.tile.ITankTile;
 import com.lordmau5.ffs.tile.ITankValve;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
@@ -35,6 +34,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import team.chisel.api.IFacade;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -45,7 +45,7 @@ import java.util.Random;
 @Optional.InterfaceList(
         @Optional.Interface(iface = "team.chisel.api.IFacade", modid = "chisel")
 )
-public class BlockTankFrame extends Block { //implements IFacade {
+public class BlockTankFrame extends Block implements IFacade {
 
     public BlockTankFrame() {
         super(Material.rock);
@@ -56,13 +56,13 @@ public class BlockTankFrame extends Block { //implements IFacade {
         setUnlocalizedName(name);
         setRegistryName(name);
         setDefaultState(((IExtendedBlockState) blockState.getBaseState())
-                .withProperty(FFSStateProps.FRAME_STATE, null)
-                .withProperty(FFSStateProps.BLOCK_POS, null));
+                .withProperty(FFSStateProps.FRAME_MODEL, null)
+                .withProperty(FFSStateProps.FRAME_MODEL, null));
     }
 
     @Override
     public BlockState createBlockState() {
-        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty[] { FFSStateProps.FRAME_STATE, FFSStateProps.BLOCK_POS });
+        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty[] { FFSStateProps.FRAME_MODEL, FFSStateProps.FRAME_STATE });
     }
 
     @Override
@@ -138,8 +138,8 @@ public class BlockTankFrame extends Block { //implements IFacade {
     public float getPlayerRelativeBlockHardness(EntityPlayer player, World world, BlockPos pos) {
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
-            TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
-            return net.minecraftforge.common.ForgeHooks.blockStrength(frame.getBlockState(), player, world, pos);
+            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
+            return frame.getBlockState().getBlock().getPlayerRelativeBlockHardness(player, world, pos);
         }
         return super.getPlayerRelativeBlockHardness(player, world, pos);
     }
@@ -163,11 +163,11 @@ public class BlockTankFrame extends Block { //implements IFacade {
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
         TileEntity tile = world.getTileEntity(pos);
         if (tile != null && tile instanceof TileEntityTankFrame) {
-            if(((TileEntityTankFrame) tile).getBlockState() == null)
+            TileEntityTankFrame frame = (TileEntityTankFrame) tile;
+            if(frame.getBlockState() == null)
                 return state;
 
-            FrameBlockAccessWrapper wrapper = new FrameBlockAccessWrapper(world);
-            return ((IExtendedBlockState) state).withProperty(FFSStateProps.FRAME_STATE, wrapper.getBlockState(pos)).withProperty(FFSStateProps.BLOCK_POS, pos);
+            return ((IExtendedBlockState) state).withProperty(FFSStateProps.FRAME_MODEL, frame.getFakeModel()).withProperty(FFSStateProps.FRAME_STATE, frame.getExtendedBlockState());
         } else {
             return state;
         }
@@ -302,7 +302,7 @@ public class BlockTankFrame extends Block { //implements IFacade {
     /**
      * Chisel!
      */
-    /*@Override
+    @Override
     public IBlockState getFacade(IBlockAccess world, BlockPos blockPos, EnumFacing enumFacing) {
         TileEntity tile = world.getTileEntity(blockPos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
@@ -310,10 +310,8 @@ public class BlockTankFrame extends Block { //implements IFacade {
             if(frame.getMasterValve() == null)
                 return null;
 
-            IBlockState blockState = new FrameBlockAccessWrapper(world).getBlockState(blockPos);
-            if(blockState != null)
-                return blockState;
+            return frame.getExtendedBlockState();
         }
-        return null;
-    }*/
+        return world.getBlockState(blockPos);
+    }
 }

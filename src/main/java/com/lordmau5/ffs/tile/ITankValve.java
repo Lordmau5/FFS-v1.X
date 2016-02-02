@@ -626,7 +626,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
     }
 
     public void updateBlockAndNeighbors(boolean onlyThis) {
-        if(getWorld().isRemote)
+        if(getWorld() == null || getWorld().isRemote)
             return;
 
         this.markForUpdate(onlyThis);
