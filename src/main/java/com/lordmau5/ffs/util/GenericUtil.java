@@ -3,7 +3,6 @@ package com.lordmau5.ffs.util;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.ITankTile;
 import com.lordmau5.ffs.tile.ITankValve;
-import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGlass;
 import net.minecraft.block.material.Material;
@@ -270,8 +269,7 @@ public class GenericUtil {
             for(int y=0; y<=dY; y++)
                 for(int z=0; z<=dZ; z++) {
                     BlockPos pos = pos1.add(x, y, z);
-                    BlockPos blockPos = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
-                    blocks.put(pos, world.getBlockState(blockPos));
+                    blocks.put(pos, world.getBlockState(pos));
                 }
 
         return blocks;
@@ -293,26 +291,20 @@ public class GenericUtil {
         // Calculate frames only
         for(Map.Entry<BlockPos, IBlockState> e : getBlocksBetweenPoints(world, new BlockPos(x1, y1, z1), new BlockPos(x2, y2, z2)).entrySet()) {
             BlockPos p = e.getKey();
+            IBlockState state = e.getValue();
+            if(state == null)
+                continue;
+
             if(((p.getX() == x1 || p.getX() == x2) && (p.getY() == y1 || p.getY() == y2)) ||
                 ((p.getX() == x1 || p.getX() == x2) && (p.getZ() == z1 || p.getZ() == z2)) ||
                 ((p.getY() == y1 || p.getY() == y2) && (p.getZ() == z1 || p.getZ() == z2))) {
-                    IBlockState state = e.getValue();
-                    TileEntity tile = world.getTileEntity(p);
-                    if(tile != null && tile instanceof TileEntityTankFrame)
-                        state = ((TileEntityTankFrame) tile).getBlockState();
-
                     maps[0].put(p, state);
             }
             else if(((p.getX() == x1 || p.getX() == x2) || (p.getY() == y1 || p.getY() == y2) || (p.getZ() == z1 || p.getZ() == z2))) {
-                IBlockState state = e.getValue();
-                TileEntity tile = world.getTileEntity(p);
-                if(tile != null && tile instanceof TileEntityTankFrame)
-                    state = ((TileEntityTankFrame) tile).getBlockState();
-
                 maps[1].put(p, state);
             }
             else {
-                maps[2].put(p, e.getValue());
+                maps[2].put(p, state);
             }
         }
 
