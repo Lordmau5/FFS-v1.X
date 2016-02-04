@@ -1,9 +1,9 @@
 package com.lordmau5.ffs.tile;
 
-import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.client.FrameBlockAccessWrapper;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -47,12 +47,10 @@ public class TileEntityTankFrame extends ITankTile {
     }
 
     public IBakedModel getFakeModel() {
-        //if(fake_model == null) {
-            IBakedModel fake_model = FancyFluidStorage.minecraft.getBlockRendererDispatcher().getModelFromBlockState(getBlockState(), new FrameBlockAccessWrapper(getWorld()), getPos());
-            if(fake_model instanceof ISmartBlockModel) {
-                fake_model = ((ISmartBlockModel) fake_model).handleBlockState(getExtendedBlockState());
-            }
-        //}
+        IBakedModel fake_model = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelFromBlockState(getBlockState(), new FrameBlockAccessWrapper(getWorld()), getPos());
+        if(fake_model instanceof ISmartBlockModel) {
+            fake_model = ((ISmartBlockModel) fake_model).handleBlockState(getExtendedBlockState());
+        }
         return fake_model;
     }
 

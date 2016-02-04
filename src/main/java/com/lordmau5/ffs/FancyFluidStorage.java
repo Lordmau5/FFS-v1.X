@@ -13,7 +13,6 @@ import com.lordmau5.ffs.tile.TileEntityTankComputer;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.TileEntityValve;
 import com.lordmau5.ffs.util.GenericUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -44,8 +43,6 @@ import java.util.List;
 public class FancyFluidStorage {
 
     public static final String modId = "FFS";
-
-    public static Minecraft minecraft;
 
     public static BlockValve blockValve;
     public static BlockTankComputer blockTankComputer;
@@ -167,8 +164,6 @@ public class FancyFluidStorage {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         GenericUtil.init();
-
-        minecraft = Minecraft.getMinecraft();
 
         ForgeChunkManager.setForcedChunkLoadingCallback(instance, new ForgeChunkManager.LoadingCallback() {
             @Override
