@@ -19,9 +19,11 @@ import java.util.List;
  */
 public class TankFrameModel implements ISmartBlockModel {
 
+    private IBakedModel model;
+
     @Override
     public IBakedModel handleBlockState(IBlockState state) {
-        IBakedModel model = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_MODEL);
+        model = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_MODEL);
         IBlockState fake_state = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_STATE);
 
         if(fake_state != null) {
@@ -60,7 +62,7 @@ public class TankFrameModel implements ISmartBlockModel {
 
     @Override
     public TextureAtlasSprite getParticleTexture() {
-        return null;
+        return model.getParticleTexture();
     }
 
     @Override

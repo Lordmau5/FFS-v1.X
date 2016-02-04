@@ -169,7 +169,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
 
                                 int id = random.nextInt(remainingFrames.size());
                                 TileEntityTankFrame frame = remainingFrames.get(id);
-                                if (frame.getBlockState().getBlock().isFlammable(getWorld(), frame.getPos(), EnumFacing.UP)) {
+                                if (frame.getBlockState().getBlock().isFlammable(getFakeWorld(), frame.getPos(), EnumFacing.UP)) {
                                     firePos.add(frame.getPos());
                                     i++;
                                 } else
@@ -183,7 +183,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
                         frameBurnability = 0;
 
                         if (FancyFluidStorage.instance.SET_WORLD_ON_FIRE)
-                            getWorld().playSoundEffect(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D, FancyFluidStorage.modId + ":fire", 1.0F, worldObj.rand.nextFloat() * 0.1F + 0.9F);
+                            getWorld().playSoundEffect(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D, FancyFluidStorage.modId + ":fire", 1.0F, getWorld().rand.nextFloat() * 0.1F + 0.9F);
                     }
                 }
             }
@@ -206,7 +206,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
                         int id = random.nextInt(remainingFrames.size());
                         TileEntityTankFrame frame = remainingFrames.get(id);
                         Block block = frame.getBlockState().getBlock();
-                        if (GenericUtil.canBlockLeak(block) && !frame.getNeighborBlockOrAir(getFluid().getFluid().getBlock()).isEmpty() && block.getBlockHardness(worldObj, frame.getPos()) <= 1.0F) {
+                        if (GenericUtil.canBlockLeak(block) && !frame.getNeighborBlockOrAir(getFluid().getFluid().getBlock()).isEmpty() && block.getBlockHardness(getFakeWorld(), frame.getPos()) <= 1.0F) {
                             validFrames.add(frame);
                             i++;
                         } else
@@ -215,7 +215,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
 
                     for (TileEntityTankFrame frame : validFrames) {
                         Block block = frame.getBlockState().getBlock();
-                        int hardness = (int) Math.ceil(block.getBlockHardness(getWorld(), frame.getPos()) * 100);
+                        int hardness = (int) Math.ceil(block.getBlockHardness(getFakeWorld(), frame.getPos()) * 100);
                         int rand = random.nextInt(hardness) + 1;
                         int diff = (int) Math.ceil(50 * ((float) getFluidAmount() / (float) getCapacity()));
                         if (rand >= hardness - diff) {
@@ -450,7 +450,8 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
         for (Map.Entry<BlockPos, IBlockState> frameCheck : maps[0].entrySet()) {
             pos = frameCheck.getKey();
             IBlockState fBlock = frameCheck.getValue();
-            int burnability = fBlock.getBlock().getFlammability(getWorld(), pos, EnumFacing.UP);
+            int burnability = fBlock.getBlock().getFlammability(getFakeWorld(), pos, EnumFacing.UP);
+            // TODO: We're crashing here on world-load, some stupid NPE. I don't like this :(
             if(burnability > frameBurnability)
                 frameBurnability = burnability;
 
@@ -464,7 +465,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
         for (Map.Entry<BlockPos, IBlockState> insideFrameCheck : maps[1].entrySet()) {
             pos = insideFrameCheck.getKey();
             IBlockState check = insideFrameCheck.getValue();
-            int burnability = check.getBlock().getFlammability(getWorld(), pos, EnumFacing.UP);
+            int burnability = check.getBlock().getFlammability(getFakeWorld(), pos, EnumFacing.UP);
             if(burnability > frameBurnability)
                 frameBurnability = burnability;
 

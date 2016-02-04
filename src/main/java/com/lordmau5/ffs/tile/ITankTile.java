@@ -1,5 +1,6 @@
 package com.lordmau5.ffs.tile;
 
+import com.lordmau5.ffs.util.FakeWorldWrapper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -119,4 +120,17 @@ public abstract class ITankTile extends TileEntity implements ITickable {
         }
     }
 
+    //------------------------------
+
+    private FakeWorldWrapper wrapper;
+
+    public World getFakeWorld() {
+        if(worldObj == null)
+            return null;
+
+        if(wrapper == null || wrapper.wrappedWorld != worldObj)
+            wrapper = new FakeWorldWrapper(worldObj);
+
+        return wrapper;
+    }
 }
