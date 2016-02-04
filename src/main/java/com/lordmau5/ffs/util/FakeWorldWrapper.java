@@ -22,11 +22,6 @@ public class FakeWorldWrapper extends World {
     }
 
     @Override
-    public int getLight(BlockPos pos) {
-        return wrappedWorld.getLight(pos);
-    }
-
-    @Override
     public IBlockState getBlockState(BlockPos pos) {
         IBlockState state = wrappedWorld.getBlockState(pos);
         if(state.getBlock() instanceof BlockTankFrame) {
