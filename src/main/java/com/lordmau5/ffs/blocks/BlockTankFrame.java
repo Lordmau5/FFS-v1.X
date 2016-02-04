@@ -175,6 +175,11 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
+    public boolean isFullCube() {
+        return false;
+    }
+
+    @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
@@ -222,6 +227,11 @@ public class BlockTankFrame extends Block implements IFacade {
     @Override
     public boolean canCreatureSpawn(IBlockAccess world, BlockPos pos, EntityLiving.SpawnPlacementType type) {
         return false;
+    }
+
+    @Override
+    public float getAmbientOcclusionLightValue() {
+        return super.getAmbientOcclusionLightValue();
     }
 
     /**

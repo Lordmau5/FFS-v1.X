@@ -13,4 +13,9 @@ public class BlockTankFrameOpaque extends BlockTankFrame {
     public boolean isOpaqueCube() {
         return true;
     }
+
+    @Override
+    public boolean isFullCube() {
+        return true;
+    }
 }
