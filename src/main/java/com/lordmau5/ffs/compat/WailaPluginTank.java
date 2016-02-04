@@ -43,9 +43,10 @@ public class WailaPluginTank implements IWailaDataProvider {
     public ItemStack getWailaStack(IWailaDataAccessor iWailaDataAccessor, IWailaConfigHandler iWailaConfigHandler) {
         TileEntity te = iWailaDataAccessor.getTileEntity();
         if (te instanceof TileEntityTankFrame) {
-            IBlockState state = ((TileEntityTankFrame) te).getBlockState();
+            TileEntityTankFrame frame = (TileEntityTankFrame) te;
+            IBlockState state = frame.getBlockState();
             try {
-                return new ItemStack(state.getBlock(), 1, state.getBlock().getMetaFromState(state));
+                return state.getBlock().getPickBlock(iWailaDataAccessor.getMOP(), frame.getFakeWorld(), iWailaDataAccessor.getPosition(), iWailaDataAccessor.getPlayer());
             } catch (Exception e) {
                 return null; // Catch this just in case something goes bad here. It's pretty rare but possible.
             }
