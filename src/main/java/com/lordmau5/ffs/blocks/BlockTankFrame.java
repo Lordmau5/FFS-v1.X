@@ -238,113 +238,106 @@ public class BlockTankFrame extends Block implements IFacade {
      * Fake World Overrides!
      */
 
+    private TileEntityTankFrame getFrameTile(IBlockAccess world, BlockPos pos) {
+        TileEntity tile = world.getTileEntity(pos);
+        if(tile != null && tile instanceof TileEntityTankFrame)
+            return (TileEntityTankFrame) tile;
+
+        return null;
+    }
+
+    private World getFakeWorld(World world, BlockPos pos) {
+        TileEntityTankFrame frame = getFrameTile(world, pos);
+
+        return frame != null ? frame.getFakeWorld() : world;
+    }
+
+    private IBlockAccess getFakeBlockAccess(IBlockAccess world, BlockPos pos) {
+        TileEntityTankFrame frame = getFrameTile(world, pos);
+
+        return frame != null ? frame.getFakeWorld() : world;
+    }
+
+    private Block getFakeBlock(IBlockAccess world, BlockPos pos) {
+        TileEntityTankFrame frame = getFrameTile(world, pos);
+        if(frame == null)
+            return getDefaultState().getBlock();
+
+        return frame.getBlockState() != null ? frame.getBlockState().getBlock() : getDefaultState().getBlock();
+    }
+
+
     @Override
     public boolean addDestroyEffects(World world, BlockPos pos, EffectRenderer effectRenderer) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            World fakeWorld = ((TileEntityTankFrame) tile).getFakeWorld();
-            IBlockState state = ((TileEntityTankFrame) tile).getBlockState();
-            if(fakeWorld != null && state != null)
-                return state.getBlock().addDestroyEffects(fakeWorld, pos, effectRenderer);
-        }
-        return super.addDestroyEffects(world, pos, effectRenderer);
+        World fakeWorld = getFakeWorld(world, pos);
+        Block fakeBlock = getFakeBlock(world, pos);
+
+        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.addDestroyEffects(fakeWorld, pos, effectRenderer) : super.addDestroyEffects(world, pos, effectRenderer);
     }
 
 
     @Override
     public boolean addHitEffects(World world, MovingObjectPosition target, EffectRenderer effectRenderer) {
-        TileEntity tile = world.getTileEntity(target.getBlockPos());
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            World fakeWorld = ((TileEntityTankFrame) tile).getFakeWorld();
-            IBlockState state = ((TileEntityTankFrame) tile).getBlockState();
-            if(fakeWorld != null && state != null)
-                return state.getBlock().addHitEffects(fakeWorld, target, effectRenderer);
-        }
-        return super.addHitEffects(world, target, effectRenderer);
+        World fakeWorld = getFakeWorld(world, target.getBlockPos());
+        Block fakeBlock = getFakeBlock(world, target.getBlockPos());
+
+        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.addHitEffects(fakeWorld, target, effectRenderer) : super.addHitEffects(world, target, effectRenderer);
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public int colorMultiplier(IBlockAccess world, BlockPos pos, int pass) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            World fakeWorld = ((TileEntityTankFrame) tile).getFakeWorld();
-            IBlockState state = ((TileEntityTankFrame) tile).getBlockState();
-            if(fakeWorld != null && state != null)
-                return state.getBlock().colorMultiplier(fakeWorld, pos, pass);
-        }
-        return 16777215;
+        IBlockAccess fakeWorld = getFakeBlockAccess(world, pos);
+        Block fakeBlock = getFakeBlock(world, pos);
+
+        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.colorMultiplier(fakeWorld, pos, pass) : super.colorMultiplier(world, pos, pass);
     }
 
     @Override
     public float getBlockHardness(World world, BlockPos pos) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            World fakeWorld = ((TileEntityTankFrame) tile).getFakeWorld();
-            IBlockState state = ((TileEntityTankFrame) tile).getBlockState();
-            if(fakeWorld != null && state != null)
-                return state.getBlock().getBlockHardness(fakeWorld, pos);
-        }
-        return super.getBlockHardness(world, pos);
+        World fakeWorld = getFakeWorld(world, pos);
+        Block fakeBlock = getFakeBlock(world, pos);
+
+        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getBlockHardness(fakeWorld, pos) : super.getBlockHardness(world, pos);
     }
 
     @Override
     public float getExplosionResistance(World world, BlockPos pos, Entity exploder, Explosion explosion) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            World fakeWorld = ((TileEntityTankFrame) tile).getFakeWorld();
-            IBlockState state = ((TileEntityTankFrame) tile).getBlockState();
-            if(fakeWorld != null && state != null)
-                return state.getBlock().getExplosionResistance(fakeWorld, pos, exploder, explosion);
-        }
-        return super.getExplosionResistance(world, pos, exploder, explosion);
+        World fakeWorld = getFakeWorld(world, pos);
+        Block fakeBlock = getFakeBlock(world, pos);
+
+        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getExplosionResistance(fakeWorld, pos, exploder, explosion) : super.getExplosionResistance(world, pos, exploder, explosion);
     }
 
     public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            World fakeWorld = ((TileEntityTankFrame) tile).getFakeWorld();
-            IBlockState state = ((TileEntityTankFrame) tile).getBlockState();
-            if(fakeWorld != null && state != null)
-                return state.getBlock().getFlammability(fakeWorld, pos, face);
-        }
-        return super.getFlammability(world, pos, face);
+        IBlockAccess fakeWorld = getFakeBlockAccess(world, pos);
+        Block fakeBlock = getFakeBlock(world, pos);
+
+        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getFlammability(fakeWorld, pos, face) : super.getFlammability(world, pos, face);
     }
 
     @Override
     public int getLightOpacity(IBlockAccess world, BlockPos pos) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            World fakeWorld = ((TileEntityTankFrame) tile).getFakeWorld();
-            IBlockState state = ((TileEntityTankFrame) tile).getBlockState();
-            if(fakeWorld != null && state != null)
-                return state.getBlock().getLightOpacity(fakeWorld, pos);
-        }
-        return super.getLightOpacity(world, pos);
+        IBlockAccess fakeWorld = getFakeBlockAccess(world, pos);
+        Block fakeBlock = getFakeBlock(world, pos);
+
+        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getLightOpacity(fakeWorld, pos) : super.getLightOpacity(world, pos);
     }
 
     @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos, EntityPlayer player) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            World fakeWorld = ((TileEntityTankFrame) tile).getFakeWorld();
-            IBlockState state = ((TileEntityTankFrame) tile).getBlockState();
-            if(fakeWorld != null && state != null)
-                return state.getBlock().getPickBlock(target, fakeWorld, pos, player);
-        }
-        return super.getPickBlock(target, world, pos, player);
+        World fakeWorld = getFakeWorld(world, pos);
+        Block fakeBlock = getFakeBlock(world, pos);
+
+        return (fakeWorld != null && fakeBlock != null && fakeBlock != this) ? fakeBlock.getPickBlock(target, fakeWorld, pos, player) : super.getPickBlock(target, world, pos, player);
     }
 
     @Override
     public float getPlayerRelativeBlockHardness(EntityPlayer player, World world, BlockPos pos) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankFrame) {
-            World fakeWorld = ((TileEntityTankFrame) tile).getFakeWorld();
-            IBlockState state = ((TileEntityTankFrame) tile).getBlockState();
-            if(fakeWorld != null && state != null)
-                return state.getBlock().getPlayerRelativeBlockHardness(player, fakeWorld, pos);
-        }
-        return super.getPlayerRelativeBlockHardness(player, world, pos);
+        World fakeWorld = getFakeWorld(world, pos);
+        Block fakeBlock = getFakeBlock(world, pos);
+
+        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getPlayerRelativeBlockHardness(player, fakeWorld, pos) : super.getPlayerRelativeBlockHardness(player, world, pos);
     }
 
     /**
