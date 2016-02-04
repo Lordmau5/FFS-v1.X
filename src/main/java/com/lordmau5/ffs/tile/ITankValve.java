@@ -409,7 +409,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
      * inner frame
      */
     private void fetchMaps() {
-        maps = GenericUtil.getTankFrame(getWorld(), bottomDiagFrame, topDiagFrame);
+        maps = GenericUtil.getTankFrame(getFakeWorld(), bottomDiagFrame, topDiagFrame);
     }
 
     private boolean setupTank() {
@@ -451,7 +451,6 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
             pos = frameCheck.getKey();
             IBlockState fBlock = frameCheck.getValue();
             int burnability = fBlock.getBlock().getFlammability(getFakeWorld(), pos, EnumFacing.UP);
-            // TODO: We're crashing here on world-load, some stupid NPE. I don't like this :(
             if(burnability > frameBurnability)
                 frameBurnability = burnability;
 
@@ -671,15 +670,19 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
     public void markForUpdate() {
         super.markForUpdate();
 
-        updateComparatorOutput();
-    }
-
-    private void markForUpdate(boolean onlyThis) {
-        if (!onlyThis || getFluidLuminosity() != oldLuminosity) {
+        if (getFluidLuminosity() != oldLuminosity) {
             oldLuminosity = getFluidLuminosity();
             for (TileEntityTankFrame tile : getTankTiles(TileEntityTankFrame.class)) {
                 tile.markForUpdate();
             }
+        }
+
+        updateComparatorOutput();
+    }
+
+    private void markForUpdate(boolean onlyThis) {
+        if (!onlyThis) {
+            oldLuminosity = -1;
         }
 
         markForUpdate();
