@@ -62,7 +62,7 @@ public class TankFrameModel implements ISmartBlockModel {
 
     @Override
     public TextureAtlasSprite getParticleTexture() {
-        return model.getParticleTexture();
+        return model != null ? model.getParticleTexture() : null;
     }
 
     @Override
