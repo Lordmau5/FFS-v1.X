@@ -246,16 +246,14 @@ public class BlockTankFrame extends Block implements IFacade {
         return null;
     }
 
-    private World getFakeWorld(World world, BlockPos pos) {
-        TileEntityTankFrame frame = getFrameTile(world, pos);
-
-        return frame != null ? frame.getFakeWorld() : world;
-    }
-
     private IBlockAccess getFakeBlockAccess(IBlockAccess world, BlockPos pos) {
         TileEntityTankFrame frame = getFrameTile(world, pos);
 
-        return frame != null ? frame.getFakeWorld() : world;
+        return frame != null ? frame.getFakeWorld() : null;
+    }
+    
+    private World getFakeWorld(World world, BlockPos pos) {
+        return (World) getFakeBlockAccess(world, pos);
     }
 
     private Block getFakeBlock(IBlockAccess world, BlockPos pos) {
@@ -263,7 +261,7 @@ public class BlockTankFrame extends Block implements IFacade {
         if(frame == null)
             return getDefaultState().getBlock();
 
-        return frame.getBlockState() != null ? frame.getBlockState().getBlock() : getDefaultState().getBlock();
+        return frame.getBlockState() != null ? frame.getBlockState().getBlock() : null;
     }
 
 
@@ -272,7 +270,7 @@ public class BlockTankFrame extends Block implements IFacade {
         World fakeWorld = getFakeWorld(world, pos);
         Block fakeBlock = getFakeBlock(world, pos);
 
-        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.addDestroyEffects(fakeWorld, pos, effectRenderer) : super.addDestroyEffects(world, pos, effectRenderer);
+        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.addDestroyEffects(fakeWorld, pos, effectRenderer) : super.addDestroyEffects(world, pos, effectRenderer);
     }
 
 
@@ -281,7 +279,7 @@ public class BlockTankFrame extends Block implements IFacade {
         World fakeWorld = getFakeWorld(world, target.getBlockPos());
         Block fakeBlock = getFakeBlock(world, target.getBlockPos());
 
-        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.addHitEffects(fakeWorld, target, effectRenderer) : super.addHitEffects(world, target, effectRenderer);
+        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.addHitEffects(fakeWorld, target, effectRenderer) : super.addHitEffects(world, target, effectRenderer);
     }
 
     @Override
@@ -290,7 +288,7 @@ public class BlockTankFrame extends Block implements IFacade {
         IBlockAccess fakeWorld = getFakeBlockAccess(world, pos);
         Block fakeBlock = getFakeBlock(world, pos);
 
-        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.colorMultiplier(fakeWorld, pos, pass) : super.colorMultiplier(world, pos, pass);
+        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.colorMultiplier(fakeWorld, pos, pass) : super.colorMultiplier(world, pos, pass);
     }
 
     @Override
@@ -298,7 +296,7 @@ public class BlockTankFrame extends Block implements IFacade {
         World fakeWorld = getFakeWorld(world, pos);
         Block fakeBlock = getFakeBlock(world, pos);
 
-        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getBlockHardness(fakeWorld, pos) : super.getBlockHardness(world, pos);
+        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.getBlockHardness(fakeWorld, pos) : super.getBlockHardness(world, pos);
     }
 
     @Override
@@ -306,14 +304,14 @@ public class BlockTankFrame extends Block implements IFacade {
         World fakeWorld = getFakeWorld(world, pos);
         Block fakeBlock = getFakeBlock(world, pos);
 
-        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getExplosionResistance(fakeWorld, pos, exploder, explosion) : super.getExplosionResistance(world, pos, exploder, explosion);
+        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.getExplosionResistance(fakeWorld, pos, exploder, explosion) : super.getExplosionResistance(world, pos, exploder, explosion);
     }
 
     public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face) {
         IBlockAccess fakeWorld = getFakeBlockAccess(world, pos);
         Block fakeBlock = getFakeBlock(world, pos);
 
-        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getFlammability(fakeWorld, pos, face) : super.getFlammability(world, pos, face);
+        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.getFlammability(fakeWorld, pos, face) : super.getFlammability(world, pos, face);
     }
 
     @Override
@@ -321,7 +319,7 @@ public class BlockTankFrame extends Block implements IFacade {
         IBlockAccess fakeWorld = getFakeBlockAccess(world, pos);
         Block fakeBlock = getFakeBlock(world, pos);
 
-        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getLightOpacity(fakeWorld, pos) : super.getLightOpacity(world, pos);
+        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.getLightOpacity(fakeWorld, pos) : super.getLightOpacity(world, pos);
     }
 
     @Override
@@ -337,7 +335,7 @@ public class BlockTankFrame extends Block implements IFacade {
         World fakeWorld = getFakeWorld(world, pos);
         Block fakeBlock = getFakeBlock(world, pos);
 
-        return (fakeWorld != null && fakeWorld != world && fakeBlock != null && fakeBlock != this) ? fakeBlock.getPlayerRelativeBlockHardness(player, fakeWorld, pos) : super.getPlayerRelativeBlockHardness(player, world, pos);
+        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.getPlayerRelativeBlockHardness(player, fakeWorld, pos) : super.getPlayerRelativeBlockHardness(player, world, pos);
     }
 
     /**
