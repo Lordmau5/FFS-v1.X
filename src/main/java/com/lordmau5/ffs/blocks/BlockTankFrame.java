@@ -1,8 +1,8 @@
 package com.lordmau5.ffs.blocks;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.tile.ITankTile;
-import com.lordmau5.ffs.tile.ITankValve;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
 import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
@@ -183,9 +183,9 @@ public class BlockTankFrame extends Block implements IFacade {
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
-        ITankTile tile = (ITankTile) world.getTileEntity(pos);
+        AbstractTankTile tile = (AbstractTankTile) world.getTileEntity(pos);
         if (tile != null && tile.getMasterValve() != null) {
-            ITankValve valve = tile.getMasterValve();
+            AbstractTankValve valve = tile.getMasterValve();
             if (valve.isValid()) {
                 if (GenericUtil.isFluidContainer(player.getHeldItem()))
                     return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);

@@ -11,7 +11,7 @@ import com.lordmau5.ffs.proxy.CommonProxy;
 import com.lordmau5.ffs.proxy.GuiHandler;
 import com.lordmau5.ffs.tile.TileEntityTankComputer;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.TileEntityTankValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
@@ -134,7 +134,7 @@ public class FancyFluidStorage {
         GameRegistry.registerBlock(blockTankFrame = new BlockTankFrame("blockTankFrame"), "blockTankFrame");
         GameRegistry.registerBlock(blockTankFrameOpaque = new BlockTankFrameOpaque(), "blockTankFrameOpaque");
 
-        GameRegistry.registerTileEntity(TileEntityValve.class, "tileEntityValve");
+        GameRegistry.registerTileEntity(TileEntityTankValve.class, "tileEntityValve");
         GameRegistry.registerTileEntity(TileEntityTankComputer.class, "tileEntityTankComputer");
         GameRegistry.registerTileEntity(TileEntityTankFrame.class, "tileEntityTankFrame");
 

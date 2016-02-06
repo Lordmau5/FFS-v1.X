@@ -1,8 +1,8 @@
 package com.lordmau5.ffs.blocks;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.tile.ITankTile;
-import com.lordmau5.ffs.tile.ITankValve;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.tile.TileEntityTankComputer;
 import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
@@ -55,8 +55,8 @@ public class BlockTankComputer extends Block {
     @Override
     public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof ITankTile && ((ITankTile) tile).getMasterValve() != null) {
-            ((ITankTile) tile).getMasterValve().breakTank(null);
+        if(tile != null && tile instanceof AbstractTankTile && ((AbstractTankTile) tile).getMasterValve() != null) {
+            ((AbstractTankTile) tile).getMasterValve().breakTank(null);
         }
         super.onBlockDestroyedByExplosion(world, pos, explosion);
     }
@@ -64,8 +64,8 @@ public class BlockTankComputer extends Block {
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
         TileEntity tile = world.getTileEntity(pos);
-        if(!world.isRemote && tile != null && tile instanceof ITankTile && ((ITankTile) tile).getMasterValve() != null) {
-            ((ITankTile) tile).getMasterValve().breakTank(null);
+        if(!world.isRemote && tile != null && tile instanceof AbstractTankTile && ((AbstractTankTile) tile).getMasterValve() != null) {
+            ((AbstractTankTile) tile).getMasterValve().breakTank(null);
         }
 
         super.breakBlock(world, pos, state);
@@ -75,9 +75,9 @@ public class BlockTankComputer extends Block {
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
-        ITankTile tile = (ITankTile) world.getTileEntity(pos);
+        AbstractTankTile tile = (AbstractTankTile) world.getTileEntity(pos);
         if (tile != null && tile.getMasterValve() != null) {
-            ITankValve valve = tile.getMasterValve();
+            AbstractTankValve valve = tile.getMasterValve();
             if(GenericUtil.isFluidContainer(player.getHeldItem()))
                 return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 

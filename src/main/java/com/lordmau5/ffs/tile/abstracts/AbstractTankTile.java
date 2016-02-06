@@ -1,5 +1,6 @@
-package com.lordmau5.ffs.tile;
+package com.lordmau5.ffs.tile.abstracts;
 
+import com.lordmau5.ffs.tile.TileEntityTankValve;
 import com.lordmau5.ffs.util.FakeWorldWrapper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -15,7 +16,7 @@ import net.minecraft.world.World;
 /**
  * Created by Dustin on 20.01.2016.
  */
-public abstract class ITankTile extends TileEntity implements ITickable {
+public abstract class AbstractTankTile extends TileEntity implements ITickable {
 
     /**
      * Necessary stuff for the interfaces.
@@ -28,7 +29,7 @@ public abstract class ITankTile extends TileEntity implements ITickable {
     private boolean needsUpdate;
 
     private BlockPos masterValvePos;
-    private TileEntityValve masterValve;
+    private TileEntityTankValve masterValve;
 
     public void setNeedsUpdate() {
         this.needsUpdate = true;
@@ -55,10 +56,10 @@ public abstract class ITankTile extends TileEntity implements ITickable {
         this.masterValve = null;
     }
 
-    public ITankValve getMasterValve() {
+    public AbstractTankValve getMasterValve() {
         if(getWorld() != null && masterValve == null && this.masterValvePos != null) {
             TileEntity tile = getWorld().getTileEntity(this.masterValvePos);
-            masterValve = tile instanceof TileEntityValve ? (TileEntityValve) tile : null;
+            masterValve = tile instanceof TileEntityTankValve ? (TileEntityTankValve) tile : null;
         }
 
         return masterValve;

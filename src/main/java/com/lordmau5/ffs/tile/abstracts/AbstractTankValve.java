@@ -1,10 +1,13 @@
-package com.lordmau5.ffs.tile;
+package com.lordmau5.ffs.tile.abstracts;
 
 import buildcraft.api.transport.IPipeTile;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.blocks.BlockTankFrame;
-import com.lordmau5.ffs.tile.ifaces.IFacingTile;
-import com.lordmau5.ffs.tile.ifaces.INameableTile;
+import com.lordmau5.ffs.tile.TileEntityTankFrame;
+import com.lordmau5.ffs.tile.TileEntityTankValve;
+import com.lordmau5.ffs.tile.interfaces.IFacingTile;
+import com.lordmau5.ffs.tile.interfaces.INameableTile;
+import com.lordmau5.ffs.tile.util.TankConfig;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -29,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Dustin on 21.01.2016.
  */
-public abstract class ITankValve extends ITankTile implements IFacingTile, INameableTile, IFluidTank {
+public abstract class AbstractTankValve extends AbstractTankTile implements IFacingTile, INameableTile, IFluidTank {
 
     private final int maxSize = FancyFluidStorage.instance.MAX_SIZE;
     protected int mbPerVirtualTank = FancyFluidStorage.instance.MB_PER_TANK_BLOCK;
@@ -48,7 +51,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
     private int randomBurnTicks = 20 * 5; // Every 5 seconds
     private int randomLeakTicks = 20 * 60; // Every minute
 
-    public List<ITankTile> tankTiles;
+    public List<AbstractTankTile> tankTiles;
 
     private Map<BlockPos, IBlockState>[] maps;
 
@@ -73,7 +76,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
     private int lastComparatorOut = 0;
     // ---------------
 
-    public ITankValve() {
+    public AbstractTankValve() {
         tankTiles = new ArrayList<>();
     }
 
@@ -276,12 +279,12 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
         return tankTiles.stream().filter(p -> type.isAssignableFrom(p.getClass())).map(p -> (T) p).collect(Collectors.toList());
     }
 
-    public List<ITankValve> getAllValves() {
+    public List<AbstractTankValve> getAllValves() {
         if(!isMaster() && getMasterValve() != null && getMasterValve() != this)
             return getMasterValve().getAllValves();
 
-        List<ITankValve> valves = getTankTiles(ITankValve.class);
-        valves.add(this);
+        List<AbstractTankValve> valves = getTankTiles(AbstractTankValve.class);
+        //valves.add(this);
         return valves;
     }
 
@@ -361,7 +364,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
         return length[0] != -1;
     }
 
-    private void setTankTileFacing(Map<BlockPos, IBlockState> airBlocks, ITankTile tankTile) {
+    private void setTankTileFacing(Map<BlockPos, IBlockState> airBlocks, AbstractTankTile tankTile) {
         List<BlockPos> possibleAirBlocks = new ArrayList<>();
         for(EnumFacing dr : EnumFacing.VALUES) {
             if(getWorld().isAirBlock(tankTile.getPos().offset(dr)))
@@ -459,8 +462,8 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
             }
         }
 
-        List<ITankTile> facingTiles = new ArrayList<>();
-        List<ITankValve> valves = new ArrayList<>();
+        List<AbstractTankTile> facingTiles = new ArrayList<>();
+        List<AbstractTankValve> valves = new ArrayList<>();
         for (Map.Entry<BlockPos, IBlockState> insideFrameCheck : maps[1].entrySet()) {
             pos = insideFrameCheck.getKey();
             IBlockState check = insideFrameCheck.getValue();
@@ -473,11 +476,11 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
 
             TileEntity tile = getWorld().getTileEntity(pos);
             if (tile != null) {
-                if(tile instanceof ITankTile && tile instanceof IFacingTile)
-                    facingTiles.add((ITankTile) tile);
+                if(tile instanceof AbstractTankTile && tile instanceof IFacingTile)
+                    facingTiles.add((AbstractTankTile) tile);
 
-                if(tile instanceof ITankValve) {
-                    ITankValve valve = (ITankValve) tile;
+                if(tile instanceof AbstractTankValve) {
+                    AbstractTankValve valve = (AbstractTankValve) tile;
                     if (valve == this)
                         continue;
 
@@ -488,7 +491,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
                     valves.add(valve);
                     continue;
                 }
-                else if(tile instanceof ITankTile) {
+                else if(tile instanceof AbstractTankTile) {
                     continue;
                 }
                 return false;
@@ -501,7 +504,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
         if (this.fluidStack != null)
             this.fluidStack.amount = Math.min(this.fluidStack.amount, this.fluidCapacity);
 
-        for (ITankValve valve : valves) {
+        for (AbstractTankValve valve : valves) {
             pos = valve.getPos();
             valve.valveHeightPosition = Math.abs(bottomDiagFrame.subtract(pos).getY());
 
@@ -510,7 +513,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
             valve.setTankConfig(getTankConfig());
             tankTiles.add(valve);
         }
-        for (ITankTile facingTile : facingTiles) {
+        for (AbstractTankTile facingTile : facingTiles) {
             setTankTileFacing(maps[2], facingTile);
         }
         isMaster = true;
@@ -549,10 +552,10 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
                     tankFrame.initialize(getPos(), setTiles.getValue());
                     tankTiles.add(tankFrame);
                 }
-                else if(tile instanceof ITankTile) {
-                    ITankTile tankTile = (ITankTile) tile;
+                else if(tile instanceof AbstractTankTile) {
+                    AbstractTankTile tankTile = (AbstractTankTile) tile;
                     tankTile.setValvePos(getPos());
-                    tankTiles.add((ITankTile) tile);
+                    tankTiles.add((AbstractTankTile) tile);
                 }
             } else {
                 Block block = setTiles.getValue().getBlock();
@@ -582,7 +585,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
             return;
         }
 
-        for(ITankValve valve : getAllValves()) {
+        for(AbstractTankValve valve : getAllValves()) {
             valve.setTankConfig(getTankConfig());
             valve.fluidStack = getFluid();
             valve.updateFluidTemperature();
@@ -590,7 +593,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
             valve.setValid(false);
             valve.updateBlockAndNeighbors(true);
         }
-        tankTiles.removeAll(getTankTiles(ITankValve.class));
+        tankTiles.removeAll(getTankTiles(AbstractTankValve.class));
         for(TileEntityTankFrame tankFrame : getTankTiles(TileEntityTankFrame.class)) {
             if(frame == tankFrame)
                 continue;
@@ -598,11 +601,9 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
             tankFrame.breakFrame();
         }
         tankTiles.removeAll(getTankTiles(TileEntityTankFrame.class));
-        for(ITankTile tankTile : tankTiles) {
+        for(AbstractTankTile tankTile : tankTiles) {
             tankTile.setValvePos(null);
         }
-
-        setValid(false);
 
         tankTiles.clear();
 
@@ -632,12 +633,12 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
         this.markForUpdate(onlyThis);
 
         if(!tankTiles.isEmpty() && !onlyThis) {
-            for(ITankTile tile : tankTiles) {
+            for(AbstractTankTile tile : tankTiles) {
                 if(tile == this)
                     continue;
 
-                if(tile instanceof ITankValve)
-                    ((ITankValve) tile).updateBlockAndNeighbors(true);
+                if(tile instanceof AbstractTankValve)
+                    ((AbstractTankValve) tile).updateBlockAndNeighbors(true);
                 else
                     tile.markForUpdate();
             }
@@ -658,7 +659,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
         if(this.lastComparatorOut != getComparatorOutput()) {
             this.lastComparatorOut = getComparatorOutput();
             if(isMaster()) {
-                for(TileEntityValve otherValve : getTankTiles(TileEntityValve.class)) {
+                for(TileEntityTankValve otherValve : getTankTiles(TileEntityTankValve.class)) {
                     getWorld().updateComparatorOutputLevel(otherValve.getPos(), otherValve.getBlockType());
                 }
             }
@@ -693,7 +694,7 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
     }
 
     @Override
-    public ITankValve getMasterValve() {
+    public AbstractTankValve getMasterValve() {
         return isMaster() ? this : super.getMasterValve();
     }
 
@@ -727,7 +728,6 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
         isMaster = tag.getBoolean("master");
         if(isMaster()) {
             setValid(tag.getBoolean("isValid"));
-
             if(tag.getBoolean("hasFluid")) {
                 if(tag.hasKey("fluidName"))
                     fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getString("fluidName")), tag.getInteger("fluidAmount"));
@@ -852,14 +852,14 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
                 return 0;
 
             if (getFluidAmount() >= getCapacity()) {
-                for(ITankValve valve : getAllValves()) {
+                for(AbstractTankValve valve : getAllValves()) {
                     if (valve == this)
                         continue;
 
                     EnumFacing outside = valve.getTileFacing().getOpposite();
                     TileEntity tile = getWorld().getTileEntity(valve.getPos().offset(outside));
-                    if (tile != null && tile instanceof TileEntityValve) {
-                        return ((TileEntityValve) tile).fill(getTileFacing(), resource, doFill);
+                    if (tile != null && tile instanceof TileEntityTankValve) {
+                        return ((TileEntityTankValve) tile).fill(getTileFacing(), resource, doFill);
                     }
                 }
             }
@@ -945,15 +945,15 @@ public abstract class ITankValve extends ITankTile implements IFacingTile, IName
             return false;
 
         if (getFluidAmount() >= getCapacity()) {
-            for (ITankValve valve : getAllValves()) {
+            for (AbstractTankValve valve : getAllValves()) {
                 if (valve == this)
                     continue;
 
                 if (valve.valveHeightPosition > getTankHeight()) {
                     EnumFacing outside = valve.getTileFacing().getOpposite();
                     TileEntity tile = getWorld().getTileEntity(valve.getPos().offset(outside));
-                    if (tile != null && tile instanceof TileEntityValve) {
-                        return ((TileEntityValve) tile).canFill(valve.getTileFacing(), fluid);
+                    if (tile != null && tile instanceof TileEntityTankValve) {
+                        return ((TileEntityTankValve) tile).canFill(valve.getTileFacing(), fluid);
                     }
                 }
             }

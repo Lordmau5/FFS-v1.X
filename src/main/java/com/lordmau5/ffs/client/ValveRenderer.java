@@ -1,7 +1,7 @@
 package com.lordmau5.ffs.client;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.TileEntityTankValve;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -47,7 +47,7 @@ public class ValveRenderer extends TileEntitySpecialRenderer {
     @Override
     public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float partialTicks, int destroyStage)
     {
-        TileEntityValve valve = (TileEntityValve) tile;
+        TileEntityTankValve valve = (TileEntityTankValve) tile;
         BlockPos valvePos = valve.getPos();
 
         if (valve == null || !valve.isValid() || !valve.isMaster())

@@ -1,8 +1,8 @@
 package com.lordmau5.ffs.blocks;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.tile.ITankValve;
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
+import com.lordmau5.ffs.tile.TileEntityTankValve;
 import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
@@ -49,14 +49,14 @@ public class BlockValve extends Block {
 
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TileEntityValve();
+        return new TileEntityTankValve();
     }
 
     @Override
     public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityValve) {
-            TileEntityValve valve = (TileEntityValve) world.getTileEntity(pos);
+        if(tile != null && tile instanceof TileEntityTankValve) {
+            TileEntityTankValve valve = (TileEntityTankValve) world.getTileEntity(pos);
             valve.breakTank(null);
         }
         super.onBlockDestroyedByExplosion(world, pos, explosion);
@@ -65,7 +65,7 @@ public class BlockValve extends Block {
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
         if(!world.isRemote) {
-            ITankValve valve = (ITankValve) world.getTileEntity(pos);
+            AbstractTankValve valve = (AbstractTankValve) world.getTileEntity(pos);
             if(valve.isValid())
                 valve.breakTank(null);
         }
@@ -77,7 +77,7 @@ public class BlockValve extends Block {
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
-        TileEntityValve valve = (TileEntityValve) world.getTileEntity(pos);
+        TileEntityTankValve valve = (TileEntityTankValve) world.getTileEntity(pos);
 
         if(valve.isValid()) {
             if(GenericUtil.isFluidContainer(player.getHeldItem()))
@@ -110,8 +110,8 @@ public class BlockValve extends Block {
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityValve) {
-            TileEntityValve valve = (TileEntityValve) tile;
+        if(tile != null && tile instanceof TileEntityTankValve) {
+            TileEntityTankValve valve = (TileEntityTankValve) tile;
 
             state = state.withProperty(FFSStateProps.TILE_VALID, valve.isValid())
                     .withProperty(FFSStateProps.TILE_MASTER, valve.isMaster())
@@ -144,8 +144,8 @@ public class BlockValve extends Block {
     @Override
     public int getComparatorInputOverride(World world, BlockPos pos) {
         TileEntity te = world.getTileEntity(pos);
-        if(te instanceof TileEntityValve) {
-            TileEntityValve valve = (TileEntityValve)te;
+        if(te instanceof TileEntityTankValve) {
+            TileEntityTankValve valve = (TileEntityTankValve)te;
             return valve.getComparatorOutput();
         }
         return 0;

@@ -4,7 +4,7 @@ import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.blocks.BlockTankFrame;
 import com.lordmau5.ffs.client.ValveRenderer;
 import com.lordmau5.ffs.compat.WailaPluginTank;
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.TileEntityTankValve;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.Loader;
 public class ClientProxy extends CommonProxy {
 
     public void preInit() {
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityValve.class, new ValveRenderer());
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTankValve.class, new ValveRenderer());
 
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockValve), 0, new ModelResourceLocation("ffs:blockValve", "inventory"));
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockTankComputer), 0, new ModelResourceLocation("ffs:blockTankComputer", "inventory"));

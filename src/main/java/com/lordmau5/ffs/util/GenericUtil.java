@@ -1,8 +1,8 @@
 package com.lordmau5.ffs.util;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.tile.ITankTile;
-import com.lordmau5.ffs.tile.ITankValve;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGlass;
 import net.minecraft.block.material.Material;
@@ -50,7 +50,7 @@ public class GenericUtil {
         validTiles.add("blockFusedQuartz");
     }
 
-    public static String getUniquePositionName(ITankValve valve) {
+    public static String getUniquePositionName(AbstractTankValve valve) {
         return "tile_" + Long.toHexString(valve.getPos().toLong());
     }
 
@@ -120,7 +120,7 @@ public class GenericUtil {
         if (block.hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             if(tile != null) {
-                return tile instanceof ITankTile || isTileEntityAcceptable(block, tile);
+                return tile instanceof AbstractTankTile || isTileEntityAcceptable(block, tile);
             }
         }
 
@@ -156,7 +156,7 @@ public class GenericUtil {
 
     }
 
-    public static boolean fluidContainerHandler(World world, BlockPos pos, ITankValve valve, EntityPlayer player, EnumFacing side) {
+    public static boolean fluidContainerHandler(World world, BlockPos pos, AbstractTankValve valve, EntityPlayer player, EnumFacing side) {
         ItemStack current = player.inventory.getCurrentItem();
 
         if (current != null) {

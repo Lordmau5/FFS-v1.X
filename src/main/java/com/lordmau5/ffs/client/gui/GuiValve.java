@@ -3,11 +3,11 @@ package com.lordmau5.ffs.client.gui;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.client.FluidHelper;
 import com.lordmau5.ffs.network.NetworkHandler;
-import com.lordmau5.ffs.network.ffsPacket;
-import com.lordmau5.ffs.tile.ITankTile;
-import com.lordmau5.ffs.tile.ITankValve;
-import com.lordmau5.ffs.tile.TileEntityValve;
-import com.lordmau5.ffs.tile.ifaces.INameableTile;
+import com.lordmau5.ffs.network.FFSPacket;
+import com.lordmau5.ffs.tile.TileEntityTankValve;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
+import com.lordmau5.ffs.tile.interfaces.INameableTile;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -33,9 +33,9 @@ public class GuiValve extends GuiScreen {
     protected static final int AUTO_FLUID_OUTPUT_BTN_ID = 23442;
     protected static final int LOCK_FLUID_BTN_ID = 23443;
 
-    ITankTile tile;
-    ITankValve valve;
-    ITankValve masterValve;
+    AbstractTankTile tile;
+    AbstractTankValve valve;
+    AbstractTankValve masterValve;
 
     GuiTextField tileName;
 
@@ -43,12 +43,12 @@ public class GuiValve extends GuiScreen {
     int left = 0, top = 0;
     int mouseX, mouseY;
 
-    public GuiValve(ITankTile tile) {
+    public GuiValve(AbstractTankTile tile) {
         super();
 
         this.tile = tile;
-        if(tile instanceof ITankValve)
-            valve = (ITankValve) tile;
+        if(tile instanceof AbstractTankValve)
+            valve = (AbstractTankValve) tile;
         else
             valve = tile.getMasterValve();
 
@@ -61,8 +61,8 @@ public class GuiValve extends GuiScreen {
 
         this.left = (this.width - this.xSize) / 2;
         this.top = (this.height - this.ySize) / 2;
-        if(tile instanceof TileEntityValve) {
-            this.buttonList.add(new GuiToggle(AUTO_FLUID_OUTPUT_BTN_ID, this.left + 80, this.top + 20, "Auto fluid output", ((TileEntityValve)tile).getAutoOutput(), 16777215));
+        if(tile instanceof TileEntityTankValve) {
+            this.buttonList.add(new GuiToggle(AUTO_FLUID_OUTPUT_BTN_ID, this.left + 80, this.top + 20, "Auto fluid output", ((TileEntityTankValve)tile).getAutoOutput(), 16777215));
         }
         if(tile instanceof INameableTile) {
             tileName = new GuiTextField(0, this.fontRendererObj, this.left + 80, this.top + 100, 120, 10);
@@ -78,7 +78,7 @@ public class GuiValve extends GuiScreen {
 
         if(tile instanceof INameableTile)
             if(!tileName.getText().isEmpty())
-                NetworkHandler.sendPacketToServer(new ffsPacket.Server.UpdateTileName(tile, tileName.getText()));
+                NetworkHandler.sendPacketToServer(new FFSPacket.Server.UpdateTileName(tile, tileName.getText()));
     }
 
     @Override
@@ -188,15 +188,15 @@ public class GuiValve extends GuiScreen {
         if (btn.id == AUTO_FLUID_OUTPUT_BTN_ID && btn instanceof GuiToggle) {
             GuiToggle toggle = (GuiToggle)btn;
 
-            ((TileEntityValve)valve).setAutoOutput(toggle.getState());
-            NetworkHandler.sendPacketToServer(new ffsPacket.Server.UpdateAutoOutput((TileEntityValve) this.valve));
+            ((TileEntityTankValve)valve).setAutoOutput(toggle.getState());
+            NetworkHandler.sendPacketToServer(new FFSPacket.Server.UpdateAutoOutput((TileEntityTankValve) this.valve));
         }
         else if (btn.id == LOCK_FLUID_BTN_ID && btn instanceof GuiButtonLockFluid) {
             GuiButtonLockFluid toggle = (GuiButtonLockFluid) btn;
 
             this.masterValve.toggleFluidLock(toggle.getState());
             toggle.setState(this.masterValve.getTankConfig().isFluidLocked());
-            NetworkHandler.sendPacketToServer(new ffsPacket.Server.UpdateFluidLock(this.masterValve));
+            NetworkHandler.sendPacketToServer(new FFSPacket.Server.UpdateFluidLock(this.masterValve));
         }
     }
 

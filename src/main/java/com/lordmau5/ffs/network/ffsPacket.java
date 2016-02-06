@@ -1,8 +1,8 @@
 package com.lordmau5.ffs.network;
 
-import com.lordmau5.ffs.tile.ITankTile;
-import com.lordmau5.ffs.tile.ITankValve;
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
+import com.lordmau5.ffs.tile.TileEntityTankValve;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 /**
  * Created by Dustin on 07.07.2015.
  */
-public abstract class ffsPacket {
+public abstract class FFSPacket {
     public abstract void encode(ByteBuf buffer);
 
     public abstract void decode(ByteBuf buffer);
@@ -19,14 +19,14 @@ public abstract class ffsPacket {
     }
 
     public static class Server {
-        public static class UpdateAutoOutput extends ffsPacket {
+        public static class UpdateAutoOutput extends FFSPacket {
             public BlockPos pos;
             public boolean autoOutput;
 
             public UpdateAutoOutput(){
             }
 
-            public UpdateAutoOutput(TileEntityValve valve) {
+            public UpdateAutoOutput(TileEntityTankValve valve) {
                 this.pos = valve.getPos();
                 this.autoOutput = valve.getAutoOutput();
             }
@@ -46,14 +46,14 @@ public abstract class ffsPacket {
             }
         }
 
-        public static class UpdateTileName extends ffsPacket {
+        public static class UpdateTileName extends FFSPacket {
             public BlockPos pos;
             public String name;
 
             public UpdateTileName(){
             }
 
-            public UpdateTileName(ITankTile tankTile, String name) {
+            public UpdateTileName(AbstractTankTile tankTile, String name) {
                 this.pos = tankTile.getPos();
                 this.name = name;
             }
@@ -73,14 +73,14 @@ public abstract class ffsPacket {
             }
         }
 
-        public static class UpdateFluidLock extends ffsPacket {
+        public static class UpdateFluidLock extends FFSPacket {
             public BlockPos pos;
             public boolean fluidLock;
 
             public UpdateFluidLock(){
             }
 
-            public UpdateFluidLock(ITankValve valve) {
+            public UpdateFluidLock(AbstractTankValve valve) {
                 this.pos = valve.getPos();
                 this.fluidLock = valve.getTankConfig().isFluidLocked();
             }

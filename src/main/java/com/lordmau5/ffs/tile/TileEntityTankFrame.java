@@ -1,6 +1,7 @@
 package com.lordmau5.ffs.tile;
 
 import com.lordmau5.ffs.client.FrameBlockAccessWrapper;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -23,7 +24,7 @@ import java.util.List;
 @Optional.InterfaceList(value = {
         @Optional.Interface(iface = "framesapi.IMoveCheck", modid = "funkylocomotion")
 })
-public class TileEntityTankFrame extends ITankTile {
+public class TileEntityTankFrame extends AbstractTankTile {
 
     private IBlockState camoBlockState;
     public IBakedModel fake_model;

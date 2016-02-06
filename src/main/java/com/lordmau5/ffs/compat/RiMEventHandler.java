@@ -11,8 +11,8 @@ public class RiMEventHandler {
     @SubscribeEvent
     public void motionFinalize(MotionFinalizeEvent event) {
         TileEntity tile = event.location.entity();
-        if(tile instanceof TileEntityValve) {
-            TileEntityValve valve = (TileEntityValve) tile;
+        if(tile instanceof TileEntityTankValve) {
+            TileEntityTankValve valve = (TileEntityTankValve) tile;
             if(valve.isMaster()) {
                 valve.initiated = true;
                 valve.initialWaitTick = 0;
@@ -39,8 +39,8 @@ public class RiMEventHandler {
     @SubscribeEvent
     public void tileRotation(BlockRotateEvent event) {
         TileEntity tile = event.location.entity();
-        if(tile instanceof TileEntityValve) {
-            TileEntityValve valve = (TileEntityValve) tile;
+        if(tile instanceof TileEntityTankValve) {
+            TileEntityTankValve valve = (TileEntityTankValve) tile;
             if(valve.isMaster()) {
                 EnumFacing rot = valve.getInside().getRotation(event.axis.getRotation(event.axis));
                 valve.setInside(rot);

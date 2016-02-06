@@ -1,7 +1,9 @@
 package com.lordmau5.ffs.compat;
 
 import com.lordmau5.ffs.tile.*;
-import com.lordmau5.ffs.tile.ifaces.INameableTile;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
+import com.lordmau5.ffs.tile.interfaces.INameableTile;
 import com.lordmau5.ffs.util.GenericUtil;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
@@ -35,7 +37,7 @@ public class WailaPluginTank implements IWailaDataProvider {
         WailaPluginTank instance = new WailaPluginTank();
         registrar.registerStackProvider(instance, TileEntityTankFrame.class);
 
-        registrar.registerBodyProvider(instance, ITankTile.class);
+        registrar.registerBodyProvider(instance, AbstractTankTile.class);
     }
 
     @Optional.Method(modid = "Waila")
@@ -58,12 +60,12 @@ public class WailaPluginTank implements IWailaDataProvider {
     @Override
     public List<String> getWailaBody(ItemStack itemStack, List<String> list, IWailaDataAccessor iWailaDataAccessor, IWailaConfigHandler iWailaConfigHandler) {
         TileEntity te = iWailaDataAccessor.getTileEntity();
-        ITankValve valve = null;
-        if (te instanceof TileEntityValve) { // Continue with Valve stuff
-            valve = (TileEntityValve) te;
+        AbstractTankValve valve = null;
+        if (te instanceof TileEntityTankValve) { // Continue with Valve stuff
+            valve = (TileEntityTankValve) te;
         }
-        else if(te instanceof ITankTile) {
-            valve = ((ITankTile) te).getMasterValve();
+        else if(te instanceof AbstractTankTile) {
+            valve = ((AbstractTankTile) te).getMasterValve();
             if(valve != null && valve.isValid())
                 list.add("Part of a tank");
         }
@@ -81,8 +83,8 @@ public class WailaPluginTank implements IWailaDataProvider {
         if(te instanceof INameableTile)
             list.add("Name: " + EnumChatFormatting.ITALIC + ((INameableTile)te).getTileName() + EnumChatFormatting.RESET);
 
-        if(te instanceof TileEntityValve) {
-            TileEntityValve t_Valve = (TileEntityValve) te;
+        if(te instanceof TileEntityTankValve) {
+            TileEntityTankValve t_Valve = (TileEntityTankValve) te;
             String autoOutput = t_Valve.getAutoOutput() ? "true" : "false";
             list.add("Auto Output: " + (t_Valve.getAutoOutput() ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + EnumChatFormatting.ITALIC + autoOutput + EnumChatFormatting.RESET);
         }

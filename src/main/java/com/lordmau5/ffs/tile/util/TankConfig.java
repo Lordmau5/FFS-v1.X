@@ -1,4 +1,4 @@
-package com.lordmau5.ffs.tile;
+package com.lordmau5.ffs.tile.util;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.FluidRegistry;

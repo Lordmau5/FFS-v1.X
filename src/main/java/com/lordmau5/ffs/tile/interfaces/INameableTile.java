@@ -1,4 +1,4 @@
-package com.lordmau5.ffs.tile.ifaces;
+package com.lordmau5.ffs.tile.interfaces;
 
 import net.minecraft.nbt.NBTTagCompound;
 

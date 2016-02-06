@@ -1,7 +1,7 @@
 package com.lordmau5.ffs.compat.oc;
 
 import com.lordmau5.ffs.tile.TileEntityTankComputer;
-import com.lordmau5.ffs.tile.TileEntityValve;
+import com.lordmau5.ffs.tile.TileEntityTankValve;
 import dan200.computercraft.api.lua.LuaException;
 import li.cil.oc.api.Driver;
 import li.cil.oc.api.machine.Arguments;
@@ -63,7 +63,7 @@ public class OCCompatibility {
                         throw new Exception("expected argument 1 to be of type \"boolean\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
                     }
 
-                    for(TileEntityValve valve : tile.getValves())
+                    for(TileEntityTankValve valve : tile.getValves())
                         valve.setAutoOutput(args.checkBoolean(0));
 
                     return new Object[]{args.checkBoolean(0)};
@@ -77,13 +77,13 @@ public class OCCompatibility {
                         throw new Exception("expected argument 2 to be of type \"boolean\", found \"" + args.checkAny(1).getClass().getSimpleName() + "\"");
                     }
 
-                    List<TileEntityValve> valves = tile.getValvesByName(args.checkString(0));
+                    List<TileEntityTankValve> valves = tile.getValvesByName(args.checkString(0));
                     if(valves.isEmpty()) {
                         throw new Exception("no valves found");
                     }
 
                     List<String> valveNames = new ArrayList<>();
-                    for(TileEntityValve valve : valves) {
+                    for(TileEntityTankValve valve : valves) {
                         valve.setAutoOutput(args.checkBoolean(1));
                         valveNames.add(valve.getTileName());
                     }
@@ -98,7 +98,7 @@ public class OCCompatibility {
             public Object[] doesAutoOutput(Context context, Arguments args) throws Exception {
                 if(args.count() == 0) {
                     Map<String, Boolean> valveOutputs = new HashMap<>();
-                    for(TileEntityValve valve : tile.getValves()) {
+                    for(TileEntityTankValve valve : tile.getValves()) {
                         valveOutputs.put(valve.getTileName(), valve.getAutoOutput());
                     }
 
@@ -109,13 +109,13 @@ public class OCCompatibility {
                         throw new Exception("expected argument 1 to be of type \"String\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
                     }
 
-                    List<TileEntityValve> valves = tile.getValvesByName(args.checkString(0));
+                    List<TileEntityTankValve> valves = tile.getValvesByName(args.checkString(0));
                     if(valves.isEmpty()) {
                         throw new Exception("no valves found");
                     }
 
                     Map<String, Boolean> valveOutputs = new HashMap<>();
-                    for(TileEntityValve valve : valves) {
+                    for(TileEntityTankValve valve : valves) {
                         valveOutputs.put(valve.getTileName(), valve.getAutoOutput());
                     }
 

@@ -47,24 +47,24 @@ public class NetworkHandler {
         // pipeline.addAfter(targetName, "IDENTIFIER_NAME", new CLIENT_CLASS());
     }
 
-    public static Packet getProxyPacket(ffsPacket packet){
+    public static Packet getProxyPacket(FFSPacket packet){
         return channels.get(FMLCommonHandler.instance().getEffectiveSide()).generatePacketFrom(packet);
     }
 
-    public static void sendPacketToPlayer(ffsPacket packet, EntityPlayer player){
+    public static void sendPacketToPlayer(FFSPacket packet, EntityPlayer player){
         FMLEmbeddedChannel channel = channels.get(Side.SERVER);
         channel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.PLAYER);
         channel.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(player);
         channel.writeOutbound(packet);
     }
 
-    public static void sendPacketToAllPlayers(ffsPacket packet){
+    public static void sendPacketToAllPlayers(FFSPacket packet){
         FMLEmbeddedChannel channel = channels.get(Side.SERVER);
         channel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.ALL);
         channel.writeOutbound(packet);
     }
 
-    public static void sendPacketToServer(ffsPacket packet){
+    public static void sendPacketToServer(FFSPacket packet){
         FMLEmbeddedChannel channel = channels.get(Side.CLIENT);
         channel.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.TOSERVER);
         channel.writeOutbound(packet);

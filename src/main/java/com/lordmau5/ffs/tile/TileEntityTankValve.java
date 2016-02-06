@@ -2,6 +2,7 @@ package com.lordmau5.ffs.tile;
 
 import buildcraft.api.transport.IPipeConnection;
 import buildcraft.api.transport.IPipeTile;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -17,7 +18,7 @@ import net.minecraftforge.fml.common.Optional;
 @Optional.InterfaceList(value = {
         @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|transport")
 })
-public class TileEntityValve extends ITankValve implements IFluidHandler,
+public class TileEntityTankValve extends AbstractTankValve implements IFluidHandler,
         IPipeConnection
 {
 
@@ -41,10 +42,10 @@ public class TileEntityValve extends ITankValve implements IFluidHandler,
                     EnumFacing out = getTileFacing().getOpposite();
                     TileEntity tile = getWorld().getTileEntity(new BlockPos(getPos().getX() + out.getFrontOffsetX(), getPos().getY() + out.getFrontOffsetY(), getPos().getZ() + out.getFrontOffsetZ()));
                     if(tile != null) {
-                        if(!(tile instanceof TileEntityValve) && !getAutoOutput() && valveHeightPosition == 0) {}
+                        if(!(tile instanceof TileEntityTankValve) && !getAutoOutput() && valveHeightPosition == 0) {}
                         else {
                             int maxAmount = 0;
-                            if (tile instanceof TileEntityValve)
+                            if (tile instanceof TileEntityTankValve)
                                 maxAmount = 1000; // When two tanks are connected by valves, allow faster output
                             else if (tile instanceof IFluidHandler)
                                 maxAmount = 50;
@@ -145,11 +146,4 @@ public class TileEntityValve extends ITankValve implements IFluidHandler,
         return isValid() ? ConnectOverride.CONNECT : ConnectOverride.DISCONNECT;
     }
 
-    /*
-    @Optional.Method(modid = "funkylocomotion")
-    @Override
-    public boolean canMove(World worldObj, int x, int y, int z) {
-        return false;
-    }
-    */
 }
