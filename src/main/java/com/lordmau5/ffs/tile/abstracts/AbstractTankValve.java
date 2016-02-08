@@ -643,7 +643,11 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             }
         }
 
-        EnumFacing outside = getTileFacing().getOpposite();
+        EnumFacing facing = getTileFacing();
+        if(facing == null)
+            return;
+
+        EnumFacing outside = facing.getOpposite();
         BlockPos outsidePos = getPos().offset(outside);
         if(!getWorld().isAirBlock(outsidePos))
             getWorld().markBlockForUpdate(outsidePos);
