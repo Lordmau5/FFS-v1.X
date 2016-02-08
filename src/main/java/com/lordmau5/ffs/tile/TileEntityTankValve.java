@@ -82,7 +82,7 @@ public class TileEntityTankValve extends AbstractTankValve implements IFluidHand
 
     public void setAutoOutput(boolean autoOutput) {
         this.autoOutput = autoOutput;
-        markForUpdate();
+        setNeedsUpdate();
     }
 
     @Override

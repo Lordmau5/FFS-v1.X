@@ -1,6 +1,5 @@
 package com.lordmau5.ffs.tile.abstracts;
 
-import buildcraft.api.transport.IPipeTile;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.blocks.BlockTankFrame;
 import com.lordmau5.ffs.tile.TileEntityTankFrame;
@@ -645,14 +644,9 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         }
 
         EnumFacing outside = getTileFacing().getOpposite();
-        TileEntity outsideTile = getWorld().getTileEntity(getPos().offset(outside));
-        if (outsideTile != null) {
-            //BC Check
-            if(FancyFluidStorage.proxy.BUILDCRAFT_LOADED) {
-                if(outsideTile instanceof IPipeTile)
-                    ((IPipeTile) outsideTile).scheduleNeighborChange();
-            }
-        }
+        BlockPos outsidePos = getPos().offset(outside);
+        if(!getWorld().isAirBlock(outsidePos))
+            getWorld().markBlockForUpdate(outsidePos);
     }
 
     private void updateComparatorOutput() {
