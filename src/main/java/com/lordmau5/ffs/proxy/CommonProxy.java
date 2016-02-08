@@ -27,9 +27,5 @@ public class CommonProxy {
         if(Loader.isModLoaded("OpenComputers")) {
             new OCCompatibility().init();
         }
-
-        /*if(Loader.isModLoaded("JAKJ_RedstoneInMotion")) {
-            EventManager.registerEventHandler(new RiMEventHandler());
-        }*/
     }
 }

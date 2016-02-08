@@ -1,6 +1,6 @@
 package com.lordmau5.ffs.compat;
 
-import com.lordmau5.ffs.tile.TileEntityTankComputer;
+import com.lordmau5.ffs.tile.tanktiles.TileEntityTankComputer;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;

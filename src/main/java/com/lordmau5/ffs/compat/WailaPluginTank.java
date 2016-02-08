@@ -1,9 +1,10 @@
 package com.lordmau5.ffs.compat;
 
-import com.lordmau5.ffs.tile.*;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.tile.interfaces.INameableTile;
+import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
+import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
@@ -61,8 +62,8 @@ public class WailaPluginTank implements IWailaDataProvider {
     public List<String> getWailaBody(ItemStack itemStack, List<String> list, IWailaDataAccessor iWailaDataAccessor, IWailaConfigHandler iWailaConfigHandler) {
         TileEntity te = iWailaDataAccessor.getTileEntity();
         AbstractTankValve valve = null;
-        if (te instanceof TileEntityTankValve) { // Continue with Valve stuff
-            valve = (TileEntityTankValve) te;
+        if (te instanceof AbstractTankValve) { // Continue with Valve stuff
+            valve = (AbstractTankValve) te;
         }
         else if(te instanceof AbstractTankTile) {
             valve = ((AbstractTankTile) te).getMasterValve();
@@ -83,8 +84,8 @@ public class WailaPluginTank implements IWailaDataProvider {
         if(te instanceof INameableTile)
             list.add("Name: " + EnumChatFormatting.ITALIC + ((INameableTile)te).getTileName() + EnumChatFormatting.RESET);
 
-        if(te instanceof TileEntityTankValve) {
-            TileEntityTankValve t_Valve = (TileEntityTankValve) te;
+        if(te instanceof TileEntityFluidValve) {
+            TileEntityFluidValve t_Valve = (TileEntityFluidValve) te;
             String autoOutput = t_Valve.getAutoOutput() ? "true" : "false";
             list.add("Auto Output: " + (t_Valve.getAutoOutput() ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + EnumChatFormatting.ITALIC + autoOutput + EnumChatFormatting.RESET);
         }

@@ -2,8 +2,8 @@ package com.lordmau5.ffs.tile.abstracts;
 
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.blocks.BlockTankFrame;
-import com.lordmau5.ffs.tile.TileEntityTankFrame;
-import com.lordmau5.ffs.tile.TileEntityTankValve;
+import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
+import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.interfaces.IFacingTile;
 import com.lordmau5.ffs.tile.interfaces.INameableTile;
 import com.lordmau5.ffs.tile.util.TankConfig;
@@ -657,7 +657,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         if(this.lastComparatorOut != getComparatorOutput()) {
             this.lastComparatorOut = getComparatorOutput();
             if(isMaster()) {
-                for(TileEntityTankValve otherValve : getTankTiles(TileEntityTankValve.class)) {
+                for(AbstractTankValve otherValve : getTankTiles(AbstractTankValve.class)) {
                     getWorld().updateComparatorOutputLevel(otherValve.getPos(), otherValve.getBlockType());
                 }
             }
@@ -856,8 +856,8 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
                     EnumFacing outside = valve.getTileFacing().getOpposite();
                     TileEntity tile = getWorld().getTileEntity(valve.getPos().offset(outside));
-                    if (tile != null && tile instanceof TileEntityTankValve) {
-                        return ((TileEntityTankValve) tile).fill(getTileFacing(), resource, doFill);
+                    if (tile != null && tile instanceof TileEntityFluidValve) {
+                        return ((TileEntityFluidValve) tile).fill(getTileFacing(), resource, doFill);
                     }
                 }
             }
@@ -950,8 +950,8 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                 if (valve.valveHeightPosition > getTankHeight()) {
                     EnumFacing outside = valve.getTileFacing().getOpposite();
                     TileEntity tile = getWorld().getTileEntity(valve.getPos().offset(outside));
-                    if (tile != null && tile instanceof TileEntityTankValve) {
-                        return ((TileEntityTankValve) tile).canFill(valve.getTileFacing(), fluid);
+                    if (tile != null && tile instanceof TileEntityFluidValve) {
+                        return ((TileEntityFluidValve) tile).canFill(valve.getTileFacing(), fluid);
                     }
                 }
             }

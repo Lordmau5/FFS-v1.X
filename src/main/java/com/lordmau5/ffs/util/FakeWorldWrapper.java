@@ -1,7 +1,7 @@
 package com.lordmau5.ffs.util;
 
 import com.lordmau5.ffs.blocks.BlockTankFrame;
-import com.lordmau5.ffs.tile.TileEntityTankFrame;
+import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
@@ -25,7 +25,9 @@ public class FakeWorldWrapper extends World {
     public IBlockState getBlockState(BlockPos pos) {
         IBlockState state = wrappedWorld.getBlockState(pos);
         if(state.getBlock() instanceof BlockTankFrame) {
-            state = ((TileEntityTankFrame)wrappedWorld.getTileEntity(pos)).getBlockState();
+            IBlockState fake_state = ((TileEntityTankFrame)wrappedWorld.getTileEntity(pos)).getBlockState();
+            if(fake_state != null)
+                state = fake_state;
         }
         return state;
     }

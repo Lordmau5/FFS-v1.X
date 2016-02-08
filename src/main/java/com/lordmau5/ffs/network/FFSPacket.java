@@ -2,7 +2,7 @@ package com.lordmau5.ffs.network;
 
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
-import com.lordmau5.ffs.tile.TileEntityTankValve;
+import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -26,7 +26,7 @@ public abstract class FFSPacket {
             public UpdateAutoOutput(){
             }
 
-            public UpdateAutoOutput(TileEntityTankValve valve) {
+            public UpdateAutoOutput(TileEntityFluidValve valve) {
                 this.pos = valve.getPos();
                 this.autoOutput = valve.getAutoOutput();
             }

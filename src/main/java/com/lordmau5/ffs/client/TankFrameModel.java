@@ -26,6 +26,9 @@ public class TankFrameModel implements ISmartBlockModel {
         model = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_MODEL);
         IBlockState fake_state = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_STATE);
 
+        if(model == null)
+            return this;
+
         if(fake_state != null) {
             if(fake_state.getBlock().canRenderInLayer(MinecraftForgeClient.getRenderLayer())) {
                 return model;

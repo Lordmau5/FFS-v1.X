@@ -1,8 +1,7 @@
-package com.lordmau5.ffs.blocks;
+package com.lordmau5.ffs.blocks.abstracts;
 
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
-import com.lordmau5.ffs.tile.TileEntityTankValve;
 import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
@@ -24,17 +23,21 @@ import net.minecraft.world.World;
 import java.util.Random;
 
 /**
- * Created by Dustin on 28.06.2015.
+ * Created by Dustin on 08.02.2016.
  */
-public class BlockValve extends Block {
+public abstract class AbstractBlockValve extends Block {
 
-    public BlockValve() {
+    private Block blockDrop;
+
+    public AbstractBlockValve(String name, Block blockDrop) {
         super(Material.iron);
-        setUnlocalizedName("blockValve");
-        setRegistryName("blockValve");
+        this.blockDrop = blockDrop;
+
+        setUnlocalizedName(name);
+        setRegistryName(name);
         setCreativeTab(CreativeTabs.tabRedstone);
-        setHardness(5.0F); // Same hardness as an iron block
-        setResistance(10.0F); // Same as hardness
+        setHardness(5.0F);
+        setResistance(10.0F);
 
         setDefaultState(blockState.getBaseState()
                 .withProperty(FFSStateProps.TILE_VALID, false)
@@ -48,15 +51,10 @@ public class BlockValve extends Block {
     }
 
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TileEntityTankValve();
-    }
-
-    @Override
     public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankValve) {
-            TileEntityTankValve valve = (TileEntityTankValve) world.getTileEntity(pos);
+        if(tile != null && tile instanceof AbstractTankValve) {
+            AbstractTankValve valve = (AbstractTankValve) world.getTileEntity(pos);
             valve.breakTank(null);
         }
         super.onBlockDestroyedByExplosion(world, pos, explosion);
@@ -77,7 +75,7 @@ public class BlockValve extends Block {
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
-        TileEntityTankValve valve = (TileEntityTankValve) world.getTileEntity(pos);
+        AbstractTankValve valve = (AbstractTankValve) world.getTileEntity(pos);
 
         if(valve.isValid()) {
             if(GenericUtil.isFluidContainer(player.getHeldItem()))
@@ -94,7 +92,7 @@ public class BlockValve extends Block {
 
     @Override
     public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-        return Item.getItemFromBlock(FancyFluidStorage.blockValve);
+        return Item.getItemFromBlock(this.blockDrop);
     }
 
     @Override
@@ -110,8 +108,8 @@ public class BlockValve extends Block {
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankValve) {
-            TileEntityTankValve valve = (TileEntityTankValve) tile;
+        if(tile != null && tile instanceof AbstractTankValve) {
+            AbstractTankValve valve = (AbstractTankValve) tile;
 
             state = state.withProperty(FFSStateProps.TILE_VALID, valve.isValid())
                     .withProperty(FFSStateProps.TILE_MASTER, valve.isMaster())
@@ -144,8 +142,8 @@ public class BlockValve extends Block {
     @Override
     public int getComparatorInputOverride(World world, BlockPos pos) {
         TileEntity te = world.getTileEntity(pos);
-        if(te instanceof TileEntityTankValve) {
-            TileEntityTankValve valve = (TileEntityTankValve)te;
+        if(te instanceof AbstractTankValve) {
+            AbstractTankValve valve = (AbstractTankValve)te;
             return valve.getComparatorOutput();
         }
         return 0;
@@ -155,4 +153,5 @@ public class BlockValve extends Block {
     public boolean canCreatureSpawn(IBlockAccess world, BlockPos pos, EntityLiving.SpawnPlacementType type) {
         return false;
     }
+
 }

@@ -1,4 +1,4 @@
-package com.lordmau5.ffs.tile;
+package com.lordmau5.ffs.tile.valves;
 
 import buildcraft.api.transport.IPipeConnection;
 import buildcraft.api.transport.IPipeTile;
@@ -18,7 +18,7 @@ import net.minecraftforge.fml.common.Optional;
 @Optional.InterfaceList(value = {
         @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|transport")
 })
-public class TileEntityTankValve extends AbstractTankValve implements IFluidHandler,
+public class TileEntityFluidValve extends AbstractTankValve implements IFluidHandler,
         IPipeConnection
 {
 
@@ -42,10 +42,10 @@ public class TileEntityTankValve extends AbstractTankValve implements IFluidHand
                     EnumFacing out = getTileFacing().getOpposite();
                     TileEntity tile = getWorld().getTileEntity(new BlockPos(getPos().getX() + out.getFrontOffsetX(), getPos().getY() + out.getFrontOffsetY(), getPos().getZ() + out.getFrontOffsetZ()));
                     if(tile != null) {
-                        if(!(tile instanceof TileEntityTankValve) && !getAutoOutput() && valveHeightPosition == 0) {}
+                        if(!(tile instanceof TileEntityFluidValve) && !getAutoOutput() && valveHeightPosition == 0) {}
                         else {
                             int maxAmount = 0;
-                            if (tile instanceof TileEntityTankValve)
+                            if (tile instanceof TileEntityFluidValve)
                                 maxAmount = 1000; // When two tanks are connected by valves, allow faster output
                             else if (tile instanceof IFluidHandler)
                                 maxAmount = 50;
@@ -143,6 +143,9 @@ public class TileEntityTankValve extends AbstractTankValve implements IFluidHand
     @Optional.Method(modid = "BuildCraftAPI|transport")
     @Override
     public ConnectOverride overridePipeConnection(IPipeTile.PipeType pipeType, EnumFacing from) {
+        if(pipeType != IPipeTile.PipeType.FLUID)
+            return ConnectOverride.DISCONNECT;
+
         return isValid() ? ConnectOverride.CONNECT : ConnectOverride.DISCONNECT;
     }
 

@@ -1,2 +1,3 @@
-tile.blockValve.name=Tank Valve
+tile.blockFluidValve.name=Tank Valve
+tile.blockEnergyValve.name=Fluid-Energy Relay
 tile.blockTankComputer.name=Tank Computer

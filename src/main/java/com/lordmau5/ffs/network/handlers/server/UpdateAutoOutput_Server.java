@@ -3,7 +3,7 @@ package com.lordmau5.ffs.network.handlers.server;
 
 import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.network.FFSPacket;
-import com.lordmau5.ffs.tile.TileEntityTankValve;
+import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.minecraft.tileentity.TileEntity;
@@ -19,8 +19,8 @@ public class UpdateAutoOutput_Server extends SimpleChannelInboundHandler<FFSPack
         World world = NetworkHandler.getPlayer(ctx).worldObj;
         if(world != null) {
             TileEntity tile = world.getTileEntity(msg.pos);
-            if(tile != null && tile instanceof TileEntityTankValve) {
-                ((TileEntityTankValve) tile).setAutoOutput(msg.autoOutput);
+            if(tile != null && tile instanceof TileEntityFluidValve) {
+                ((TileEntityFluidValve) tile).setAutoOutput(msg.autoOutput);
             }
         }
     }

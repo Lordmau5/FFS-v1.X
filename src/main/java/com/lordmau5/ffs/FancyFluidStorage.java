@@ -1,23 +1,20 @@
 package com.lordmau5.ffs;
 
-import com.lordmau5.ffs.blocks.BlockTankComputer;
-import com.lordmau5.ffs.blocks.BlockTankFrame;
-import com.lordmau5.ffs.blocks.BlockTankFrameOpaque;
-import com.lordmau5.ffs.blocks.BlockValve;
+import com.lordmau5.ffs.blocks.*;
 import com.lordmau5.ffs.client.FluidHelper;
 import com.lordmau5.ffs.client.TankFrameModel;
 import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.proxy.CommonProxy;
 import com.lordmau5.ffs.proxy.GuiHandler;
-import com.lordmau5.ffs.tile.TileEntityTankComputer;
-import com.lordmau5.ffs.tile.TileEntityTankFrame;
-import com.lordmau5.ffs.tile.TileEntityTankValve;
+import com.lordmau5.ffs.tile.valves.TileEntityEnergyValve;
+import com.lordmau5.ffs.tile.tanktiles.TileEntityTankComputer;
+import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
+import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -34,8 +31,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-
 /**
  * Created by Dustin on 28.06.2015.
  */
@@ -44,7 +39,8 @@ public class FancyFluidStorage {
 
     public static final String modId = "FFS";
 
-    public static BlockValve blockValve;
+    public static BlockFluidValve blockFluidValve;
+    public static BlockEnergyValve blockEnergyValve;
     public static BlockTankComputer blockTankComputer;
     public static BlockTankFrame blockTankFrame;
     public static BlockTankFrameOpaque blockTankFrameOpaque;
@@ -129,12 +125,14 @@ public class FancyFluidStorage {
         config = new Configuration(event.getSuggestedConfigurationFile());
         loadConfig();
 
-        GameRegistry.registerBlock(blockValve = new BlockValve(), "blockValve");
+        GameRegistry.registerBlock(blockFluidValve = new BlockFluidValve(), "blockFluidValve");
+        GameRegistry.registerBlock(blockEnergyValve = new BlockEnergyValve(), "blockEnergyValve");
         GameRegistry.registerBlock(blockTankComputer = new BlockTankComputer(), "blockTankComputer");
         GameRegistry.registerBlock(blockTankFrame = new BlockTankFrame("blockTankFrame"), "blockTankFrame");
         GameRegistry.registerBlock(blockTankFrameOpaque = new BlockTankFrameOpaque(), "blockTankFrameOpaque");
 
-        GameRegistry.registerTileEntity(TileEntityTankValve.class, "tileEntityValve");
+        GameRegistry.registerTileEntity(TileEntityFluidValve.class, "tileEntityFluidValve");
+        GameRegistry.registerTileEntity(TileEntityEnergyValve.class, "tileEntityEnergyValve");
         GameRegistry.registerTileEntity(TileEntityTankComputer.class, "tileEntityTankComputer");
         GameRegistry.registerTileEntity(TileEntityTankFrame.class, "tileEntityTankFrame");
 
@@ -148,7 +146,7 @@ public class FancyFluidStorage {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
 
-        GameRegistry.addRecipe(new ItemStack(blockValve), "IGI", "GBG", "IGI",
+        GameRegistry.addRecipe(new ItemStack(blockFluidValve), "IGI", "GBG", "IGI",
                 'I', Items.iron_ingot,
                 'G', Blocks.iron_bars,
                 'B', Items.bucket);
@@ -165,11 +163,8 @@ public class FancyFluidStorage {
     public void postInit(FMLPostInitializationEvent event) {
         GenericUtil.init();
 
-        ForgeChunkManager.setForcedChunkLoadingCallback(instance, new ForgeChunkManager.LoadingCallback() {
-            @Override
-            public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
-                // Good day sir
-            }
+        ForgeChunkManager.setForcedChunkLoadingCallback(instance, (tickets, world) -> {
+            // Good day sir
         });
     }
 

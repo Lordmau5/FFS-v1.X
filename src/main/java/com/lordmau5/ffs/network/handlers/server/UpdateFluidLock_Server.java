@@ -1,9 +1,9 @@
 package com.lordmau5.ffs.network.handlers.server;
 
 
-import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.network.FFSPacket;
-import com.lordmau5.ffs.tile.TileEntityTankValve;
+import com.lordmau5.ffs.network.NetworkHandler;
+import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.minecraft.tileentity.TileEntity;
@@ -19,8 +19,8 @@ public class UpdateFluidLock_Server extends SimpleChannelInboundHandler<FFSPacke
         World world = NetworkHandler.getPlayer(ctx).worldObj;
         if(world != null) {
             TileEntity tile = world.getTileEntity(msg.pos);
-            if(tile != null && tile instanceof TileEntityTankValve) {
-                TileEntityTankValve valve = (TileEntityTankValve) tile;
+            if(tile != null && tile instanceof AbstractTankValve) {
+                AbstractTankValve valve = (AbstractTankValve) tile;
                 valve.toggleFluidLock(msg.fluidLock);
             }
         }

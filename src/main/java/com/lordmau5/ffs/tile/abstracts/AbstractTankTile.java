@@ -1,6 +1,5 @@
 package com.lordmau5.ffs.tile.abstracts;
 
-import com.lordmau5.ffs.tile.TileEntityTankValve;
 import com.lordmau5.ffs.util.FakeWorldWrapper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,7 +28,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     private boolean needsUpdate;
 
     private BlockPos masterValvePos;
-    private TileEntityTankValve masterValve;
+    private AbstractTankValve masterValve;
 
     public void setNeedsUpdate() {
         this.needsUpdate = true;
@@ -59,7 +58,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     public AbstractTankValve getMasterValve() {
         if(getWorld() != null && masterValve == null && this.masterValvePos != null) {
             TileEntity tile = getWorld().getTileEntity(this.masterValvePos);
-            masterValve = tile instanceof TileEntityTankValve ? (TileEntityTankValve) tile : null;
+            masterValve = tile instanceof AbstractTankValve ? (AbstractTankValve) tile : null;
         }
 
         return masterValve;
@@ -126,11 +125,11 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     private FakeWorldWrapper wrapper;
 
     public World getFakeWorld() {
-        if(worldObj == null)
+        if(getWorld() == null)
             return null;
 
-        if(wrapper == null || wrapper.wrappedWorld != worldObj)
-            wrapper = new FakeWorldWrapper(worldObj);
+        if(wrapper == null || wrapper.wrappedWorld != getWorld())
+            wrapper = new FakeWorldWrapper(getWorld());
 
         return wrapper;
     }

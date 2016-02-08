@@ -1,6 +1,5 @@
-package com.lordmau5.ffs.tile;
+package com.lordmau5.ffs.tile.tanktiles;
 
-import com.lordmau5.ffs.client.FrameBlockAccessWrapper;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -27,15 +26,11 @@ import java.util.List;
 public class TileEntityTankFrame extends AbstractTankTile {
 
     private IBlockState camoBlockState;
-    public IBakedModel fake_model;
-
-    public boolean needsNewModel;
 
     public int lightValue;
 
     public void initialize(BlockPos valvePos, IBlockState camoBlockState) {
         setValvePos(valvePos);
-        this.fake_model = null;
         this.camoBlockState = camoBlockState;
     }
 
@@ -48,7 +43,7 @@ public class TileEntityTankFrame extends AbstractTankTile {
     }
 
     public IBakedModel getFakeModel() {
-        IBakedModel fake_model = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelFromBlockState(getBlockState(), new FrameBlockAccessWrapper(getWorld()), getPos());
+        IBakedModel fake_model = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelFromBlockState(getBlockState(), getFakeWorld(), getPos());
         if(fake_model instanceof ISmartBlockModel) {
             fake_model = ((ISmartBlockModel) fake_model).handleBlockState(getExtendedBlockState());
         }
@@ -58,7 +53,7 @@ public class TileEntityTankFrame extends AbstractTankTile {
     public IBlockState getBlockState() {
         IBlockState state = null;
         if(camoBlockState != null)
-            state = camoBlockState.getBlock().getActualState(camoBlockState,  new FrameBlockAccessWrapper(getWorld()), getPos());
+            state = camoBlockState.getBlock().getActualState(camoBlockState, getFakeWorld(), getPos());
 
         return state;
     }
@@ -67,7 +62,7 @@ public class TileEntityTankFrame extends AbstractTankTile {
         IBlockState state = getBlockState();
 
         if(camoBlockState != null && getWorld().isRemote)
-            state = camoBlockState.getBlock().getExtendedState(state, new FrameBlockAccessWrapper(getWorld()), getPos());
+            state = camoBlockState.getBlock().getExtendedState(state, getFakeWorld(), getPos());
 
         return state;
     }
@@ -137,9 +132,6 @@ public class TileEntityTankFrame extends AbstractTankTile {
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
-        if(tag.hasKey("needsNewModel"))
-            fake_model = null;
-
         if(tag.hasKey("blockName")) {
             setBlockState(Block.getBlockFromName(tag.getString("blockName")).getStateFromMeta(tag.getInteger("metadata")));
         }
@@ -153,11 +145,6 @@ public class TileEntityTankFrame extends AbstractTankTile {
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        if(needsNewModel) {
-            tag.setBoolean("needsNewModel", true);
-            needsNewModel = false;
-        }
-
         if(getBlockStateForNBT() != null) {
             tag.setString("blockName", getBlockStateForNBT().getBlock().getRegistryName());
             tag.setInteger("metadata", getBlockStateForNBT().getBlock().getMetaFromState(getBlockStateForNBT()));

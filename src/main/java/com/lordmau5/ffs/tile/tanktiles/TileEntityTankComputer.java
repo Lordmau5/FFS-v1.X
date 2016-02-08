@@ -1,4 +1,4 @@
-package com.lordmau5.ffs.tile;
+package com.lordmau5.ffs.tile.tanktiles;
 
 /**
  * Created by Dustin on 21.01.2016.
@@ -6,6 +6,7 @@ package com.lordmau5.ffs.tile;
 
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.interfaces.IFacingTile;
+import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -23,17 +24,17 @@ import java.util.stream.Collectors;
 @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft")
 public class TileEntityTankComputer extends AbstractTankTile implements IFacingTile, IPeripheral {
 
-    public List<TileEntityTankValve> getValves() {
-        return getMasterValve().getAllValves().stream().filter(p -> p instanceof TileEntityTankValve).map(p -> (TileEntityTankValve) p).collect(Collectors.toList());
+    public List<TileEntityFluidValve> getValves() {
+        return getMasterValve().getAllValves().stream().filter(p -> p instanceof TileEntityFluidValve).map(p -> (TileEntityFluidValve) p).collect(Collectors.toList());
     }
 
     // Used by CC and OC
-    public List<TileEntityTankValve> getValvesByName(String name) {
-        List<TileEntityTankValve> valves = new ArrayList<>();
+    public List<TileEntityFluidValve> getValvesByName(String name) {
+        List<TileEntityFluidValve> valves = new ArrayList<>();
         if(getValves().isEmpty())
             return valves;
 
-        for(TileEntityTankValve valve : getValves()) {
+        for(TileEntityFluidValve valve : getValves()) {
             if(valve.getTileName().toLowerCase().equals(name.toLowerCase()))
                 valves.add(valve);
         }
@@ -103,7 +104,7 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
                         throw new LuaException("expected argument 1 to be of type \"boolean\", found \"" + arguments[0].getClass().getSimpleName() + "\"");
                     }
 
-                    for(TileEntityTankValve valve : getValves())
+                    for(TileEntityFluidValve valve : getValves())
                         valve.setAutoOutput((boolean) arguments[0]);
 
                     return new Object[]{(boolean) arguments[0]};
@@ -117,13 +118,13 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
                         throw new LuaException("expected argument 2 to be of type \"boolean\", found \"" + arguments[1].getClass().getSimpleName() + "\"");
                     }
 
-                    List<TileEntityTankValve> valves = getValvesByName((String) arguments[0]);
+                    List<TileEntityFluidValve> valves = getValvesByName((String) arguments[0]);
                     if(valves.isEmpty()) {
                         throw new LuaException("no valves found");
                     }
 
                     List<String> valveNames = new ArrayList<>();
-                    for(TileEntityTankValve valve : valves) {
+                    for(TileEntityFluidValve valve : valves) {
                         valve.setAutoOutput((boolean) arguments[1]);
                         valveNames.add(valve.getTileName());
                     }
@@ -136,7 +137,7 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
             case 4: { // doesAutoOutput
                 if(arguments.length == 0) {
                     Map<String, Boolean> valveOutputs = new HashMap<>();
-                    for(TileEntityTankValve valve : getValves()) {
+                    for(TileEntityFluidValve valve : getValves()) {
                         valveOutputs.put(valve.getTileName(), valve.getAutoOutput());
                     }
 
@@ -147,13 +148,13 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
                         throw new LuaException("expected argument 1 to be of type \"String\", found \"" + arguments[0].getClass().getSimpleName() + "\"");
                     }
 
-                    List<TileEntityTankValve> valves = getValvesByName((String) arguments[0]);
+                    List<TileEntityFluidValve> valves = getValvesByName((String) arguments[0]);
                     if(valves.isEmpty()) {
                         throw new LuaException("no valves found");
                     }
 
                     Map<String, Boolean> valveOutputs = new HashMap<>();
-                    for(TileEntityTankValve valve : valves) {
+                    for(TileEntityFluidValve valve : valves) {
                         valveOutputs.put(valve.getTileName(), valve.getAutoOutput());
                     }
 
