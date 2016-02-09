@@ -19,6 +19,9 @@ import net.minecraftforge.fml.common.Optional;
  * - 2 energy valves possible.
  */
 
+@Optional.InterfaceList(value = {
+        @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|transport")
+})
 public class TileEntityEnergyValve extends AbstractTankValve implements IPipeConnection, IEnergyReceiver, IEnergyProvider {
 
 
