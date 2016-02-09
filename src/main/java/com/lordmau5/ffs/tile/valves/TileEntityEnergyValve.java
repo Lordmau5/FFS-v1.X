@@ -10,13 +10,15 @@ import cofh.api.energy.IEnergyProvider;
 import cofh.api.energy.IEnergyReceiver;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Optional;
 
 /**
- * - Use as master -> AbstractTankValve
  * - Slave-valve to extract the fluid
  * - Bring to other tank (?)
  * - 2 energy valves possible.
+ *
+ * - 1:1 ratio
  */
 
 @Optional.InterfaceList(value = {
@@ -24,7 +26,14 @@ import net.minecraftforge.fml.common.Optional;
 })
 public class TileEntityEnergyValve extends AbstractTankValve implements IPipeConnection, IEnergyReceiver, IEnergyProvider {
 
+    private int maxEnergyBuffer = 0;
 
+    @Override
+    public void buildTank(EnumFacing inside) {
+        super.buildTank(inside);
+
+        maxEnergyBuffer = (int) Math.ceil(getCapacity() / 200);
+    }
 
     // BC
 
@@ -41,22 +50,41 @@ public class TileEntityEnergyValve extends AbstractTankValve implements IPipeCon
 
     @Override
     public int extractEnergy(EnumFacing facing, int maxExtract, boolean simulate) {
+        if(!isValid())
+            return 0;
+
+        if(getFluidAmount() <= 0)
+            return 0;
+
         return 0;
     }
 
     @Override
     public int receiveEnergy(EnumFacing facing, int maxReceive, boolean simulate) {
-        return 0;
+        if(!isValid())
+            return 0;
+
+        if(getCapacity() - getFluidAmount() <= 0)
+            return 0;
+
+        maxReceive = Math.min(maxReceive, maxEnergyBuffer);
+
+        maxReceive = fill(FluidRegistry.getFluidStack(FluidRegistry.WATER.getName(), maxReceive), false);
+
+        if(simulate)
+            return maxReceive;
+
+        return fill(FluidRegistry.getFluidStack(FluidRegistry.WATER.getName(), maxReceive), true);
     }
 
     @Override
     public int getEnergyStored(EnumFacing facing) {
-        return 0;
+        return (int) Math.ceil((float) getFluidAmount() * 0.75f);
     }
 
     @Override
     public int getMaxEnergyStored(EnumFacing facing) {
-        return 0;
+        return getCapacity();
     }
 
     @Override
