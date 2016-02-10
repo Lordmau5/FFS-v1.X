@@ -31,7 +31,7 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
         if(!isValid())
             return;
 
-        if(getFluid() == null)
+        if(getFluid() == null || getFluid().getFluid() == null)
             return;
 
         if(getAutoOutput() || valveHeightPosition == 0) { // Auto outputs at 50mB/t (1B/s) if enabled
