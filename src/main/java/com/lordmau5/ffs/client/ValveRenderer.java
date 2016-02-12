@@ -72,15 +72,14 @@ public class ValveRenderer extends TileEntitySpecialRenderer {
         if (fillPercentage > 0 && valve.getFluid() != null) {
             FluidStack fluid = valve.getFluid();
 
-            int i = valve.getFluidLuminosity();
-            i = (i << 20 | i << 4);
-            lightmap_X = i >> 16 & 65535;
-            lightmap_Y = i & 65535;
+            int i = getWorld().getCombinedLight(valvePos.offset(valve.getTileFacing()), fluid.getFluid().getLuminosity());
+            lightmap_X = i >> 0x10 & 0xFFFF;
+            lightmap_Y = i & 0xFFFF;
 
-            int c = fluid.getFluid().getColor();
-            red = c & 0xFF;
+            int c = fluid.getFluid().getColor(fluid);
+            blue = c & 0xFF;
             green = (c >> 8) & 0xFF;
-            blue = (c >> 16) & 0xFF;
+            red = (c >> 16) & 0xFF;
             alpha = (c >> 24) & 0xFF;
 
             preGL();
