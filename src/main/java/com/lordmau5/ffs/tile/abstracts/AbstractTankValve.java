@@ -125,6 +125,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         if (!isMaster() && getMasterValve() == null) {
             setValid(false);
             updateBlockAndNeighbors();
+            return;
         }
 
         if(getFluid() == null)
@@ -271,7 +272,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
             getTankConfig().lockFluid(getFluid());
         }
-        getMasterValve().markForUpdate(true);
+        getMasterValve().setNeedsUpdate(UpdateType.STATE);
     }
 
     public <T> List<T> getTankTiles(Class<T> type) {
@@ -629,6 +630,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         if(getWorld() == null || getWorld().isRemote)
             return;
 
+        setNeedsUpdate();
         this.markForUpdate(onlyThis);
 
         if(!tankTiles.isEmpty() && !onlyThis) {
@@ -639,7 +641,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                 if(tile instanceof AbstractTankValve)
                     ((AbstractTankValve) tile).updateBlockAndNeighbors(true);
                 else
-                    tile.markForUpdate();
+                    tile.setNeedsUpdate();
             }
         }
 
@@ -667,16 +669,16 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
     @Override
     public void markForUpdate() {
-        super.markForUpdate();
-
         if (getFluidLuminosity() != oldLuminosity) {
             oldLuminosity = getFluidLuminosity();
             for (TileEntityTankFrame tile : getTankTiles(TileEntityTankFrame.class)) {
-                tile.markForUpdate();
+                tile.setNeedsUpdate(UpdateType.FULL);
             }
         }
 
         updateComparatorOutput();
+
+        super.markForUpdate();
     }
 
     private void markForUpdate(boolean onlyThis) {

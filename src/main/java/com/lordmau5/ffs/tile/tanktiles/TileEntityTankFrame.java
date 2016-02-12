@@ -139,7 +139,7 @@ public class TileEntityTankFrame extends AbstractTankTile {
         int newLightValue = (getMasterValve() != null ? getMasterValve().getFluidLuminosity() : 0);
         if(newLightValue != lightValue) {
             lightValue = newLightValue;
-            markForUpdate();
+            setNeedsUpdate(UpdateType.STATE);
         }
     }
 

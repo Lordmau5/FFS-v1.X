@@ -17,6 +17,13 @@ import net.minecraft.world.World;
  */
 public abstract class AbstractTankTile extends TileEntity implements ITickable {
 
+    public enum UpdateType {
+        NONE,
+        STATE,
+        FULL
+    }
+    private UpdateType updateType = UpdateType.NONE;
+
     /**
      * Necessary stuff for the interfaces.
      * Current interface list:
@@ -25,13 +32,14 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     public EnumFacing tile_facing = null;
     public String tile_name = "";
 
-    private boolean needsUpdate;
-
     private BlockPos masterValvePos;
-    private AbstractTankValve masterValve;
 
     public void setNeedsUpdate() {
-        this.needsUpdate = true;
+        this.updateType = UpdateType.FULL;
+    }
+
+    public void setNeedsUpdate(UpdateType updateType) {
+        this.updateType = updateType;
     }
 
     @Override
@@ -52,16 +60,15 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
 
     public void setValvePos(BlockPos masterValvePos) {
         this.masterValvePos = masterValvePos;
-        this.masterValve = null;
     }
 
     public AbstractTankValve getMasterValve() {
-        if(getWorld() != null && masterValve == null && this.masterValvePos != null) {
+        if(getWorld() != null && this.masterValvePos != null) {
             TileEntity tile = getWorld().getTileEntity(this.masterValvePos);
-            masterValve = tile instanceof AbstractTankValve ? (AbstractTankValve) tile : null;
+            return tile instanceof AbstractTankValve ? (AbstractTankValve) tile : null;
         }
 
-        return masterValve;
+        return null;
     }
 
     @Override
@@ -102,21 +109,29 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
 
     public void markForUpdate() {
         if(getWorld() == null) {
-            needsUpdate = true;
+            setNeedsUpdate();
             return;
         }
 
-        getWorld().markBlockForUpdate(getPos());
-        if(getWorld().isRemote) {
-            getWorld().checkLight(getPos());
+        if(updateType == UpdateType.FULL) {
+            getWorld().markBlockForUpdate(getPos());
+            if (getWorld().isRemote) {
+                getWorld().checkLight(getPos());
+            }
+        }
+        else if(updateType == UpdateType.STATE) {
+            getWorld().notifyBlockOfStateChange(getPos(), blockType);
+            if (getWorld().isRemote) {
+                getWorld().checkLight(getPos());
+            }
         }
     }
 
     @Override
     public void update() {
-        if (needsUpdate) {
+        if (updateType != UpdateType.NONE) {
             markForUpdate();
-            needsUpdate = false;
+            updateType = UpdateType.NONE;
         }
     }
 
