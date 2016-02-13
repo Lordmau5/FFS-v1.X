@@ -28,19 +28,24 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
     public void update() {
         super.update();
 
-        if (getWorld().isRemote)
+        if(getWorld().isRemote)
             return;
 
         if(!isValid())
             return;
 
-        if(getFluid() == null || getFluid().getFluid() == null)
+        FluidStack fluidStack = getFluid();
+        if(fluidStack == null)
+            return;
+
+        Fluid fluid = fluidStack.getFluid();
+        if(fluid == null)
             return;
 
         if(getAutoOutput() || valveHeightPosition == 0) { // Auto outputs at 50mB/t (1B/s) if enabled
             if (getFluidAmount() != 0) {
                 float height = (float) getFluidAmount() / (float) getCapacity();
-                boolean isNegativeDensity = getFluid().getFluid().getDensity(getFluid()) < 0 ;
+                boolean isNegativeDensity = fluid.getDensity(fluidStack) < 0 ;
                 if (GenericUtil.canAutoOutput(height, getTankHeight(), valveHeightPosition, isNegativeDensity)) { // Valves can output until the liquid is at their halfway point.
                     EnumFacing out = getTileFacing().getOpposite();
                     TileEntity tile = getWorld().getTileEntity(new BlockPos(getPos().getX() + out.getFrontOffsetX(), getPos().getY() + out.getFrontOffsetY(), getPos().getZ() + out.getFrontOffsetZ()));
@@ -55,7 +60,7 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
 
                             if (maxAmount != 0) {
                                 IFluidHandler handler = (IFluidHandler) tile;
-                                FluidStack fillStack = getFluid().copy();
+                                FluidStack fillStack = fluidStack.copy();
                                 fillStack.amount = Math.min(getFluidAmount(), maxAmount);
                                 if (handler.fill(getTileFacing(), fillStack, false) > 0) {
                                     drain(handler.fill(getTileFacing(), fillStack, true), true);
@@ -67,11 +72,11 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
             }
         }
 
-        if(getFluid().getFluid() == FluidRegistry.WATER) {
+        if(fluid == FluidRegistry.WATER) {
             if(getWorld().isRaining()) {
                 int rate = (int) Math.floor(getWorld().rainingStrength * 5 * worldObj.getBiomeGenForCoords(getPos()).rainfall);
                 if (getPos().getY() == getWorld().getPrecipitationHeight(getPos()).getY() - 1) {
-                    FluidStack waterStack = getFluid().copy();
+                    FluidStack waterStack = fluidStack.copy();
                     waterStack.amount = rate * 10;
                     fill(waterStack, true);
                 }
