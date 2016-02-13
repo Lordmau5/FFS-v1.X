@@ -28,6 +28,9 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
     public void update() {
         super.update();
 
+        if (getWorld().isRemote)
+            return;
+
         if(!isValid())
             return;
 
