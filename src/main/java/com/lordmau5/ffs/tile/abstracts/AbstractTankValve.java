@@ -284,7 +284,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             return getMasterValve().getAllValves();
 
         List<AbstractTankValve> valves = getTankTiles(AbstractTankValve.class);
-        //valves.add(this);
+        valves.add(this);
         return valves;
     }
 
@@ -364,7 +364,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         return length[0] != -1;
     }
 
-    private void setTankTileFacing(Map<BlockPos, IBlockState> airBlocks, AbstractTankTile tankTile) {
+    private void setTankTileFacing(Map<BlockPos, IBlockState> airBlocks, TileEntity tankTile) {
         List<BlockPos> possibleAirBlocks = new ArrayList<>();
         for(EnumFacing dr : EnumFacing.VALUES) {
             if(getWorld().isAirBlock(tankTile.getPos().offset(dr)))
@@ -462,8 +462,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             }
         }
 
-        List<AbstractTankTile> facingTiles = new ArrayList<>();
-        List<AbstractTankValve> valves = new ArrayList<>();
+        List<TileEntity> facingTiles = new ArrayList<>();
         for (Map.Entry<BlockPos, IBlockState> insideFrameCheck : maps[1].entrySet()) {
             pos = insideFrameCheck.getKey();
             IBlockState check = insideFrameCheck.getValue();
@@ -471,13 +470,10 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             if(burnability > frameBurnability)
                 frameBurnability = burnability;
 
-            if (GenericUtil.areTankBlocksValid(check, bottomDiagBlock, getWorld(), pos) || GenericUtil.isBlockGlass(check.getBlock(), check.getBlock().getMetaFromState(check)))
-                continue;
-
             TileEntity tile = getWorld().getTileEntity(pos);
             if (tile != null) {
-                if(tile instanceof AbstractTankTile && tile instanceof IFacingTile)
-                    facingTiles.add((AbstractTankTile) tile);
+                if(tile instanceof IFacingTile)
+                    facingTiles.add(tile);
 
                 if(tile instanceof AbstractTankValve) {
                     AbstractTankValve valve = (AbstractTankValve) tile;
@@ -488,32 +484,22 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                         this.fluidStack = valve.fluidStack;
                         updateFluidTemperature();
                     }
-                    valves.add(valve);
                     continue;
                 }
                 else if(tile instanceof AbstractTankTile) {
                     continue;
                 }
-                return false;
             }
 
-            return false;
+            if (!GenericUtil.areTankBlocksValid(check, bottomDiagBlock, getWorld(), pos) && !GenericUtil.isBlockGlass(check.getBlock(), check.getBlock().getMetaFromState(check)))
+                return false;
         }
 
         // Make sure we don't overfill a tank. If the new tank is smaller than the old one, excess liquid disappear.
         if (this.fluidStack != null)
             this.fluidStack.amount = Math.min(this.fluidStack.amount, this.fluidCapacity);
 
-        for (AbstractTankValve valve : valves) {
-            pos = valve.getPos();
-            valve.valveHeightPosition = Math.abs(bottomDiagFrame.subtract(pos).getY());
-
-            valve.isMaster = false;
-            valve.setValvePos(getPos());
-            valve.setTankConfig(getTankConfig());
-            tankTiles.add(valve);
-        }
-        for (AbstractTankTile facingTile : facingTiles) {
+        for (TileEntity facingTile : facingTiles) {
             setTankTileFacing(maps[2], facingTile);
         }
         isMaster = true;
@@ -534,7 +520,11 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
         for (Map.Entry<BlockPos, IBlockState> setTiles : maps[1].entrySet()) {
             pos = setTiles.getKey();
+
             TileEntity tile = getWorld().getTileEntity(pos);
+            if(tile == this)
+                continue;
+
             if (tile != null) {
                 if (tile instanceof TileEntityTankFrame) {
                     ((TileEntityTankFrame) tile).setValvePos(getPos());
@@ -551,6 +541,17 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                     TileEntityTankFrame tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
                     tankFrame.initialize(getPos(), setTiles.getValue());
                     tankTiles.add(tankFrame);
+                }
+                else if(tile instanceof AbstractTankValve) {
+                    AbstractTankValve valve = (AbstractTankValve) tile;
+
+                    pos = valve.getPos();
+                    valve.valveHeightPosition = Math.abs(bottomDiagFrame.subtract(pos).getY());
+
+                    valve.isMaster = false;
+                    valve.setValvePos(getPos());
+                    valve.setTankConfig(getTankConfig());
+                    tankTiles.add(valve);
                 }
                 else if(tile instanceof AbstractTankTile) {
                     AbstractTankTile tankTile = (AbstractTankTile) tile;
