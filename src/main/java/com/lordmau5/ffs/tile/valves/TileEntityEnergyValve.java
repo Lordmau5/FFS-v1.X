@@ -28,13 +28,44 @@ import net.minecraftforge.fml.common.Optional;
 })
 public class TileEntityEnergyValve extends AbstractTankValve implements IPipeConnection, IEnergyReceiver, IEnergyProvider {
 
-    private int maxEnergyBuffer = 0;
+    private int maxEnergyBuffer = -1;
+    public boolean isExtract = false;
 
     @Override
     public void buildTank(EnumFacing inside) {
         super.buildTank(inside);
+    }
 
-        maxEnergyBuffer = (int) Math.ceil(getCapacity() / 200);
+    public TileEntityEnergyValve() {
+        super();
+
+        maxEnergyBuffer = -1;
+    }
+
+    @Override
+    public void update() {
+        super.update();
+
+        if(isExtract)
+            outputToTile();
+    }
+
+    private void outputToTile() {
+        if(getFluidAmount() <= 0)
+            return;
+
+        BlockPos outsidePos = getPos().offset(getTileFacing().getOpposite());
+        if(getWorld().isAirBlock(outsidePos))
+            return;
+
+        TileEntity outsideTile = getWorld().getTileEntity(outsidePos);
+        if(outsideTile == null || !(outsideTile instanceof IEnergyReceiver))
+            return;
+
+        IEnergyReceiver receiver = (IEnergyReceiver) outsideTile;
+        int maxReceive = receiver.receiveEnergy(getTileFacing(), getFluidAmount(), true);
+        if(maxReceive > 0)
+            receiver.receiveEnergy(getTileFacing(), internal_extractEnergy(maxReceive, false), false);
     }
 
     // BC
@@ -50,15 +81,47 @@ public class TileEntityEnergyValve extends AbstractTankValve implements IPipeCon
 
     // CoFH / RF-API
 
+    private int getMaxEnergyBuffer() {
+        if(maxEnergyBuffer == -1)
+            maxEnergyBuffer = (int) Math.ceil((float) getCapacity() / 200f);
+
+        return maxEnergyBuffer;
+    }
+
     @Override
-    public int extractEnergy(EnumFacing facing, int maxExtract, boolean simulate) {
+    public void setValvePos(BlockPos masterValvePos) {
+        super.setValvePos(masterValvePos);
+
+        maxEnergyBuffer = -1;
+    }
+
+    private int convertForOutput(int amount) {
+        return (int) Math.ceil((double) amount * 0.75d);
+    }
+
+    private int internal_extractEnergy(int extractEnergy, boolean simulate) {
         if(!isValid())
+            return 0;
+
+        if(!isExtract)
             return 0;
 
         if(getFluidAmount() <= 0)
             return 0;
 
-        return 0;
+        int energy = convertForOutput(drain(extractEnergy, false).amount);
+
+        if(simulate)
+            return energy;
+
+        return convertForOutput(drain(extractEnergy, true).amount);
+    }
+
+    @Override
+    public int extractEnergy(EnumFacing facing, int maxExtract, boolean simulate) {
+        maxExtract = Math.min(maxExtract, getFluidAmount());
+
+        return internal_extractEnergy(maxExtract, simulate);
     }
 
     @Override
@@ -66,10 +129,13 @@ public class TileEntityEnergyValve extends AbstractTankValve implements IPipeCon
         if(!isValid())
             return 0;
 
+        if(isExtract)
+            return 0;
+
         if(getCapacity() - getFluidAmount() <= 0)
             return 0;
 
-        maxReceive = Math.min(maxReceive, maxEnergyBuffer);
+        maxReceive = Math.min(maxReceive, getMaxEnergyBuffer());
 
         maxReceive = fill(FluidRegistry.getFluidStack(FluidRegistry.WATER.getName(), maxReceive), false);
 
@@ -81,7 +147,7 @@ public class TileEntityEnergyValve extends AbstractTankValve implements IPipeCon
 
     @Override
     public int getEnergyStored(EnumFacing facing) {
-        return (int) Math.ceil((float) getFluidAmount() * 0.75f);
+        return (int) Math.ceil((double) getFluidAmount() * 0.75d);
     }
 
     @Override
