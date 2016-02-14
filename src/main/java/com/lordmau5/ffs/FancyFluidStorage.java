@@ -1,6 +1,10 @@
 package com.lordmau5.ffs;
 
-import com.lordmau5.ffs.blocks.*;
+import com.lordmau5.ffs.block.tanktiles.BlockTankComputer;
+import com.lordmau5.ffs.block.tanktiles.BlockTankFrame;
+import com.lordmau5.ffs.block.tanktiles.BlockTankFrameOpaque;
+import com.lordmau5.ffs.block.valves.BlockEnergyValve;
+import com.lordmau5.ffs.block.valves.BlockFluidValve;
 import com.lordmau5.ffs.client.FluidHelper;
 import com.lordmau5.ffs.client.TankFrameModel;
 import com.lordmau5.ffs.network.NetworkHandler;

@@ -1,4 +1,4 @@
-package com.lordmau5.ffs.blocks;
+package com.lordmau5.ffs.block.tanktiles;
 
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;

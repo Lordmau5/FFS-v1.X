@@ -1,4 +1,4 @@
-package com.lordmau5.ffs.compat;
+package com.lordmau5.ffs.compat.waila;
 
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;

@@ -1,7 +1,7 @@
-package com.lordmau5.ffs.blocks;
+package com.lordmau5.ffs.block.valves;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.blocks.abstracts.AbstractBlockValve;
+import com.lordmau5.ffs.block.abstracts.AbstractBlockValve;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
@@ -20,5 +20,4 @@ public class BlockFluidValve extends AbstractBlockValve {
     public TileEntity createTileEntity(World world, IBlockState state) {
         return new TileEntityFluidValve();
     }
-
 }

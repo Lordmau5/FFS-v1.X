@@ -1,6 +1,6 @@
 package com.lordmau5.ffs.util;
 
-import com.lordmau5.ffs.blocks.BlockTankFrame;
+import com.lordmau5.ffs.block.tanktiles.BlockTankFrame;
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;

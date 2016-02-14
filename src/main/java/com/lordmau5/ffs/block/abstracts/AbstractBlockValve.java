@@ -1,9 +1,7 @@
-package com.lordmau5.ffs.blocks;
+package com.lordmau5.ffs.block.abstracts;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
-import com.lordmau5.ffs.tile.tanktiles.TileEntityTankComputer;
 import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
@@ -25,21 +23,26 @@ import net.minecraft.world.World;
 import java.util.Random;
 
 /**
- * Created by Dustin on 28.06.2015.
+ * Created by Dustin on 08.02.2016.
  */
-public class BlockTankComputer extends Block {
+public abstract class AbstractBlockValve extends Block {
 
-    public BlockTankComputer() {
+    private Block blockDrop;
+
+    public AbstractBlockValve(String name, Block blockDrop) {
         super(Material.iron);
-        setUnlocalizedName("blockTankComputer");
-        setRegistryName("blockTankComputer");
+        this.blockDrop = blockDrop;
+
+        setUnlocalizedName(name);
+        setRegistryName(name);
         setCreativeTab(CreativeTabs.tabRedstone);
-        setHardness(5.0F); // Same hardness as an iron block
-        setResistance(10.0F); // Same as hardness
+        setHardness(5.0F);
+        setResistance(10.0F);
 
         setDefaultState(blockState.getBaseState()
                 .withProperty(FFSStateProps.TILE_VALID, false)
-                .withProperty(FFSStateProps.TILE_INSIDE, EnumFacing.DOWN));
+                .withProperty(FFSStateProps.TILE_MASTER, false)
+                .withProperty(FFSStateProps.TILE_INSIDE_DUAL, EnumFacing.Axis.X));
     }
 
     @Override
@@ -48,24 +51,21 @@ public class BlockTankComputer extends Block {
     }
 
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TileEntityTankComputer();
-    }
-
-    @Override
     public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof AbstractTankTile && ((AbstractTankTile) tile).getMasterValve() != null) {
-            ((AbstractTankTile) tile).getMasterValve().breakTank(null);
+        if(tile != null && tile instanceof AbstractTankValve) {
+            AbstractTankValve valve = (AbstractTankValve) world.getTileEntity(pos);
+            valve.breakTank(null);
         }
         super.onBlockDestroyedByExplosion(world, pos, explosion);
     }
 
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(!world.isRemote && tile != null && tile instanceof AbstractTankTile && ((AbstractTankTile) tile).getMasterValve() != null) {
-            ((AbstractTankTile) tile).getMasterValve().breakTank(null);
+        if(!world.isRemote) {
+            AbstractTankValve valve = (AbstractTankValve) world.getTileEntity(pos);
+            if(valve.isValid())
+                valve.breakTank(null);
         }
 
         super.breakBlock(world, pos, state);
@@ -75,21 +75,24 @@ public class BlockTankComputer extends Block {
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
-        AbstractTankTile tile = (AbstractTankTile) world.getTileEntity(pos);
-        if (tile != null && tile.getMasterValve() != null) {
-            AbstractTankValve valve = tile.getMasterValve();
+        AbstractTankValve valve = (AbstractTankValve) world.getTileEntity(pos);
+
+        if(valve.isValid()) {
             if(GenericUtil.isFluidContainer(player.getHeldItem()))
                 return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 
             player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
             return true;
         }
+        else {
+            valve.buildTank(side.getOpposite());
+        }
         return true;
     }
 
     @Override
     public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-        return Item.getItemFromBlock(FancyFluidStorage.blockTankComputer);
+        return Item.getItemFromBlock(this.blockDrop);
     }
 
     @Override
@@ -99,17 +102,18 @@ public class BlockTankComputer extends Block {
 
     @Override
     protected BlockState createBlockState() {
-        return new BlockState(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_INSIDE);
+        return new BlockState(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_MASTER, FFSStateProps.TILE_INSIDE_DUAL);
     }
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
         TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof TileEntityTankComputer) {
-            TileEntityTankComputer valve = (TileEntityTankComputer) tile;
+        if(tile != null && tile instanceof AbstractTankValve) {
+            AbstractTankValve valve = (AbstractTankValve) tile;
 
             state = state.withProperty(FFSStateProps.TILE_VALID, valve.isValid())
-                    .withProperty(FFSStateProps.TILE_INSIDE, (valve.getTileFacing() == null) ? EnumFacing.DOWN : valve.getTileFacing().getOpposite());
+                    .withProperty(FFSStateProps.TILE_MASTER, valve.isMaster())
+                    .withProperty(FFSStateProps.TILE_INSIDE_DUAL, (valve.getTileFacing() == null) ? EnumFacing.Axis.X : valve.getTileFacing().getAxis());
         }
         return state;
     }
@@ -131,7 +135,23 @@ public class BlockTankComputer extends Block {
     }
 
     @Override
+    public boolean hasComparatorInputOverride() {
+        return true;
+    }
+
+    @Override
+    public int getComparatorInputOverride(World world, BlockPos pos) {
+        TileEntity te = world.getTileEntity(pos);
+        if(te instanceof AbstractTankValve) {
+            AbstractTankValve valve = (AbstractTankValve)te;
+            return valve.getComparatorOutput();
+        }
+        return 0;
+    }
+
+    @Override
     public boolean canCreatureSpawn(IBlockAccess world, BlockPos pos, EntityLiving.SpawnPlacementType type) {
         return false;
     }
+
 }

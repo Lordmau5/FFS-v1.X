@@ -1,4 +1,4 @@
-package com.lordmau5.ffs.compat;
+package com.lordmau5.ffs.compat.cc;
 
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankComputer;
 import dan200.computercraft.api.ComputerCraftAPI;

@@ -1,4 +1,4 @@
-package com.lordmau5.ffs.blocks;
+package com.lordmau5.ffs.block.tanktiles;
 
 /**
  * Created by Dustin on 02.07.2015.

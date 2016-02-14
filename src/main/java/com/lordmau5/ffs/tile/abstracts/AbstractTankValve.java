@@ -1,7 +1,7 @@
 package com.lordmau5.ffs.tile.abstracts;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.blocks.BlockTankFrame;
+import com.lordmau5.ffs.block.tanktiles.BlockTankFrame;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.interfaces.IFacingTile;

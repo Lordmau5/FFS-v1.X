@@ -4,14 +4,14 @@
     "model": "minecraft:cube_column",
     "textures": {
       "side": "ffs:blocks/blockValve",
-      "end": "ffs:blocks/blockFluidValve_Slave_Valid"
+      "end": "ffs:blocks/power/tankPowerOn"
     }
   },
   "variants": {
       "inventory": [{
         "model": "minecraft:cube_all",
         "textures": {
-          "all": "ffs:blocks/blockFluidValve_Invalid"
+          "all": "ffs:blocks/power/tankPowerOff"
         }
       }],
       "tile_valid": {
@@ -19,7 +19,7 @@
           "false": {
               "model": "minecraft:cube_all",
               "textures": {
-                  "all": "ffs:blocks/blockFluidValve_Invalid"
+                  "all": "ffs:blocks/power/tankPowerOff"
               }
           }
       },
@@ -34,12 +34,8 @@
           }
       },
       "tile_master": {
-          "true": {
-              "textures": {
-                  "end": "ffs:blocks/blockFluidValve_Master_Valid"
-              }
-          },
-          "false": {}
+        "true": {},
+        "false": {}
       }
   }
 }
