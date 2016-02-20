@@ -38,14 +38,14 @@ public abstract class AbstractBlockValve extends Block {
         setHardness(5.0F);
         setResistance(10.0F);
 
-        ffs_setDefaultState();
+        setDefaultState();
     }
 
-    public abstract void ffs_setDefaultState();
+    public abstract void setDefaultState();
 
-    public abstract BlockState ffs_createBlockState();
+    public abstract BlockState createBlockState();
 
-    public abstract IBlockState ffs_getActualState(IBlockState state, IBlockAccess world, BlockPos pos);
+    public abstract IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos);
 
     @Override
     public boolean hasTileEntity(IBlockState state) {
@@ -100,16 +100,6 @@ public abstract class AbstractBlockValve extends Block {
     @Override
     public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
         return layer == EnumWorldBlockLayer.SOLID || layer == EnumWorldBlockLayer.TRANSLUCENT;
-    }
-
-    @Override
-    protected BlockState createBlockState() {
-        return ffs_createBlockState();
-    }
-
-    @Override
-    public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return ffs_getActualState(state, world, pos);
     }
 
     @Override

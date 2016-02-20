@@ -24,7 +24,7 @@ public class BlockMetaphaser extends AbstractBlockValve {
     }
 
     @Override
-    public void ffs_setDefaultState() {
+    public void setDefaultState() {
         setDefaultState(blockState.getBaseState()
                 .withProperty(FFSStateProps.TILE_VALID, false)
                 .withProperty(FFSStateProps.TILE_METAPHASER_IS_OUTPUT, false)
@@ -32,12 +32,12 @@ public class BlockMetaphaser extends AbstractBlockValve {
     }
 
     @Override
-    public BlockState ffs_createBlockState() {
+    public BlockState createBlockState() {
         return new BlockState(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_METAPHASER_IS_OUTPUT, FFSStateProps.TILE_INSIDE_DUAL);
     }
 
     @Override
-    public IBlockState ffs_getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+    public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityMetaphaser) {
             TileEntityMetaphaser valve = (TileEntityMetaphaser) tile;

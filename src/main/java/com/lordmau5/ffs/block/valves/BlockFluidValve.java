@@ -22,7 +22,7 @@ public class BlockFluidValve extends AbstractBlockValve {
     }
 
     @Override
-    public void ffs_setDefaultState() {
+    public void setDefaultState() {
         setDefaultState(blockState.getBaseState()
                 .withProperty(FFSStateProps.TILE_VALID, false)
                 .withProperty(FFSStateProps.TILE_MASTER, false)
@@ -30,12 +30,12 @@ public class BlockFluidValve extends AbstractBlockValve {
     }
 
     @Override
-    public BlockState ffs_createBlockState() {
+    public BlockState createBlockState() {
         return new BlockState(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_MASTER, FFSStateProps.TILE_INSIDE_DUAL);
     }
 
     @Override
-    public IBlockState ffs_getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+    public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityFluidValve) {
             TileEntityFluidValve valve = (TileEntityFluidValve) tile;
