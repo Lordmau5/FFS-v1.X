@@ -125,6 +125,8 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
                 getWorld().checkLight(getPos());
             }
         }
+
+        updateType = UpdateType.NONE;
     }
 
     @Override

@@ -2,11 +2,11 @@ package com.lordmau5.ffs.tile.abstracts;
 
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.block.tanktiles.BlockTankFrame;
-import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
-import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.interfaces.IFacingTile;
 import com.lordmau5.ffs.tile.interfaces.INameableTile;
+import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.util.TankConfig;
+import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -216,11 +216,12 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                             remainingFrames.remove(id);
                     }
 
+                    int diff = (int) Math.ceil(50 * ((float) getFluidAmount() / (float) getCapacity()));
+
                     for (TileEntityTankFrame frame : validFrames) {
                         Block block = frame.getBlockState().getBlock();
                         int hardness = (int) Math.ceil(block.getBlockHardness(getFakeWorld(), frame.getPos()) * 100);
                         int rand = random.nextInt(hardness) + 1;
-                        int diff = (int) Math.ceil(50 * ((float) getFluidAmount() / (float) getCapacity()));
                         if (rand >= hardness - diff) {
                             EnumFacing leakDir;
                             List<EnumFacing> dirs = frame.getNeighborBlockOrAir(getFluid().getFluid().getBlock());
@@ -335,8 +336,6 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
          */
         initiated = false;
         updateBlockAndNeighbors();
-
-        updateComparatorOutput();
     }
 
     /**
@@ -586,7 +585,11 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             return;
         }
 
+        setValid(false);
         for(AbstractTankValve valve : getAllValves()) {
+            if(valve == this)
+                continue;
+
             valve.setTankConfig(getTankConfig());
             valve.fluidStack = getFluid();
             valve.updateFluidTemperature();
@@ -608,7 +611,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
         tankTiles.clear();
 
-        this.updateBlockAndNeighbors(true);
+        updateBlockAndNeighbors(true);
     }
 
     public void setValid(boolean isValid) {
@@ -639,21 +642,9 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                 if(tile == this)
                     continue;
 
-                if(tile instanceof AbstractTankValve)
-                    ((AbstractTankValve) tile).updateBlockAndNeighbors(true);
-                else
-                    tile.setNeedsUpdate();
+                tile.setNeedsUpdate();
             }
         }
-
-        EnumFacing facing = getTileFacing();
-        if(facing == null)
-            return;
-
-        EnumFacing outside = facing.getOpposite();
-        BlockPos outsidePos = getPos().offset(outside);
-        if(!getWorld().isAirBlock(outsidePos))
-            getWorld().markBlockForUpdate(outsidePos);
     }
 
     private void updateComparatorOutput() {
@@ -673,8 +664,16 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         if (getFluidLuminosity() != oldLuminosity) {
             oldLuminosity = getFluidLuminosity();
             for (TileEntityTankFrame tile : getTankTiles(TileEntityTankFrame.class)) {
-                tile.setNeedsUpdate(UpdateType.FULL);
+                tile.setNeedsUpdate();
             }
+        }
+
+        EnumFacing facing = getTileFacing();
+        if(facing != null) {
+            EnumFacing outside = facing.getOpposite();
+            BlockPos outsidePos = getPos().offset(outside);
+            if(!getWorld().isAirBlock(outsidePos))
+                getWorld().markBlockForUpdate(outsidePos);
         }
 
         updateComparatorOutput();

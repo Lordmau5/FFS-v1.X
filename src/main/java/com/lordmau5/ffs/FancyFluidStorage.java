@@ -1,19 +1,21 @@
 package com.lordmau5.ffs;
 
+import com.lordmau5.ffs.block.fluid.BlockMetaphasedFlux;
+import com.lordmau5.ffs.block.fluid.FluidMetaphasedFlux;
 import com.lordmau5.ffs.block.tanktiles.BlockTankComputer;
 import com.lordmau5.ffs.block.tanktiles.BlockTankFrame;
 import com.lordmau5.ffs.block.tanktiles.BlockTankFrameOpaque;
-import com.lordmau5.ffs.block.valves.BlockEnergyValve;
 import com.lordmau5.ffs.block.valves.BlockFluidValve;
+import com.lordmau5.ffs.block.valves.BlockMetaphaser;
 import com.lordmau5.ffs.client.FluidHelper;
 import com.lordmau5.ffs.client.TankFrameModel;
 import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.proxy.CommonProxy;
 import com.lordmau5.ffs.proxy.GuiHandler;
-import com.lordmau5.ffs.tile.valves.TileEntityEnergyValve;
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankComputer;
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
+import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
@@ -24,6 +26,8 @@ import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -44,10 +48,13 @@ public class FancyFluidStorage {
     public static final String modId = "FFS";
 
     public static BlockFluidValve blockFluidValve;
-    public static BlockEnergyValve blockEnergyValve;
+    public static BlockMetaphaser blockMetaphaser;
     public static BlockTankComputer blockTankComputer;
     public static BlockTankFrame blockTankFrame;
     public static BlockTankFrameOpaque blockTankFrameOpaque;
+
+    public static Fluid fluidMetaphasedFlux;
+    public static BlockMetaphasedFlux blockMetaphasedFlux;
 
     public static Configuration config;
 
@@ -130,13 +137,16 @@ public class FancyFluidStorage {
         loadConfig();
 
         GameRegistry.registerBlock(blockFluidValve = new BlockFluidValve(), "blockFluidValve");
-        GameRegistry.registerBlock(blockEnergyValve = new BlockEnergyValve(), "blockEnergyValve");
+        GameRegistry.registerBlock(blockMetaphaser = new BlockMetaphaser(), "blockMetaphaser");
         GameRegistry.registerBlock(blockTankComputer = new BlockTankComputer(), "blockTankComputer");
         GameRegistry.registerBlock(blockTankFrame = new BlockTankFrame("blockTankFrame"), "blockTankFrame");
         GameRegistry.registerBlock(blockTankFrameOpaque = new BlockTankFrameOpaque(), "blockTankFrameOpaque");
 
+        FluidRegistry.registerFluid(fluidMetaphasedFlux = new FluidMetaphasedFlux());
+        GameRegistry.registerBlock(blockMetaphasedFlux = new BlockMetaphasedFlux(fluidMetaphasedFlux), "blockMetaphasedFlux");
+
         GameRegistry.registerTileEntity(TileEntityFluidValve.class, "tileEntityFluidValve");
-        GameRegistry.registerTileEntity(TileEntityEnergyValve.class, "tileEntityEnergyValve");
+        GameRegistry.registerTileEntity(TileEntityMetaphaser.class, "tileEntityMetaphaser");
         GameRegistry.registerTileEntity(TileEntityTankComputer.class, "tileEntityTankComputer");
         GameRegistry.registerTileEntity(TileEntityTankFrame.class, "tileEntityTankFrame");
 

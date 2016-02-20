@@ -4,6 +4,8 @@ import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.client.ValveRenderer;
 import com.lordmau5.ffs.compat.waila.WailaPluginTank;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.model.ModelLoader;
@@ -19,8 +21,16 @@ public class ClientProxy extends CommonProxy {
         ClientRegistry.bindTileEntitySpecialRenderer(AbstractTankValve.class, new ValveRenderer());
 
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockFluidValve), 0, new ModelResourceLocation("ffs:blockFluidValve", "inventory"));
-        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockEnergyValve), 0, new ModelResourceLocation("ffs:blockEnergyValve", "inventory"));
+        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockMetaphaser), 0, new ModelResourceLocation("ffs:blockMetaphaser", "inventory"));
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockTankComputer), 0, new ModelResourceLocation("ffs:blockTankComputer", "inventory"));
+
+        ModelLoader.setCustomStateMapper(FancyFluidStorage.blockMetaphasedFlux, new StateMapperBase()
+        {
+            protected ModelResourceLocation getModelResourceLocation(IBlockState state)
+            {
+                return new ModelResourceLocation("ffs:blockMetaphasedFlux", "fluid");
+            }
+        });
     }
 
     public void init() {

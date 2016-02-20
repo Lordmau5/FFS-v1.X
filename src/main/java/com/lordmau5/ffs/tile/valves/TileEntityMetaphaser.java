@@ -8,7 +8,9 @@ import buildcraft.api.transport.IPipeConnection;
 import buildcraft.api.transport.IPipeTile;
 import cofh.api.energy.IEnergyProvider;
 import cofh.api.energy.IEnergyReceiver;
+import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -26,7 +28,7 @@ import net.minecraftforge.fml.common.Optional;
 @Optional.InterfaceList(value = {
         @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|transport")
 })
-public class TileEntityEnergyValve extends AbstractTankValve implements IPipeConnection, IEnergyReceiver, IEnergyProvider {
+public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConnection, IEnergyReceiver, IEnergyProvider {
 
     private int maxEnergyBuffer = -1;
     public boolean isExtract = false;
@@ -36,10 +38,15 @@ public class TileEntityEnergyValve extends AbstractTankValve implements IPipeCon
         super.buildTank(inside);
     }
 
-    public TileEntityEnergyValve() {
+    public TileEntityMetaphaser() {
         super();
 
         maxEnergyBuffer = -1;
+    }
+
+    public void setExtract(boolean extract) {
+        isExtract = extract;
+        setNeedsUpdate();
     }
 
     @Override
@@ -66,6 +73,20 @@ public class TileEntityEnergyValve extends AbstractTankValve implements IPipeCon
         int maxReceive = receiver.receiveEnergy(getTileFacing(), getFluidAmount(), true);
         if(maxReceive > 0)
             receiver.receiveEnergy(getTileFacing(), internal_extractEnergy(maxReceive, false), false);
+    }
+
+    @Override
+    public void writeToNBT(NBTTagCompound tag) {
+        super.writeToNBT(tag);
+
+        tag.setBoolean("isExtract", isExtract);
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+
+        setExtract(tag.getBoolean("isExtract"));
     }
 
     // BC
@@ -137,12 +158,12 @@ public class TileEntityEnergyValve extends AbstractTankValve implements IPipeCon
 
         maxReceive = Math.min(maxReceive, getMaxEnergyBuffer());
 
-        maxReceive = fill(FluidRegistry.getFluidStack(FluidRegistry.WATER.getName(), maxReceive), false);
+        maxReceive = fill(FluidRegistry.getFluidStack(FancyFluidStorage.fluidMetaphasedFlux.getName(), maxReceive), false);
 
         if(simulate)
             return maxReceive;
 
-        return fill(FluidRegistry.getFluidStack(FluidRegistry.WATER.getName(), maxReceive), true);
+        return fill(FluidRegistry.getFluidStack(FancyFluidStorage.fluidMetaphasedFlux.getName(), maxReceive), true);
     }
 
     @Override

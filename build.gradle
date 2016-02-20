@@ -74,7 +74,7 @@ repositories {
 }
 
 dependencies {
-    compile name: "buildcraft-7.2.0-pre10"
+    compile name: "buildcraft-7.2.0-pre11"
     compile name: "Chisel-MC1.8.9-0.0.2.6"
     //compile name: "buildcraft", version: "${buildcraft_version}"
     //compile name: "PlanetguyLib", version: "${pglib_version}"

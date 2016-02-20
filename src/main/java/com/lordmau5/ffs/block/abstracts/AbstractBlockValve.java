@@ -2,7 +2,6 @@ package com.lordmau5.ffs.block.abstracts;
 
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
-import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -39,11 +38,14 @@ public abstract class AbstractBlockValve extends Block {
         setHardness(5.0F);
         setResistance(10.0F);
 
-        setDefaultState(blockState.getBaseState()
-                .withProperty(FFSStateProps.TILE_VALID, false)
-                .withProperty(FFSStateProps.TILE_MASTER, false)
-                .withProperty(FFSStateProps.TILE_INSIDE_DUAL, EnumFacing.Axis.X));
+        ffs_setDefaultState();
     }
+
+    public abstract void ffs_setDefaultState();
+
+    public abstract BlockState ffs_createBlockState();
+
+    public abstract IBlockState ffs_getActualState(IBlockState state, IBlockAccess world, BlockPos pos);
 
     @Override
     public boolean hasTileEntity(IBlockState state) {
@@ -102,20 +104,12 @@ public abstract class AbstractBlockValve extends Block {
 
     @Override
     protected BlockState createBlockState() {
-        return new BlockState(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_MASTER, FFSStateProps.TILE_INSIDE_DUAL);
+        return ffs_createBlockState();
     }
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
-        TileEntity tile = world.getTileEntity(pos);
-        if(tile != null && tile instanceof AbstractTankValve) {
-            AbstractTankValve valve = (AbstractTankValve) tile;
-
-            state = state.withProperty(FFSStateProps.TILE_VALID, valve.isValid())
-                    .withProperty(FFSStateProps.TILE_MASTER, valve.isMaster())
-                    .withProperty(FFSStateProps.TILE_INSIDE_DUAL, (valve.getTileFacing() == null) ? EnumFacing.Axis.X : valve.getTileFacing().getAxis());
-        }
-        return state;
+        return ffs_getActualState(state, world, pos);
     }
 
     @Override

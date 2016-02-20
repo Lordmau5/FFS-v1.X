@@ -19,4 +19,6 @@ public class FFSStateProps {
     public static final PropertyEnum<EnumFacing> TILE_INSIDE = PropertyEnum.create("tile_inside", EnumFacing.class);
     public static final PropertyEnum<EnumFacing.Axis> TILE_INSIDE_DUAL = PropertyEnum.create("tile_inside", EnumFacing.Axis.class);
 
+    public static final PropertyBool TILE_METAPHASER_IS_OUTPUT = PropertyBool.create("tile_metaphaser_is_output");
+
 }
