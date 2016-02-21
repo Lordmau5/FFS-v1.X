@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +33,7 @@ public final class FluidHelper {
         textureMap.clear();
 
         for (FluidType type : FluidType.values()) {
-            textureMap.put(type, new HashMap<Fluid, TextureAtlasSprite>());
+            textureMap.put(type, new HashMap<>());
         }
 
         for (Fluid fluid : FluidRegistry.getRegisteredFluids().values()) {
@@ -44,7 +43,7 @@ public final class FluidHelper {
                 if (map.getTextureExtry(flow) != null) {
                     sprite = map.getTextureExtry(flow);
                 } else {
-                    sprite = map.registerSprite(fluid.getStill());
+                    sprite = map.registerSprite(fluid.getFlowing());
                 }
                 textureMap.get(FluidType.FLOWING).put(fluid, sprite);
             }
@@ -63,13 +62,6 @@ public final class FluidHelper {
     }
 
     public static final ResourceLocation BLOCK_TEXTURE = TextureMap.locationBlocksTexture;
-
-    public static TextureAtlasSprite getFluidTexture(FluidStack stack, FluidType type) {
-        if (stack == null) {
-            return missingIcon;
-        }
-        return getFluidTexture(stack.getFluid(), type);
-    }
 
     public static TextureAtlasSprite getFluidTexture(Fluid fluid, FluidType type) {
         if (fluid == null || type == null) {
