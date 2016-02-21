@@ -8,8 +8,8 @@ import net.minecraftforge.fluids.Fluid;
  */
 public class FluidMetaphasedFlux extends Fluid {
 
-    private static ResourceLocation still = new ResourceLocation("ffs:textures/blocks/power/fluid/metaphased_RF");
-    private static ResourceLocation flowing = new ResourceLocation("ffs:textures/blocks/power/fluid/metaphased_RF_Flow");
+    private static ResourceLocation still = new ResourceLocation("ffs", "blocks/power/fluid/metaphased_RF");
+    private static ResourceLocation flowing = new ResourceLocation("ffs", "blocks/power/fluid/metaphased_RF_Flow");
 
     public FluidMetaphasedFlux() {
         super("metaphasedFlux", still, flowing);
@@ -17,6 +17,6 @@ public class FluidMetaphasedFlux extends Fluid {
 
     @Override
     public int getColor() {
-        return 0xFFFFFFFF;
+        return 0xCCFFFFFF;
     }
 }

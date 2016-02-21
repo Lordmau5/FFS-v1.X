@@ -1,6 +1,5 @@
 package com.lordmau5.ffs;
 
-import com.lordmau5.ffs.block.fluid.BlockMetaphasedFlux;
 import com.lordmau5.ffs.block.fluid.FluidMetaphasedFlux;
 import com.lordmau5.ffs.block.tanktiles.BlockTankComputer;
 import com.lordmau5.ffs.block.tanktiles.BlockTankFrame;
@@ -54,7 +53,6 @@ public class FancyFluidStorage {
     public static BlockTankFrameOpaque blockTankFrameOpaque;
 
     public static Fluid fluidMetaphasedFlux;
-    public static BlockMetaphasedFlux blockMetaphasedFlux;
 
     public static Configuration config;
 
@@ -143,7 +141,6 @@ public class FancyFluidStorage {
         GameRegistry.registerBlock(blockTankFrameOpaque = new BlockTankFrameOpaque(), "blockTankFrameOpaque");
 
         FluidRegistry.registerFluid(fluidMetaphasedFlux = new FluidMetaphasedFlux());
-        GameRegistry.registerBlock(blockMetaphasedFlux = new BlockMetaphasedFlux(fluidMetaphasedFlux), "blockMetaphasedFlux");
 
         GameRegistry.registerTileEntity(TileEntityFluidValve.class, "tileEntityFluidValve");
         GameRegistry.registerTileEntity(TileEntityMetaphaser.class, "tileEntityMetaphaser");
@@ -184,7 +181,7 @@ public class FancyFluidStorage {
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    public void loadTextures(TextureStitchEvent.Post event) {
+    public void loadTextures(TextureStitchEvent.Pre event) {
         FluidHelper.initTextures(event.map);
     }
 
