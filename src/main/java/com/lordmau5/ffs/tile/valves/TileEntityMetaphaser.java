@@ -86,7 +86,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
-        setExtract(tag.getBoolean("isExtract"));
+        isExtract = tag.getBoolean("isExtract");
     }
 
     // BC
