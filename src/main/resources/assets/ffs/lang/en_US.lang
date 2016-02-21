@@ -1,3 +1,5 @@
 tile.blockFluidValve.name=Tank Valve
 tile.blockMetaphaser.name=Metaphaser
 tile.blockTankComputer.name=Tank Computer
+
+fluid.metaphasedFlux=Metaphased Flux
