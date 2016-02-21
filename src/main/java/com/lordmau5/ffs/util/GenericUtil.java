@@ -157,6 +157,9 @@ public class GenericUtil {
     }
 
     public static boolean fluidContainerHandler(World world, BlockPos pos, AbstractTankValve valve, EntityPlayer player, EnumFacing side) {
+        if(world.isRemote)
+            return true;
+
         ItemStack current = player.inventory.getCurrentItem();
 
         if (current != null) {
