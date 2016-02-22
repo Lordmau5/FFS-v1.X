@@ -3,62 +3,53 @@ package com.lordmau5.ffs.client;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
+import net.minecraftforge.client.model.animation.FastTESR;
 import net.minecraftforge.fluids.FluidStack;
-import org.lwjgl.opengl.GL11;
 
 /**
  * Created by Dustin on 29.06.2015.
  */
-public class ValveRenderer extends TileEntitySpecialRenderer {
+public class ValveRenderer extends FastTESR {
 
     private int red, green, blue, alpha;
     private int lightmap_X, lightmap_Y;
 
     private void preGL() {
         GlStateManager.pushMatrix();
-        GlStateManager.pushAttrib();
 
-        GlStateManager.enableCull();
-        GlStateManager.disableLighting();
-        GlStateManager.enableAlpha();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        bindTexture(TextureMap.locationBlocksTexture);
+        GlStateManager.disableCull();
     }
 
     private void postGL() {
-        GlStateManager.disableBlend();
-        GlStateManager.disableAlpha();
-        GlStateManager.enableLighting();
-        GlStateManager.disableCull();
+        GlStateManager.enableCull();
 
-        GlStateManager.popAttrib();
         GlStateManager.popMatrix();
     }
 
     @Override
-    public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float partialTicks, int destroyStage)
+    public void renderTileEntityFast(TileEntity tile, double x, double y, double z, float partialTicks, int destroyStage, WorldRenderer wr)
     {
         AbstractTankValve valve = (AbstractTankValve) tile;
-        BlockPos valvePos = valve.getPos();
 
         if (valve == null || !valve.isValid() || !valve.isMaster())
             return;
-
-        Tessellator t = Tessellator.getInstance();
 
         BlockPos bottomDiag = valve.bottomDiagFrame;
         BlockPos topDiag = valve.topDiagFrame;
         if (bottomDiag == null || topDiag == null)
             return;
+
+        BlockPos valvePos = valve.getPos();
+
+        x += bottomDiag.getX() - valvePos.getX();
+        y += bottomDiag.getY() - valvePos.getY() + 1;
+        z += bottomDiag.getZ() - valvePos.getZ();
+
+        wr.setTranslation(x, y, z);
 
         int height = topDiag.getY() - bottomDiag.getY();
         int xSize = topDiag.getX() - bottomDiag.getX() + (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 0 : 1);
@@ -72,6 +63,8 @@ public class ValveRenderer extends TileEntitySpecialRenderer {
         if (fillPercentage > 0 && valve.getFluid() != null) {
             FluidStack fluid = valve.getFluid();
 
+            boolean isNegativeDensity = fluid.getFluid().getDensity(fluid) < 0;
+
             int i = getWorld().getCombinedLight(valvePos.offset(valve.getTileFacing()), fluid.getFluid().getLuminosity());
             lightmap_X = i >> 0x10 & 0xFFFF;
             lightmap_Y = i & 0xFFFF;
@@ -80,7 +73,7 @@ public class ValveRenderer extends TileEntitySpecialRenderer {
             blue = c & 0xFF;
             green = (c >> 8) & 0xFF;
             red = (c >> 16) & 0xFF;
-            alpha = (c >> 24) & 0xFF;
+            alpha = isNegativeDensity ? (int) Math.ceil((0.125f + fillPercentage - (0.125f * fillPercentage)) * 255) : (c >> 24) & 0xFF;
 
             preGL();
 
@@ -90,13 +83,7 @@ public class ValveRenderer extends TileEntitySpecialRenderer {
             float stillMinU = still.getMinU(), stillMaxU = still.getMaxU(), stillMinV = still.getMinV(), stillMaxV = still.getMaxV();
             float flowMinU = flowing.getMinU(), flowMaxU = flowMinU + (stillMaxU - stillMinU), flowMinV_ = flowing.getMinV(), flowMaxV_ = flowMinV_ + (stillMaxV - stillMinV);
 
-            GlStateManager.translate((float) x, (float) y, (float) z);
-            GlStateManager.translate((float) (bottomDiag.getX() - valvePos.getX()), (float) bottomDiag.getY() - valvePos.getY() + 1, (float) (bottomDiag.getZ() - valvePos.getZ()));
-
-            t.getWorldRenderer().begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-
             float pureRenderHeight = (height - 1) * fillPercentage;
-            boolean isNegativeDensity = fluid.getFluid().getDensity(fluid) < 0;
 
             for (int rY = 0; rY < (isNegativeDensity ? (height - 1) : Math.ceil(pureRenderHeight)); rY++) {
                 float renderHeight = pureRenderHeight - rY;
@@ -122,84 +109,81 @@ public class ValveRenderer extends TileEntitySpecialRenderer {
                         float xMaxOffset = 0;
                         //North
                         if (rZ == (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0)) {
-                            zMinOffset = 0.005f;
+                            zMinOffset = 0.001f;
 
-                            addVertexWithUV(t, rX, rY, rZ + zMinOffset, flowMaxU, flowMaxV_);
-                            addVertexWithUV(t, rX, renderHeight, rZ + zMinOffset, flowMaxU, flowMinV);
-                            addVertexWithUV(t, rX + 1, renderHeight, rZ + zMinOffset, flowMinU, flowMinV);
-                            addVertexWithUV(t, rX + 1, rY, rZ + zMinOffset, flowMinU, flowMaxV_);
+                            addVertexWithUV(wr, rX, rY, rZ + zMinOffset, flowMaxU, flowMaxV_);
+                            addVertexWithUV(wr, rX, renderHeight, rZ + zMinOffset, flowMaxU, flowMinV);
+                            addVertexWithUV(wr, rX + 1, renderHeight, rZ + zMinOffset, flowMinU, flowMinV);
+                            addVertexWithUV(wr, rX + 1, rY, rZ + zMinOffset, flowMinU, flowMaxV_);
                         }
 
                         //South
                         if (rZ == zSize - 1) {
-                            zMaxOffset = 0.005f;
+                            zMaxOffset = 0.001f;
 
-                            addVertexWithUV(t, rX, rY, rZ + 1 - zMaxOffset, flowMaxU, flowMaxV_);
-                            addVertexWithUV(t, rX + 1, rY, rZ + 1 - zMaxOffset, flowMinU, flowMaxV_);
-                            addVertexWithUV(t, rX + 1, renderHeight, rZ + 1 - zMaxOffset, flowMinU, flowMinV);
-                            addVertexWithUV(t, rX, renderHeight, rZ + 1 - zMaxOffset, flowMaxU, flowMinV);
+                            addVertexWithUV(wr, rX, rY, rZ + 1 - zMaxOffset, flowMaxU, flowMaxV_);
+                            addVertexWithUV(wr, rX + 1, rY, rZ + 1 - zMaxOffset, flowMinU, flowMaxV_);
+                            addVertexWithUV(wr, rX + 1, renderHeight, rZ + 1 - zMaxOffset, flowMinU, flowMinV);
+                            addVertexWithUV(wr, rX, renderHeight, rZ + 1 - zMaxOffset, flowMaxU, flowMinV);
                         }
 
                         //West
                         if (rX == (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0)) {
-                            xMinOffset = 0.005f;
+                            xMinOffset = 0.001f;
 
-                            addVertexWithUV(t, rX + xMinOffset, rY, rZ, flowMaxU, flowMaxV_);
-                            addVertexWithUV(t, rX + xMinOffset, rY, rZ + 1, flowMinU, flowMaxV_);
-                            addVertexWithUV(t, rX + xMinOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
-                            addVertexWithUV(t, rX + xMinOffset, renderHeight, rZ, flowMaxU, flowMinV);
+                            addVertexWithUV(wr, rX + xMinOffset, rY, rZ, flowMaxU, flowMaxV_);
+                            addVertexWithUV(wr, rX + xMinOffset, rY, rZ + 1, flowMinU, flowMaxV_);
+                            addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
+                            addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ, flowMaxU, flowMinV);
                         }
 
                         //East
                         if (rX == xSize - 1) {
-                            xMaxOffset = 0.005f;
+                            xMaxOffset = 0.001f;
 
-                            addVertexWithUV(t, rX + 1 - xMaxOffset, rY, rZ, flowMaxU, flowMaxV_);
-                            addVertexWithUV(t, rX + 1 - xMaxOffset, renderHeight, rZ, flowMaxU, flowMinV);
-                            addVertexWithUV(t, rX + 1 - xMaxOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
-                            addVertexWithUV(t, rX + 1 - xMaxOffset, rY, rZ + 1, flowMinU, flowMaxV_);
+                            addVertexWithUV(wr, rX + 1 - xMaxOffset, rY, rZ, flowMaxU, flowMaxV_);
+                            addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ, flowMaxU, flowMinV);
+                            addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
+                            addVertexWithUV(wr, rX + 1 - xMaxOffset, rY, rZ + 1, flowMinU, flowMaxV_);
                         }
 
                         //Top
                         if(isNegativeDensity) {
                             if(rY == height - 2) {
-                                addVertexWithUV(t, rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
-                                addVertexWithUV(t, rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
-                                addVertexWithUV(t, rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
-                                addVertexWithUV(t, rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
+                                addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
+                                addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
+                                addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
+                                addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
                             }
                         }
                         else {
                             if (rY == Math.floor(pureRenderHeight) || rY + 1 == Math.ceil(pureRenderHeight)) {
-                                addVertexWithUV(t, rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
-                                addVertexWithUV(t, rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
-                                addVertexWithUV(t, rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
-                                addVertexWithUV(t, rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
+                                addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
+                                addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
+                                addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
+                                addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
                             }
                         }
 
                         //Bottom
-                        addVertexWithUV(t, rX + 1, 0.01f, rZ + zMinOffset, stillMinU, stillMinV);
-                        addVertexWithUV(t, rX + 1, 0.01f, rZ + 1 - zMaxOffset, stillMinU, stillMaxV);
-                        addVertexWithUV(t, rX, 0.01f, rZ + 1 - zMaxOffset, stillMaxU, stillMaxV);
-                        addVertexWithUV(t, rX, 0.01f, rZ + zMinOffset, stillMaxU, stillMinV);
+                        addVertexWithUV(wr, rX + 1, 0.01f, rZ + zMinOffset, stillMinU, stillMinV);
+                        addVertexWithUV(wr, rX + 1, 0.01f, rZ + 1 - zMaxOffset, stillMinU, stillMaxV);
+                        addVertexWithUV(wr, rX, 0.01f, rZ + 1 - zMaxOffset, stillMaxU, stillMaxV);
+                        addVertexWithUV(wr, rX, 0.01f, rZ + zMinOffset, stillMaxU, stillMinV);
                     }
                 }
             }
 
-            if(isNegativeDensity) {
-                GlStateManager.color(1f, 1f, 1f, 0.125f + fillPercentage - (0.125f * fillPercentage));
-                GlStateManager.rotate(180, 0, 0, 1);
-                GlStateManager.translate(bottomDiag.getX() - topDiag.getX() - 1, -height + 1, 0);
-            }
-
-            t.draw();
+            // Disabled for now. Gotta figure out rotation on this bloody thing for the negative density fluids
+//            if(isNegativeDensity) {
+//                GlStateManager.rotate(180, 0, 0, 1);
+//            }
 
             postGL();
         }
     }
 
-    private void addVertexWithUV(Tessellator t, double x, double y, double z, double u, double v) {
-        t.getWorldRenderer().pos(x, y, z).color(red, green, blue, alpha).tex(u, v).lightmap(lightmap_X, lightmap_Y).endVertex();
+    private void addVertexWithUV(WorldRenderer wr, double x, double y, double z, double u, double v) {
+        wr.pos(x, y, z).color(red, green, blue, alpha).tex(u, v).lightmap(lightmap_X, lightmap_Y).endVertex();
     }
 }
