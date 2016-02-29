@@ -7,6 +7,7 @@ import com.lordmau5.ffs.block.tanktiles.BlockTankFrameOpaque;
 import com.lordmau5.ffs.block.valves.BlockFluidValve;
 import com.lordmau5.ffs.block.valves.BlockMetaphaser;
 import com.lordmau5.ffs.client.FluidHelper;
+import com.lordmau5.ffs.client.OverlayRenderHandler;
 import com.lordmau5.ffs.client.TankFrameModel;
 import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.proxy.CommonProxy;
@@ -20,6 +21,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -183,6 +185,8 @@ public class FancyFluidStorage {
     @SideOnly(Side.CLIENT)
     public void loadTextures(TextureStitchEvent.Pre event) {
         FluidHelper.initTextures(event.map);
+
+        OverlayRenderHandler.overlayTexture = event.map.registerSprite(new ResourceLocation("ffs", "blocks/overlay/tankOverlayAnim"));
     }
 
     @SubscribeEvent
