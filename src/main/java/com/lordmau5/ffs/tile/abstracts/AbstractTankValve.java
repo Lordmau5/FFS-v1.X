@@ -585,7 +585,6 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             return;
         }
 
-        setValid(false);
         for(AbstractTankValve valve : getAllValves()) {
             if(valve == this)
                 continue;
@@ -597,6 +596,8 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             valve.setValid(false);
             valve.updateBlockAndNeighbors(true);
         }
+        setValid(false);
+
         tankTiles.removeAll(getTankTiles(AbstractTankValve.class));
         for(TileEntityTankFrame tankFrame : getTankTiles(TileEntityTankFrame.class)) {
             if(frame == tankFrame)
@@ -604,6 +605,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
             tankFrame.breakFrame();
         }
+
         tankTiles.removeAll(getTankTiles(TileEntityTankFrame.class));
         for(AbstractTankTile tankTile : tankTiles) {
             tankTile.setValvePos(null);
