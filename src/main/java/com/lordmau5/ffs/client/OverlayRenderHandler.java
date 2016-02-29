@@ -37,7 +37,7 @@ public class OverlayRenderHandler {
     private ResourceLocation overlayTexture;
 
     public OverlayRenderHandler() {
-        overlayTexture = new ResourceLocation(FancyFluidStorage.modId + ":textures/blocks/tankOverlay.png");
+        overlayTexture = new ResourceLocation(FancyFluidStorage.modId + ":textures/blocks/overlay/tankOverlayAnim.png");
     }
 
     @SubscribeEvent
