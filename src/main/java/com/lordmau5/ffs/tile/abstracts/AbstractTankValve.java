@@ -732,7 +732,13 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             isValid = tag.getBoolean("isValid");
             if(tag.getBoolean("hasFluid")) {
                 if(tag.hasKey("fluidName"))
-                    fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getString("fluidName")), tag.getInteger("fluidAmount"));
+                    try
+                        fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getString("fluidName")), tag.getInteger("fluidAmount"));
+                    catch (IllegalArgumentException e) {
+                        System.out.println("Unable to load fluid: "+tag.getString("fluidName"));
+                        e.printStackTrace();
+                    }
+                        
 
                 updateFluidTemperature();
             }
