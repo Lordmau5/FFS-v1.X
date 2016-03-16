@@ -56,7 +56,7 @@ public class BlockTankFrame extends Block implements IFacade {
         setRegistryName(name);
         setDefaultState(((IExtendedBlockState) blockState.getBaseState())
                 .withProperty(FFSStateProps.FRAME_MODEL, null)
-                .withProperty(FFSStateProps.FRAME_MODEL, null));
+                .withProperty(FFSStateProps.FRAME_STATE, null));
     }
 
     @Override

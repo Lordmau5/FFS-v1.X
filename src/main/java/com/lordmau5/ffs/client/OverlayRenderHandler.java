@@ -189,7 +189,7 @@ public class OverlayRenderHandler {
 
     private void addVertex(WorldRenderer wr, double posX, double posY, double posZ, float u, float v) {
         float alpha = 3f;
-        wr.pos(posX, posY, posZ).tex(u, v).color(1f, 1f, 1f, Math.min(1, alpha * ((float) ticksRemaining / maxTicks))).endVertex();
+        wr.pos(posX, posY, posZ).tex(u, v).color(1f, 1f, 1f, Math.min(0.7f, alpha * ((float) ticksRemaining / maxTicks))).endVertex();
     }
 
 }
