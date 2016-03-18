@@ -208,7 +208,11 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
                         int id = random.nextInt(remainingFrames.size());
                         TileEntityTankFrame frame = remainingFrames.get(id);
-                        Block block = frame.getBlockState().getBlock();
+                        IBlockState blockState = frame.getBlockState();
+                        if(blockState == null)
+                            continue;
+
+                        Block block = blockState.getBlock();
                         if (GenericUtil.canBlockLeak(block) && !frame.getNeighborBlockOrAir(getFluid().getFluid().getBlock()).isEmpty() && block.getBlockHardness(getFakeWorld(), frame.getPos()) <= 1.0F) {
                             validFrames.add(frame);
                             i++;
@@ -219,7 +223,11 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                     int diff = (int) Math.ceil(50 * ((float) getFluidAmount() / (float) getCapacity()));
 
                     for (TileEntityTankFrame frame : validFrames) {
-                        Block block = frame.getBlockState().getBlock();
+                        IBlockState blockState = frame.getBlockState();
+                        if(blockState == null)
+                            continue;
+
+                        Block block = blockState.getBlock();
                         int hardness = (int) Math.ceil(block.getBlockHardness(getFakeWorld(), frame.getPos()) * 100);
                         int rand = random.nextInt(hardness) + 1;
                         if (rand >= hardness - diff) {
