@@ -4,13 +4,12 @@ import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.client.model.ISmartBlockModel;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Optional;
 
 import java.util.ArrayList;
@@ -43,10 +42,10 @@ public class TileEntityTankFrame extends AbstractTankTile {
     }
 
     public IBakedModel getFakeModel() {
-        IBakedModel fake_model = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelFromBlockState(getBlockState(), getFakeWorld(), getPos());
-        if(fake_model instanceof ISmartBlockModel) {
-            fake_model = ((ISmartBlockModel) fake_model).handleBlockState(getExtendedBlockState());
-        }
+        IBakedModel fake_model = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelForState(getBlockState());
+        //if(fake_model instanceof ISmartBl) {
+        //    fake_model = ((ISmartBlockModel) fake_model).handleBlockState(getExtendedBlockState());
+        //}
         return fake_model;
     }
 
@@ -157,8 +156,8 @@ public class TileEntityTankFrame extends AbstractTankTile {
         if(getBlockStateForNBT() == null)
             return 0;
 
-        Block block = getBlockStateForNBT().getBlock();
-        if(block.isOpaqueCube())
+        IBlockState blockState = getBlockStateForNBT();
+        if(blockState.isOpaqueCube())
             return 0;
 
         return lightValue;

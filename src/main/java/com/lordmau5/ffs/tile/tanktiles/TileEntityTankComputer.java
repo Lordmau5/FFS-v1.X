@@ -7,22 +7,16 @@ package com.lordmau5.ffs.tile.tanktiles;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.interfaces.IFacingTile;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.common.Optional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft")
-public class TileEntityTankComputer extends AbstractTankTile implements IFacingTile, IPeripheral {
+public class TileEntityTankComputer extends AbstractTankTile implements IFacingTile{ //}, IPeripheral {
 
     public List<TileEntityFluidValve> getValves() {
         return getMasterValve().getAllValves().stream().filter(p -> p instanceof TileEntityFluidValve).map(p -> (TileEntityFluidValve) p).collect(Collectors.toList());
@@ -71,6 +65,7 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
         return new String[]{"getFluidName", "getFluidAmount", "getFluidCapacity", "setAutoOutput", "doesAutoOutput", "isFluidLocked", "getLockedFluid", "toggleFluidLock"};
     }
 
+    /*
     @Optional.Method(modid = "ComputerCraft")
     @Override
     public String getType() {
@@ -220,4 +215,5 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
     public boolean equals(IPeripheral other) {
         return false;
     }
+    */
 }

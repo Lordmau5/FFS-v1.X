@@ -4,7 +4,7 @@ import com.lordmau5.ffs.block.tanktiles.BlockTankFrame;
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 
@@ -54,7 +54,7 @@ public class FakeWorldWrapper extends World {
     }
 
     @Override
-    protected int getRenderDistanceChunks() {
-        return 0;
+    protected boolean isChunkLoaded(int i, int i1, boolean b) {
+        return false;
     }
 }

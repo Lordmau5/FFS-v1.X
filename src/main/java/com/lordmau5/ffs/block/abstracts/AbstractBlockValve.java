@@ -5,16 +5,18 @@ import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -43,7 +45,7 @@ public abstract class AbstractBlockValve extends Block {
 
     public abstract void setDefaultState();
 
-    public abstract BlockState createBlockState();
+    public abstract BlockStateContainer createBlockState();
 
     public abstract IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos);
 
@@ -74,13 +76,13 @@ public abstract class AbstractBlockValve extends Block {
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
         AbstractTankValve valve = (AbstractTankValve) world.getTileEntity(pos);
 
         if(valve.isValid()) {
-            if(GenericUtil.isFluidContainer(player.getHeldItem()))
+            if(GenericUtil.isFluidContainer(heldItem))
                 return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 
             player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
@@ -98,8 +100,8 @@ public abstract class AbstractBlockValve extends Block {
     }
 
     @Override
-    public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
-        return layer == EnumWorldBlockLayer.SOLID || layer == EnumWorldBlockLayer.TRANSLUCENT;
+    public boolean canRenderInLayer(BlockRenderLayer layer) {
+        return layer == BlockRenderLayer.SOLID || layer == BlockRenderLayer.TRANSLUCENT;
     }
 
     @Override
@@ -113,18 +115,18 @@ public abstract class AbstractBlockValve extends Block {
     }
 
     @Override
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
+    public boolean shouldSideBeRendered(IBlockState state, IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
         IBlockState otherState = worldIn.getBlockState(pos.offset(side));
         return otherState != getBlockState();
     }
 
     @Override
-    public boolean hasComparatorInputOverride() {
+    public boolean hasComparatorInputOverride(IBlockState state) {
         return true;
     }
 
     @Override
-    public int getComparatorInputOverride(World world, BlockPos pos) {
+    public int getComparatorInputOverride(IBlockState state, World world, BlockPos pos) {
         TileEntity te = world.getTileEntity(pos);
         if(te instanceof AbstractTankValve) {
             AbstractTankValve valve = (AbstractTankValve)te;
@@ -134,7 +136,7 @@ public abstract class AbstractBlockValve extends Block {
     }
 
     @Override
-    public boolean canCreatureSpawn(IBlockAccess world, BlockPos pos, EntityLiving.SpawnPlacementType type) {
+    public boolean canCreatureSpawn(IBlockState state, IBlockAccess world, BlockPos pos, EntityLiving.SpawnPlacementType type) {
         return false;
     }
 

@@ -5,12 +5,14 @@ import com.lordmau5.ffs.block.abstracts.AbstractBlockValve;
 import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
 import com.lordmau5.ffs.util.FFSStateProps;
 import com.lordmau5.ffs.util.GenericUtil;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -32,8 +34,8 @@ public class BlockMetaphaser extends AbstractBlockValve {
     }
 
     @Override
-    public BlockState createBlockState() {
-        return new BlockState(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_METAPHASER_IS_OUTPUT, FFSStateProps.TILE_INSIDE_DUAL);
+    public BlockStateContainer createBlockState() {
+        return new BlockStateContainer(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_METAPHASER_IS_OUTPUT, FFSStateProps.TILE_INSIDE_DUAL);
     }
 
     @Override
@@ -55,11 +57,11 @@ public class BlockMetaphaser extends AbstractBlockValve {
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
         TileEntityMetaphaser valve = (TileEntityMetaphaser) world.getTileEntity(pos);
 
         if(valve.isValid()) {
-            if(GenericUtil.isFluidContainer(player.getHeldItem()))
+            if(GenericUtil.isFluidContainer(heldItem))
                 return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 
             if (player.isSneaking()) {

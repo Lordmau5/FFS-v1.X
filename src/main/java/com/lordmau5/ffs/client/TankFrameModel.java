@@ -1,15 +1,15 @@
 package com.lordmau5.ffs.client;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.lordmau5.ffs.util.FFSStateProps;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 import java.util.List;
@@ -17,50 +17,39 @@ import java.util.List;
 /**
  * Created by Dustin on 11.01.2016.
  */
-public class TankFrameModel implements ISmartBlockModel {
+public class TankFrameModel implements IBakedModel {
 
     private IBakedModel model;
 
     @Override
-    public IBakedModel handleBlockState(IBlockState state) {
-        model = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_MODEL);
-        IBlockState fake_state = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_STATE);
+    public List<BakedQuad> getQuads(IBlockState iBlockState, EnumFacing enumFacing, long l) {
+        model = ((IExtendedBlockState) iBlockState).getValue(FFSStateProps.FRAME_MODEL);
+        IBlockState fake_state = ((IExtendedBlockState) iBlockState).getValue(FFSStateProps.FRAME_STATE);
 
         if(model == null)
-            return this;
+            return Lists.newArrayList();
 
         if(fake_state != null) {
             if(fake_state.getBlock().canRenderInLayer(MinecraftForgeClient.getRenderLayer())) {
-                return model;
+                return model.getQuads(fake_state, enumFacing, l);
             }
         }
-
-        return this;
-    }
-
-    @Override
-    public List<BakedQuad> getFaceQuads(EnumFacing p_177551_1_) {
-        return ImmutableList.of();
-    }
-
-    @Override
-    public List<BakedQuad> getGeneralQuads() {
-        return ImmutableList.of();
+        return Lists.newArrayList();
     }
 
     @Override
     public boolean isAmbientOcclusion() {
-        return true;
+        return model != null && model.isAmbientOcclusion();
     }
 
     @Override
     public boolean isGui3d() {
-        return true;
+        return model != null && model.isGui3d();
     }
 
     @Override
     public boolean isBuiltInRenderer() {
-        return false;
+        return model != null && model.isBuiltInRenderer();
     }
 
     @Override
@@ -71,5 +60,10 @@ public class TankFrameModel implements ISmartBlockModel {
     @Override
     public ItemCameraTransforms getItemCameraTransforms() {
         return ItemCameraTransforms.DEFAULT;
+    }
+
+    @Override
+    public ItemOverrideList getOverrides() {
+        return model != null ? model.getOverrides() : null;
     }
 }

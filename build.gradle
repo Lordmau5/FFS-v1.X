@@ -26,7 +26,6 @@ sourceSets {
   main {
     java {
       srcDir 'src/main/java'
-      srcDir 'src/gameanalytics'
     }
     resources {
       srcDir 'src/main/resources'
@@ -40,10 +39,10 @@ idea {
 
 repositories {
     mavenCentral()
-    maven { // Waila
-        name "profmobius"
-        url "http://mobiusstrip.eu/maven"
-    }
+    //maven { // Waila
+    //    name "profmobius"
+    //    url "http://mobiusstrip.eu/maven"
+    //}
     //maven { // NEI/CCC
     //    name 'chickenbones'
     //    url "http://chickenbones.net/maven/"
@@ -52,10 +51,10 @@ repositories {
     //    name 'chisel'
     //    url "http://coloredlightscore.us.to/maven/chisel-2"
     //}
-    maven { // OpenComputers
-        name 'opencomputers'
-        url "http://maven.cil.li"
-    }
+    //maven { // OpenComputers
+    //    name 'opencomputers'
+    //    url "http://maven.cil.li"
+    //}
     //ivy { // Buildcraft
     //    name "BuildCraft"
     //    artifactPattern "http://www.mod-buildcraft.com/releases/BuildCraft/[revision]/[module]-[revision]-dev.[ext]"
@@ -74,18 +73,18 @@ repositories {
 }
 
 dependencies {
-    compile name: "buildcraft-7.2.0-pre11"
-    compile name: "Chisel-MC1.8.9-0.0.2.6"
+    //compile name: "buildcraft-7.2.0-pre11"
+    //compile name: "Chisel-MC1.8.9-0.0.2.6"
     //compile name: "buildcraft", version: "${buildcraft_version}"
     //compile name: "PlanetguyLib", version: "${pglib_version}"
     //compile name: "RemainInMotion", version: "${rim_version}"
-    compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev"
+    //compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev"
 
     //compile "com.cricketcraft.chisel:Chisel2:${chisel_version}:deobf"
     // Oh cool, it doesn't find CTMLib. Freaking useless.
     //compile "com.cricketcraft.ctmlib:CTMLib:${ctmlib_version}:deobf"
 
-    compile "mcp.mobius.waila:Waila:${waila_version}:dev"
+    //compile "mcp.mobius.waila:Waila:${waila_version}:dev"
     // Apparently transitive dependency resolution doesn't want to find CCC
     //compile "codechicken:CodeChickenCore:${minecraft_version}-${codechickencore_version}:dev"
     //compile "codechicken:CodeChickenLib:${minecraft_version}-${codechickenlib_version}:dev"
@@ -105,7 +104,7 @@ targetCompatibility = 1.8
 minecraft {
     runDir = "runtime/client/assets"
     version = "$minecraft_version-$forge_version"
-    mappings = "snapshot_20160110"
+    mappings = "snapshot_20160318"
 }
 
 processResources {

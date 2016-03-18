@@ -4,11 +4,11 @@ import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.block.abstracts.AbstractBlockValve;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.util.FFSStateProps;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -30,8 +30,8 @@ public class BlockFluidValve extends AbstractBlockValve {
     }
 
     @Override
-    public BlockState createBlockState() {
-        return new BlockState(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_MASTER, FFSStateProps.TILE_INSIDE_DUAL);
+    public BlockStateContainer createBlockState() {
+        return new BlockStateContainer(this, FFSStateProps.TILE_VALID, FFSStateProps.TILE_MASTER, FFSStateProps.TILE_INSIDE_DUAL);
     }
 
     @Override

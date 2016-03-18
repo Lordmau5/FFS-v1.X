@@ -4,15 +4,14 @@ package com.lordmau5.ffs.tile.valves;
  * Created by Dustin on 07.02.2016.
  */
 
-import buildcraft.api.transport.IPipeConnection;
-import buildcraft.api.transport.IPipeTile;
+
 import cofh.api.energy.IEnergyProvider;
 import cofh.api.energy.IEnergyReceiver;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Optional;
@@ -28,7 +27,9 @@ import net.minecraftforge.fml.common.Optional;
 @Optional.InterfaceList(value = {
         @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|transport")
 })
-public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConnection, IEnergyReceiver, IEnergyProvider {
+public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyReceiver, IEnergyProvider
+        //,IPipeConnection
+{
 
     private int maxEnergyBuffer = -1;
     public boolean isExtract = false;
@@ -90,7 +91,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
     }
 
     // BC
-
+    /*
     @Optional.Method(modid = "BuildCraftAPI|transport")
     @Override
     public ConnectOverride overridePipeConnection(IPipeTile.PipeType pipeType, EnumFacing from) {
@@ -99,6 +100,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
 
         return isValid() ? ConnectOverride.CONNECT : ConnectOverride.DISCONNECT;
     }
+    */
 
     // CoFH / RF-API
 

@@ -1,12 +1,11 @@
 package com.lordmau5.ffs.tile.valves;
 
-import buildcraft.api.transport.IPipeConnection;
-import buildcraft.api.transport.IPipeTile;
+
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fml.common.Optional;
@@ -18,8 +17,8 @@ import net.minecraftforge.fml.common.Optional;
 @Optional.InterfaceList(value = {
         @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|transport")
 })
-public class TileEntityFluidValve extends AbstractTankValve implements IFluidHandler,
-        IPipeConnection
+public class TileEntityFluidValve extends AbstractTankValve implements IFluidHandler
+        //,IPipeConnection
 {
 
     private boolean autoOutput;
@@ -74,7 +73,7 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
 
         if(fluid == FluidRegistry.WATER) {
             if(getWorld().isRaining()) {
-                int rate = (int) Math.floor(getWorld().rainingStrength * 5 * worldObj.getBiomeGenForCoords(getPos()).rainfall);
+                int rate = (int) Math.floor(getWorld().rainingStrength * 5 * worldObj.getBiomeGenForCoords(getPos()).getRainfall());
                 if (getPos().getY() == getWorld().getPrecipitationHeight(getPos()).getY() - 1) {
                     FluidStack waterStack = fluidStack.copy();
                     waterStack.amount = rate * 10;
@@ -148,6 +147,7 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
     }
 
     // BC
+    /*
     @Optional.Method(modid = "BuildCraftAPI|transport")
     @Override
     public ConnectOverride overridePipeConnection(IPipeTile.PipeType pipeType, EnumFacing from) {
@@ -156,5 +156,6 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
 
         return isValid() ? ConnectOverride.CONNECT : ConnectOverride.DISCONNECT;
     }
+    */
 
 }

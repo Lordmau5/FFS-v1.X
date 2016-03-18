@@ -9,20 +9,22 @@ import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -31,9 +33,6 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.Optional;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import team.chisel.api.IFacade;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -44,7 +43,7 @@ import java.util.Random;
 @Optional.InterfaceList(
         @Optional.Interface(iface = "team.chisel.api.IFacade", modid = "chisel")
 )
-public class BlockTankFrame extends Block implements IFacade {
+public class BlockTankFrame extends Block { //implements IFacade {
 
     public BlockTankFrame() {
         super(Material.rock);
@@ -60,12 +59,12 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public BlockState createBlockState() {
+    public BlockStateContainer createBlockState() {
         return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty[] { FFSStateProps.FRAME_MODEL, FFSStateProps.FRAME_STATE });
     }
 
     @Override
-    public BlockState getBlockState() {
+    public BlockStateContainer getBlockState() {
         return super.getBlockState();
     }
 
@@ -92,7 +91,7 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public boolean removedByPlayer(World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+    public boolean removedByPlayer(IBlockState stateIn, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
         TileEntity tile = world.getTileEntity(pos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
             TileEntityTankFrame frame = (TileEntityTankFrame) world.getTileEntity(pos);
@@ -102,7 +101,7 @@ public class BlockTankFrame extends Block implements IFacade {
                 IBlockState state = frame.getBlockState();
                 Block block = state.getBlock();
 
-                if(block.canSilkHarvest(world, pos, state, player) && EnchantmentHelper.getSilkTouchModifier(player)) {
+                if(block.canSilkHarvest(world, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.silkTouch, player.getHeldItemMainhand()) > 0) {
                     ForgeEventFactory.fireBlockHarvesting(items, world, pos, state, 0, 1.0f, true, player);
 
                     ItemStack itemstack = new ItemStack(Item.getItemFromBlock(block), 1, block.getMetaFromState(state));
@@ -124,7 +123,7 @@ public class BlockTankFrame extends Block implements IFacade {
                 }
             }
         }
-        return super.removedByPlayer(world, pos, player, willHarvest);
+        return super.removedByPlayer(stateIn, world, pos, player, willHarvest);
     }
 
     @Override
@@ -134,12 +133,12 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public EnumWorldBlockLayer getBlockLayer() {
-        return EnumWorldBlockLayer.CUTOUT;
+    public BlockRenderLayer getBlockLayer() {
+        return BlockRenderLayer.CUTOUT;
     }
 
     @Override
-    public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
+    public boolean canRenderInLayer(BlockRenderLayer layer) {
          return true;
      }
 
@@ -158,7 +157,7 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public int getLightValue(IBlockAccess world, BlockPos pos) {
+    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
         int lightValue = 0;
 
         TileEntity tile = world.getTileEntity(pos);
@@ -170,24 +169,23 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public boolean isOpaqueCube() {
+    public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
 
     @Override
-    public boolean isFullCube() {
+    public boolean isFullCube(IBlockState state) {
         return false;
     }
 
-    @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
         AbstractTankTile tile = (AbstractTankTile) world.getTileEntity(pos);
         if (tile != null && tile.getMasterValve() != null) {
             AbstractTankValve valve = tile.getMasterValve();
             if (valve.isValid()) {
-                if (GenericUtil.isFluidContainer(player.getHeldItem()))
+                if (GenericUtil.isFluidContainer(heldItem))
                     return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 
                 player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
@@ -195,23 +193,6 @@ public class BlockTankFrame extends Block implements IFacade {
             }
         }
         return true;
-    }
-
-    @Override
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
-        TileEntity tile = worldIn.getTileEntity(pos);
-        if(tile == null || !(tile instanceof TileEntityTankFrame))
-            return true;
-
-        TileEntityTankFrame myFrame = (TileEntityTankFrame) tile;
-
-        tile = worldIn.getTileEntity(pos.offset(side.getOpposite()));
-        if(tile == null || !(tile instanceof TileEntityTankFrame))
-            return true;
-
-        TileEntityTankFrame otherFrame = (TileEntityTankFrame) tile;
-
-        return myFrame.getBlockState() != otherFrame.getBlockState();
     }
 
     @Override
@@ -225,13 +206,13 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public boolean canCreatureSpawn(IBlockAccess world, BlockPos pos, EntityLiving.SpawnPlacementType type) {
+    public boolean canCreatureSpawn(IBlockState state, IBlockAccess world, BlockPos pos, EntityLiving.SpawnPlacementType type) {
         return false;
     }
 
     @Override
-    public float getAmbientOcclusionLightValue() {
-        return super.getAmbientOcclusionLightValue();
+    public float getAmbientOcclusionLightValue(IBlockState state) {
+        return super.getAmbientOcclusionLightValue(state);
     }
 
     /**
@@ -256,12 +237,25 @@ public class BlockTankFrame extends Block implements IFacade {
         return (World) getFakeBlockAccess(world, pos);
     }
 
-    private Block getFakeBlock(IBlockAccess world, BlockPos pos) {
+    private IBlockState getFakeBlockState(IBlockAccess world, BlockPos pos) {
         TileEntityTankFrame frame = getFrameTile(world, pos);
         if(frame == null)
-            return getDefaultState().getBlock();
+            return getDefaultState();
 
-        return frame.getBlockState() != null ? frame.getBlockState().getBlock() : null;
+        return frame.getBlockState();
+    }
+
+    private Block getFakeBlock(IBlockAccess world, BlockPos pos) {
+        IBlockState state = getFakeBlockState(world, pos);
+        return state != null ? state.getBlock() : null;
+    }
+
+
+    @Override
+    public boolean shouldSideBeRendered(IBlockState state, IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
+        IBlockAccess fakeWorld = getFakeBlockAccess(worldIn, pos);
+        IBlockState fakeState = getFakeBlockState(worldIn, pos);
+        return (fakeWorld != null && fakeState != null) ? fakeState.shouldSideBeRendered(fakeWorld, pos, side) : super.shouldSideBeRendered(state, worldIn, pos, side);
     }
 
 
@@ -273,30 +267,20 @@ public class BlockTankFrame extends Block implements IFacade {
         return (fakeWorld != null && fakeBlock != null) ? fakeBlock.addDestroyEffects(fakeWorld, pos, effectRenderer) : super.addDestroyEffects(world, pos, effectRenderer);
     }
 
-
     @Override
-    public boolean addHitEffects(World world, MovingObjectPosition target, EffectRenderer effectRenderer) {
+    public boolean addHitEffects(IBlockState state, World world, RayTraceResult target, EffectRenderer effectRenderer) {
         World fakeWorld = getFakeWorld(world, target.getBlockPos());
-        Block fakeBlock = getFakeBlock(world, target.getBlockPos());
+        IBlockState fakeState = getFakeBlockState(world, target.getBlockPos());
 
-        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.addHitEffects(fakeWorld, target, effectRenderer) : super.addHitEffects(world, target, effectRenderer);
+        return (fakeWorld != null && fakeState != null && fakeState.getBlock() != null) ? fakeState.getBlock().addHitEffects(fakeState, fakeWorld, target, effectRenderer) : super.addHitEffects(state, world, target, effectRenderer);
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public int colorMultiplier(IBlockAccess world, BlockPos pos, int pass) {
-        IBlockAccess fakeWorld = getFakeBlockAccess(world, pos);
-        Block fakeBlock = getFakeBlock(world, pos);
-
-        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.colorMultiplier(fakeWorld, pos, pass) : super.colorMultiplier(world, pos, pass);
-    }
-
-    @Override
-    public float getBlockHardness(World world, BlockPos pos) {
+    public float getBlockHardness(IBlockState state, World world, BlockPos pos) {
         World fakeWorld = getFakeWorld(world, pos);
-        Block fakeBlock = getFakeBlock(world, pos);
+        IBlockState fakeState = getFakeBlockState(world, pos);
 
-        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.getBlockHardness(fakeWorld, pos) : super.getBlockHardness(world, pos);
+        return (fakeWorld != null && fakeState != null) ? fakeState.getBlockHardness(fakeWorld, pos) : super.getBlockHardness(state, world, pos);
     }
 
     @Override
@@ -315,33 +299,33 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public int getLightOpacity(IBlockAccess world, BlockPos pos) {
+    public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
         IBlockAccess fakeWorld = getFakeBlockAccess(world, pos);
-        Block fakeBlock = getFakeBlock(world, pos);
+        IBlockState fakeState = getFakeBlockState(world, pos);
 
-        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.getLightOpacity(fakeWorld, pos) : super.getLightOpacity(world, pos);
+        return (fakeWorld != null && fakeState != null) ? fakeState.getLightOpacity(fakeWorld, pos) : super.getLightOpacity(state, world, pos);
     }
 
     @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos, EntityPlayer player) {
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
         World fakeWorld = getFakeWorld(world, pos);
-        Block fakeBlock = getFakeBlock(world, pos);
+        IBlockState fakeState = getFakeBlockState(world, pos);
 
-        return (fakeWorld != null && fakeBlock != null && fakeBlock != this) ? fakeBlock.getPickBlock(target, fakeWorld, pos, player) : super.getPickBlock(target, world, pos, player);
+        return (fakeWorld != null && fakeState != null) ? fakeState.getBlock().getPickBlock(fakeState, target, fakeWorld, pos, player) : super.getPickBlock(state, target, world, pos, player);
     }
 
     @Override
-    public float getPlayerRelativeBlockHardness(EntityPlayer player, World world, BlockPos pos) {
+    public float getPlayerRelativeBlockHardness(IBlockState state, EntityPlayer player, World world, BlockPos pos) {
         World fakeWorld = getFakeWorld(world, pos);
-        Block fakeBlock = getFakeBlock(world, pos);
+        IBlockState fakeState = getFakeBlockState(world, pos);
 
-        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.getPlayerRelativeBlockHardness(player, fakeWorld, pos) : super.getPlayerRelativeBlockHardness(player, world, pos);
+        return (fakeWorld != null && fakeState != null) ? fakeState.getPlayerRelativeBlockHardness(player, fakeWorld, pos) : super.getPlayerRelativeBlockHardness(state, player, world, pos);
     }
 
     /**
      * Chisel!
      */
-    @Override
+    /*@Override
     public IBlockState getFacade(IBlockAccess world, BlockPos blockPos, EnumFacing enumFacing) {
         TileEntity tile = world.getTileEntity(blockPos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
@@ -352,5 +336,5 @@ public class BlockTankFrame extends Block implements IFacade {
             return frame.getBlockState();
         }
         return world.getBlockState(blockPos);
-    }
+    }*/
 }

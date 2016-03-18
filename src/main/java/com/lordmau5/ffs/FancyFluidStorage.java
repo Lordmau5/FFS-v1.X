@@ -17,7 +17,7 @@ import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
 import com.lordmau5.ffs.util.GenericUtil;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -192,8 +192,8 @@ public class FancyFluidStorage {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public void bakeSweetModels(ModelBakeEvent event) {
-        event.modelRegistry.putObject(new ModelResourceLocation("ffs:blockTankFrame", "normal"), new TankFrameModel());
-        event.modelRegistry.putObject(new ModelResourceLocation("ffs:blockTankFrameOpaque", "normal"), new TankFrameModel());
+        event.getModelRegistry().putObject(new ModelResourceLocation("ffs:blockTankFrame", "normal"), new TankFrameModel());
+        event.getModelRegistry().putObject(new ModelResourceLocation("ffs:blockTankFrameOpaque", "normal"), new TankFrameModel());
     }
 
 }

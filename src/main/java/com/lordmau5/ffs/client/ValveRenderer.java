@@ -3,10 +3,10 @@ package com.lordmau5.ffs.client;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.model.animation.FastTESR;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -31,7 +31,7 @@ public class ValveRenderer extends FastTESR {
     }
 
     @Override
-    public void renderTileEntityFast(TileEntity tile, double x, double y, double z, float partialTicks, int destroyStage, WorldRenderer wr)
+    public void renderTileEntityFast(TileEntity tile, double x, double y, double z, float partialTicks, int destroyStage, VertexBuffer vb)
     {
         AbstractTankValve valve = (AbstractTankValve) tile;
 
@@ -49,7 +49,7 @@ public class ValveRenderer extends FastTESR {
         y += bottomDiag.getY() - valvePos.getY() + 1;
         z += bottomDiag.getZ() - valvePos.getZ();
 
-        wr.setTranslation(x, y, z);
+        vb.setTranslation(x, y, z);
 
         int height = topDiag.getY() - bottomDiag.getY();
         int xSize = topDiag.getX() - bottomDiag.getX() + (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 0 : 1);
@@ -111,65 +111,65 @@ public class ValveRenderer extends FastTESR {
                         if (rZ == (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0)) {
                             zMinOffset = 0.001f;
 
-                            addVertexWithUV(wr, rX, rY, rZ + zMinOffset, flowMaxU, flowMaxV_);
-                            addVertexWithUV(wr, rX, renderHeight, rZ + zMinOffset, flowMaxU, flowMinV);
-                            addVertexWithUV(wr, rX + 1, renderHeight, rZ + zMinOffset, flowMinU, flowMinV);
-                            addVertexWithUV(wr, rX + 1, rY, rZ + zMinOffset, flowMinU, flowMaxV_);
+                            addVertexWithUV(vb, rX, rY, rZ + zMinOffset, flowMaxU, flowMaxV_);
+                            addVertexWithUV(vb, rX, renderHeight, rZ + zMinOffset, flowMaxU, flowMinV);
+                            addVertexWithUV(vb, rX + 1, renderHeight, rZ + zMinOffset, flowMinU, flowMinV);
+                            addVertexWithUV(vb, rX + 1, rY, rZ + zMinOffset, flowMinU, flowMaxV_);
                         }
 
                         //South
                         if (rZ == zSize - 1) {
                             zMaxOffset = 0.001f;
 
-                            addVertexWithUV(wr, rX, rY, rZ + 1 - zMaxOffset, flowMaxU, flowMaxV_);
-                            addVertexWithUV(wr, rX + 1, rY, rZ + 1 - zMaxOffset, flowMinU, flowMaxV_);
-                            addVertexWithUV(wr, rX + 1, renderHeight, rZ + 1 - zMaxOffset, flowMinU, flowMinV);
-                            addVertexWithUV(wr, rX, renderHeight, rZ + 1 - zMaxOffset, flowMaxU, flowMinV);
+                            addVertexWithUV(vb, rX, rY, rZ + 1 - zMaxOffset, flowMaxU, flowMaxV_);
+                            addVertexWithUV(vb, rX + 1, rY, rZ + 1 - zMaxOffset, flowMinU, flowMaxV_);
+                            addVertexWithUV(vb, rX + 1, renderHeight, rZ + 1 - zMaxOffset, flowMinU, flowMinV);
+                            addVertexWithUV(vb, rX, renderHeight, rZ + 1 - zMaxOffset, flowMaxU, flowMinV);
                         }
 
                         //West
                         if (rX == (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0)) {
                             xMinOffset = 0.001f;
 
-                            addVertexWithUV(wr, rX + xMinOffset, rY, rZ, flowMaxU, flowMaxV_);
-                            addVertexWithUV(wr, rX + xMinOffset, rY, rZ + 1, flowMinU, flowMaxV_);
-                            addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
-                            addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ, flowMaxU, flowMinV);
+                            addVertexWithUV(vb, rX + xMinOffset, rY, rZ, flowMaxU, flowMaxV_);
+                            addVertexWithUV(vb, rX + xMinOffset, rY, rZ + 1, flowMinU, flowMaxV_);
+                            addVertexWithUV(vb, rX + xMinOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
+                            addVertexWithUV(vb, rX + xMinOffset, renderHeight, rZ, flowMaxU, flowMinV);
                         }
 
                         //East
                         if (rX == xSize - 1) {
                             xMaxOffset = 0.001f;
 
-                            addVertexWithUV(wr, rX + 1 - xMaxOffset, rY, rZ, flowMaxU, flowMaxV_);
-                            addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ, flowMaxU, flowMinV);
-                            addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
-                            addVertexWithUV(wr, rX + 1 - xMaxOffset, rY, rZ + 1, flowMinU, flowMaxV_);
+                            addVertexWithUV(vb, rX + 1 - xMaxOffset, rY, rZ, flowMaxU, flowMaxV_);
+                            addVertexWithUV(vb, rX + 1 - xMaxOffset, renderHeight, rZ, flowMaxU, flowMinV);
+                            addVertexWithUV(vb, rX + 1 - xMaxOffset, renderHeight, rZ + 1, flowMinU, flowMinV);
+                            addVertexWithUV(vb, rX + 1 - xMaxOffset, rY, rZ + 1, flowMinU, flowMaxV_);
                         }
 
                         //Top
                         if(isNegativeDensity) {
                             if(rY == height - 2) {
-                                addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
-                                addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
-                                addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
-                                addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
+                                addVertexWithUV(vb, rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
+                                addVertexWithUV(vb, rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
+                                addVertexWithUV(vb, rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
+                                addVertexWithUV(vb, rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
                             }
                         }
                         else {
                             if (rY == Math.floor(pureRenderHeight) || rY + 1 == Math.ceil(pureRenderHeight)) {
-                                addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
-                                addVertexWithUV(wr, rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
-                                addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
-                                addVertexWithUV(wr, rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
+                                addVertexWithUV(vb, rX + xMinOffset, renderHeight, rZ, stillMinU, stillMinV);
+                                addVertexWithUV(vb, rX + xMinOffset, renderHeight, rZ + 1, stillMinU, stillMaxV);
+                                addVertexWithUV(vb, rX + 1 - xMaxOffset, renderHeight, rZ + 1, stillMaxU, stillMaxV);
+                                addVertexWithUV(vb, rX + 1 - xMaxOffset, renderHeight, rZ, stillMaxU, stillMinV);
                             }
                         }
 
                         //Bottom
-                        addVertexWithUV(wr, rX + 1, 0.01f, rZ + zMinOffset, stillMinU, stillMinV);
-                        addVertexWithUV(wr, rX + 1, 0.01f, rZ + 1 - zMaxOffset, stillMinU, stillMaxV);
-                        addVertexWithUV(wr, rX, 0.01f, rZ + 1 - zMaxOffset, stillMaxU, stillMaxV);
-                        addVertexWithUV(wr, rX, 0.01f, rZ + zMinOffset, stillMaxU, stillMinV);
+                        addVertexWithUV(vb, rX + 1, 0.01f, rZ + zMinOffset, stillMinU, stillMinV);
+                        addVertexWithUV(vb, rX + 1, 0.01f, rZ + 1 - zMaxOffset, stillMinU, stillMaxV);
+                        addVertexWithUV(vb, rX, 0.01f, rZ + 1 - zMaxOffset, stillMaxU, stillMaxV);
+                        addVertexWithUV(vb, rX, 0.01f, rZ + zMinOffset, stillMaxU, stillMinV);
                     }
                 }
             }
@@ -183,7 +183,7 @@ public class ValveRenderer extends FastTESR {
         }
     }
 
-    private void addVertexWithUV(WorldRenderer wr, double x, double y, double z, double u, double v) {
-        wr.pos(x, y, z).color(red, green, blue, alpha).tex(u, v).lightmap(lightmap_X, lightmap_Y).endVertex();
+    private void addVertexWithUV(VertexBuffer vb, double x, double y, double z, double u, double v) {
+        vb.pos(x, y, z).color(red, green, blue, alpha).tex(u, v).lightmap(lightmap_X, lightmap_Y).endVertex();
     }
 }

@@ -5,11 +5,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
@@ -96,7 +96,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
         readFromNBT(pkt.getNbtCompound());
     }
 
@@ -104,7 +104,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     public Packet getDescriptionPacket() {
         NBTTagCompound tag = new NBTTagCompound();
         writeToNBT(tag);
-        return new S35PacketUpdateTileEntity(getPos(), 0, tag);
+        return new SPacketUpdateTileEntity(getPos(), 0, tag);
     }
 
     public void markForUpdate() {
@@ -114,7 +114,8 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
         }
 
         if(updateType == UpdateType.FULL) {
-            getWorld().markBlockForUpdate(getPos());
+            IBlockState state = getWorld().getBlockState(getPos());
+            getWorld().notifyBlockUpdate(getPos(), state, state, 4);
             if (getWorld().isRemote) {
                 getWorld().checkLight(getPos());
             }

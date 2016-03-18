@@ -11,7 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidContainerRegistry;
@@ -63,16 +63,16 @@ public class GenericUtil {
         return height > (valvePosition - 0.5f);
     }
 
-    public static boolean isBlockGlass(Block block, int metadata) {
-        if(block == null || block.getMaterial() == Material.air)
+    public static boolean isBlockGlass(IBlockState blockState, int metadata) {
+        if(blockState == null || blockState.getMaterial() == Material.air)
             return false;
 
-        if(block instanceof BlockGlass)
+        if(blockState.getBlock() instanceof BlockGlass)
             return true;
 
-        ItemStack is = new ItemStack(block, 1, metadata);
+        ItemStack is = new ItemStack(blockState.getBlock(), 1, metadata);
 
-        if(block.getMaterial() == Material.glass && !is.getUnlocalizedName().contains("pane"))
+        if(blockState.getMaterial() == Material.glass && !is.getUnlocalizedName().contains("pane"))
             return true;
 
         for(ItemStack is2 : glassList) {
@@ -127,13 +127,13 @@ public class GenericUtil {
         if(blacklistedBlocks.contains(block))
             return false;
 
-        if(block.canProvidePower())
+        if(state.canProvidePower())
             return false;
 
-        if(block.getMaterial() == Material.sand)
+        if(state.getMaterial() == Material.sand)
             return false;
 
-        if(!block.isOpaqueCube())
+        if(!state.isOpaqueCube())
             return true;
 
         if(FancyFluidStorage.instance.TANK_FRAME_MODE == FancyFluidStorage.TankFrameMode.DIFFERENT_BLOCK)
@@ -143,8 +143,8 @@ public class GenericUtil {
 
     }
 
-    public static boolean canBlockLeak(Block block) {
-        Material mat = block.getMaterial();
+    public static boolean canBlockLeak(IBlockState state) {
+        Material mat = state.getMaterial();
         return mat.equals(Material.grass) || mat.equals(Material.sponge) || mat.equals(Material.cloth) || mat.equals(Material.clay) || mat.equals(Material.gourd) || mat.equals(Material.sand);
     }
 
