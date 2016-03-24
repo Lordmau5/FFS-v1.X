@@ -1,7 +1,6 @@
 package com.lordmau5.ffs.proxy;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.client.OverlayRenderHandler;
 import com.lordmau5.ffs.compat.cc.CCPeripheralProvider;
 import com.lordmau5.ffs.compat.oc.OCCompatibility;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,7 +18,6 @@ public class CommonProxy {
 
     public void init() {
         MinecraftForge.EVENT_BUS.register(new FancyFluidStorage());
-        MinecraftForge.EVENT_BUS.register(new OverlayRenderHandler());
 
         BUILDCRAFT_LOADED = ModAPIManager.INSTANCE.hasAPI("BuildCraftAPI|transport");
         if(Loader.isModLoaded("ComputerCraft")) {
