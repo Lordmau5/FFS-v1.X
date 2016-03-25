@@ -341,6 +341,7 @@ public class BlockTankFrame extends Block implements IFacade {
     /**
      * Chisel!
      */
+    @Optional.Method(modid = "chisel")
     @Override
     public IBlockState getFacade(IBlockAccess world, BlockPos blockPos, EnumFacing enumFacing) {
         TileEntity tile = world.getTileEntity(blockPos);
