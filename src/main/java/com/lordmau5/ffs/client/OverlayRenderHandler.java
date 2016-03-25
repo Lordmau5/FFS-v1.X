@@ -1,5 +1,6 @@
 package com.lordmau5.ffs.client;
 
+import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import net.minecraft.client.Minecraft;
@@ -45,7 +46,7 @@ public class OverlayRenderHandler {
 
         if(mc.objectMouseOver != null) {
             BlockPos pos = mc.objectMouseOver.getBlockPos();
-            if (!pos.equals(lastPos))
+            if (pos != null && lastPos != null && !pos.equals(lastPos))
                 ticksRemaining = maxTicks;
             lastPos = pos;
         }
@@ -53,10 +54,18 @@ public class OverlayRenderHandler {
 
     @SubscribeEvent
     public void overlayRender(DrawBlockHighlightEvent event) {
+        if(!FancyFluidStorage.instance.TANK_OVERLAY_RENDER)
+            return;
 
         EntityPlayer player = event.player;
         BlockPos pos = event.target.getBlockPos();
+        if(pos == null)
+            return;
+
         World world = player.getEntityWorld();
+        if(world == null)
+            return;
+
         TileEntity tile = world.getTileEntity(pos);
         if(tile == null || !(tile instanceof AbstractTankTile))
             return;
