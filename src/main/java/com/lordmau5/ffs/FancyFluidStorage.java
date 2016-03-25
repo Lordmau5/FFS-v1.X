@@ -72,6 +72,7 @@ public class FancyFluidStorage {
     public boolean SHOULD_TANKS_LEAK = true;
 
     public boolean TANK_RENDER_INSIDE = true;
+    public boolean TANK_OVERLAY_RENDER = true;
 
     public enum TankFrameMode {
         SAME_BLOCK,
@@ -125,6 +126,10 @@ public class FancyFluidStorage {
         Property tankRenderInside = config.get(Configuration.CATEGORY_GENERAL, "tanksRenderInsideOnly", true);
         tankRenderInside.comment = "Should tanks only render the inside as fluid or extend to the frame-sides?\nDefault: true";
         TANK_RENDER_INSIDE = tankRenderInside.getBoolean(true);
+
+        Property tankOverlayRender = config.get(Configuration.CATEGORY_CLIENT, "tankOverlayRender", true);
+        tankOverlayRender.comment = "Should a tank overlay be temporarily rendered on the tank when you look at the one?\nDefault: true";
+        TANK_OVERLAY_RENDER = tankOverlayRender.getBoolean(true);
 
         if (config.hasChanged()) {
             config.save();
