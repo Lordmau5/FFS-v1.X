@@ -167,6 +167,11 @@ public class FancyFluidStorage {
         GameRegistry.addRecipe(new ItemStack(blockTankComputer), "IGI", "GBG", "IGI",
                 'I', Items.iron_ingot,
                 'G', Blocks.iron_bars,
+                'B', Blocks.redstone_block);
+
+        GameRegistry.addRecipe(new ItemStack(blockMetaphaser), "IGI", "GBG", "IGI",
+                'I', Items.iron_ingot,
+                'G', Blocks.iron_bars,
                 'B', Items.comparator);
 
         proxy.init();

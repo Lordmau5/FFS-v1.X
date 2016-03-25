@@ -15,8 +15,8 @@ public class GuiButtonLockFluid extends GuiButton {
     protected static final ResourceLocation toggleTexture = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
     protected boolean state = false;
 
-    public GuiButtonLockFluid(int id, int x, int y, boolean state) {
-        super(id, x, y, 8, 8, "LockButton");
+    public GuiButtonLockFluid(int x, int y, boolean state) {
+        super(0, x, y, 8, 8, "LockButton");
         this.state = state;
     }
 

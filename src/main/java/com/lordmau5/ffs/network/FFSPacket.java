@@ -3,6 +3,7 @@ package com.lordmau5.ffs.network;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
+import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -43,6 +44,33 @@ public abstract class FFSPacket {
             public void decode(ByteBuf buffer) {
                 this.pos = new BlockPos(buffer.readInt(), buffer.readInt(), buffer.readInt());
                 this.autoOutput = buffer.readBoolean();
+            }
+        }
+
+        public static class UpdateMetaphaserMode extends FFSPacket {
+            public BlockPos pos;
+            public boolean extractMode;
+
+            public UpdateMetaphaserMode(){
+            }
+
+            public UpdateMetaphaserMode(TileEntityMetaphaser metaphaser) {
+                this.pos = metaphaser.getPos();
+                this.extractMode = metaphaser.getExtract();
+            }
+
+            @Override
+            public void encode(ByteBuf buffer) {
+                buffer.writeInt(this.pos.getX());
+                buffer.writeInt(this.pos.getY());
+                buffer.writeInt(this.pos.getZ());
+                buffer.writeBoolean(this.extractMode);
+            }
+
+            @Override
+            public void decode(ByteBuf buffer) {
+                this.pos = new BlockPos(buffer.readInt(), buffer.readInt(), buffer.readInt());
+                this.extractMode = buffer.readBoolean();
             }
         }
 

@@ -15,6 +15,7 @@ public class PacketCodec extends FMLIndexedMessageToMessageCodec<FFSPacket> {
         addPacket(FFSPacket.Server.UpdateAutoOutput.class);
         addPacket(FFSPacket.Server.UpdateTileName.class);
         addPacket(FFSPacket.Server.UpdateFluidLock.class);
+        addPacket(FFSPacket.Server.UpdateMetaphaserMode.class);
     }
 
     void addPacket(Class<? extends FFSPacket> type) {

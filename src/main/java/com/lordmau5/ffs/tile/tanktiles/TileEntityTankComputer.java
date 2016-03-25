@@ -7,6 +7,7 @@ package com.lordmau5.ffs.tile.tanktiles;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.interfaces.IFacingTile;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
+import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -19,13 +20,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft")
 public class TileEntityTankComputer extends AbstractTankTile implements IFacingTile, IPeripheral {
 
     public List<TileEntityFluidValve> getValves() {
-        return getMasterValve().getAllValves().stream().filter(p -> p instanceof TileEntityFluidValve).map(p -> (TileEntityFluidValve) p).collect(Collectors.toList());
+        return getMasterValve().getTankTiles(TileEntityFluidValve.class);
+    }
+
+    public List<TileEntityMetaphaser> getMetaphasers() {
+        return getMasterValve().getTankTiles(TileEntityMetaphaser.class);
     }
 
     // Used by CC and OC
@@ -39,6 +43,18 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
                 valves.add(valve);
         }
         return valves;
+    }
+
+    public List<TileEntityMetaphaser> getMetaphasersByName(String name) {
+        List<TileEntityMetaphaser> metaphasers = new ArrayList<>();
+        if(getMetaphasers().isEmpty())
+            return metaphasers;
+
+        for(TileEntityMetaphaser valve : getMetaphasers()) {
+            if(valve.getTileName().toLowerCase().equals(name.toLowerCase()))
+                metaphasers.add(valve);
+        }
+        return metaphasers;
     }
 
     @Override
@@ -68,7 +84,7 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
 
     // ComputerCraft
     public String[] methodNames() {
-        return new String[]{"getFluidName", "getFluidAmount", "getFluidCapacity", "setAutoOutput", "doesAutoOutput", "isFluidLocked", "getLockedFluid", "toggleFluidLock"};
+        return new String[]{"getFluidName", "getFluidAmount", "getFluidCapacity", "setAutoOutput", "doesAutoOutput", "isFluidLocked", "getLockedFluid", "toggleFluidLock", "getMetaphaserMode", "setMetaphaserMode"};
     }
 
     @Optional.Method(modid = "ComputerCraft")
@@ -196,6 +212,72 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
                 }
                 else {
                     throw new LuaException("insufficient number of arguments found - expected 1, got " + arguments.length);
+                }
+            }
+            case 8: { // getMetaphaserMode
+                if(arguments.length == 0) {
+                    Map<String, Boolean> metaphaserOutputs = new HashMap<>();
+                    for(TileEntityMetaphaser metaphaser : getMetaphasers()) {
+                        metaphaserOutputs.put(metaphaser.getTileName(), metaphaser.getExtract());
+                    }
+
+                    return new Object[]{metaphaserOutputs};
+                }
+                else if(arguments.length == 1) {
+                    if(!(arguments[0] instanceof String)) {
+                        throw new LuaException("expected argument 1 to be of type \"String\", found \"" + arguments[0].getClass().getSimpleName() + "\"");
+                    }
+
+                    List<TileEntityMetaphaser> metaphasers = getMetaphasersByName((String) arguments[0]);
+                    if(metaphasers.isEmpty()) {
+                        throw new LuaException("no valves found");
+                    }
+
+                    Map<String, Boolean> metaphaserOutputs = new HashMap<>();
+                    for(TileEntityMetaphaser metaphaser : metaphasers) {
+                        metaphaserOutputs.put(metaphaser.getTileName(), metaphaser.getExtract());
+                    }
+
+                    return new Object[]{metaphaserOutputs};
+                }
+                else {
+                    throw new LuaException("insufficient number of arguments found - expected 1, got " + arguments.length);
+                }
+            }
+            case 9: { // setMetaphaserMode
+                if(arguments.length == 1) {
+                    if(!(arguments[0] instanceof Boolean)) {
+                        throw new LuaException("expected argument 1 to be of type \"boolean\", found \"" + arguments[0].getClass().getSimpleName() + "\"");
+                    }
+
+                    for(TileEntityMetaphaser metaphaser : getMetaphasers())
+                        metaphaser.setExtract((boolean) arguments[0]);
+
+                    return new Object[]{(boolean) arguments[0]};
+                }
+                else if(arguments.length == 2) {
+                    if(!(arguments[0] instanceof String)) {
+                        throw new LuaException("expected argument 1 to be of type \"String\", found \"" + arguments[0].getClass().getSimpleName() + "\"");
+                    }
+
+                    if(!(arguments[1] instanceof Boolean)) {
+                        throw new LuaException("expected argument 2 to be of type \"boolean\", found \"" + arguments[1].getClass().getSimpleName() + "\"");
+                    }
+
+                    List<TileEntityMetaphaser> metaphasers = getMetaphasersByName((String) arguments[0]);
+                    if(metaphasers.isEmpty()) {
+                        throw new LuaException("no valves found");
+                    }
+
+                    List<String> metaphaserNames = new ArrayList<>();
+                    for(TileEntityMetaphaser metaphaser : metaphasers) {
+                        metaphaser.setExtract((boolean) arguments[1]);
+                        metaphaserNames.add(metaphaser.getTileName());
+                    }
+                    return new Object[]{metaphaserNames};
+                }
+                else {
+                    throw new LuaException("insufficient number of arguments found - expected 1 or 2, got " + arguments.length);
                 }
             }
             default:

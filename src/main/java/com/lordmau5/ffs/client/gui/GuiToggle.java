@@ -13,12 +13,12 @@ import org.lwjgl.opengl.GL11;
  */
 public class GuiToggle extends GuiButton {
 
-    protected static final ResourceLocation toggleTexture = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
+    private static final ResourceLocation toggleTexture = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
     protected boolean state = false;
-    protected int textColor = 16777215;
+    private int textColor = 16777215;
 
-    public GuiToggle(int id, int x, int y, String title, boolean state, int textColor) {
-        super(id, x, y, 16, 8, title);
+    public GuiToggle(int x, int y, String title, boolean state, int textColor) {
+        super(0, x, y, 16, 8, title);
         this.state = state;
         this.textColor = textColor;
     }

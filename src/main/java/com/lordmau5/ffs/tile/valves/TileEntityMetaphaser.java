@@ -31,7 +31,7 @@ import net.minecraftforge.fml.common.Optional;
 public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConnection, IEnergyReceiver, IEnergyProvider {
 
     private int maxEnergyBuffer = -1;
-    public boolean isExtract = false;
+    private boolean isExtract = false;
 
     @Override
     public void buildTank(EnumFacing inside) {
@@ -42,6 +42,10 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
         super();
 
         maxEnergyBuffer = -1;
+    }
+
+    public boolean getExtract() {
+        return isExtract;
     }
 
     public void setExtract(boolean extract) {
@@ -124,7 +128,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
         if(!isValid())
             return 0;
 
-        if(!isExtract)
+        if(!getExtract())
             return 0;
 
         if(getFluidAmount() <= 0)
@@ -150,7 +154,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
         if(!isValid())
             return 0;
 
-        if(isExtract)
+        if(getExtract())
             return 0;
 
         if(getCapacity() - getFluidAmount() <= 0)

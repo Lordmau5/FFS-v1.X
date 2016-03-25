@@ -5,6 +5,7 @@ import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.tile.interfaces.INameableTile;
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
+import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
 import com.lordmau5.ffs.util.GenericUtil;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
@@ -88,6 +89,11 @@ public class WailaPluginTank implements IWailaDataProvider {
             TileEntityFluidValve t_Valve = (TileEntityFluidValve) te;
             String autoOutput = t_Valve.getAutoOutput() ? "true" : "false";
             list.add("Auto Output: " + (t_Valve.getAutoOutput() ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + EnumChatFormatting.ITALIC + autoOutput + EnumChatFormatting.RESET);
+        }
+        if(te instanceof TileEntityMetaphaser) {
+            TileEntityMetaphaser t_Metaphaser = (TileEntityMetaphaser) te;
+            String autoOutput = t_Metaphaser.getExtract() ? "true" : "false";
+            list.add("Extract Mode: " + (t_Metaphaser.getExtract() ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + EnumChatFormatting.ITALIC + autoOutput + EnumChatFormatting.RESET);
         }
 
         if (fluidAmount == 0) {

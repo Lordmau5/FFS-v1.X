@@ -2,6 +2,7 @@ package com.lordmau5.ffs.compat.oc;
 
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankComputer;
+import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
 import dan200.computercraft.api.lua.LuaException;
 import li.cil.oc.api.Driver;
 import li.cil.oc.api.machine.Arguments;
@@ -166,6 +167,76 @@ public class OCCompatibility {
                 }
                 else {
                     throw new Exception("insufficient number of arguments found - expected 1, got " + a.count());
+                }
+            }
+
+            @Callback(doc = "function([metaphaserName:string]):object;  Returns the metaphasers with their extract-mode in a list. If a metaphaserName is supplied, it'll return a list of those with that name.")
+            public Object[] setMetaphaserMode(Context context, Arguments args) throws Exception {
+                if(args.count() == 1) {
+                    if(!(args.isBoolean(0))) {
+                        throw new Exception("expected argument 1 to be of type \"boolean\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
+                    }
+
+                    for(TileEntityMetaphaser metaphaser : tile.getMetaphasers())
+                        metaphaser.setExtract(args.checkBoolean(0));
+
+                    return new Object[]{args.checkBoolean(0)};
+                }
+                else if(args.count() == 2) {
+                    if(!(args.isString(0))) {
+                        throw new Exception("expected argument 1 to be of type \"String\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
+                    }
+
+                    if(!(args.isBoolean(1))) {
+                        throw new Exception("expected argument 2 to be of type \"boolean\", found \"" + args.checkAny(1).getClass().getSimpleName() + "\"");
+                    }
+
+                    List<TileEntityMetaphaser> metaphasers = tile.getMetaphasersByName(args.checkString(0));
+                    if(metaphasers.isEmpty()) {
+                        throw new Exception("no valves found");
+                    }
+
+                    List<String> metaphaserNames = new ArrayList<>();
+                    for(TileEntityMetaphaser metaphaser : metaphasers) {
+                        metaphaser.setExtract(args.checkBoolean(1));
+                        metaphaserNames.add(metaphaser.getTileName());
+                    }
+                    return new Object[]{metaphaserNames};
+                }
+                else {
+                    throw new Exception("insufficient number of arguments found - expected 1 or 2, got " + args.count());
+                }
+            }
+
+            @Callback(doc = "function([valveName:string]):object;  Returns the metaphasers with their extract-mode in a list. If a valveName is supplied, it'll return a list of those with that name.")
+            public Object[] getMetaphaserMode(Context context, Arguments args) throws Exception {
+                if(args.count() == 0) {
+                    Map<String, Boolean> valveOutputs = new HashMap<>();
+                    for(TileEntityMetaphaser metaphaser : tile.getMetaphasers()) {
+                        valveOutputs.put(metaphaser.getTileName(), metaphaser.getExtract());
+                    }
+
+                    return new Object[]{valveOutputs};
+                }
+                else if(args.count() == 1) {
+                    if(!(args.isString(0))) {
+                        throw new Exception("expected argument 1 to be of type \"String\", found \"" + args.checkAny(0).getClass().getSimpleName() + "\"");
+                    }
+
+                    List<TileEntityMetaphaser> metaphasers = tile.getMetaphasersByName(args.checkString(0));
+                    if(metaphasers.isEmpty()) {
+                        throw new Exception("no valves found");
+                    }
+
+                    Map<String, Boolean> metaphaserOutputs = new HashMap<>();
+                    for(TileEntityMetaphaser metaphaser : metaphasers) {
+                        metaphaserOutputs.put(metaphaser.getTileName(), metaphaser.getExtract());
+                    }
+
+                    return new Object[]{metaphaserOutputs};
+                }
+                else {
+                    throw new Exception("insufficient number of arguments found - expected 1, got " + args.count());
                 }
             }
         }
