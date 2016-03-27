@@ -55,10 +55,10 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
 
     @Override
     public void update() {
-        super.update();
-
-        if(isExtract)
+        if(getExtract())
             outputToTile();
+
+        super.update();
     }
 
     private void outputToTile() {
@@ -76,7 +76,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
         IEnergyReceiver receiver = (IEnergyReceiver) outsideTile;
         int maxReceive = receiver.receiveEnergy(getTileFacing(), getFluidAmount(), true);
         if(maxReceive > 0)
-            receiver.receiveEnergy(getTileFacing(), internal_extractEnergy(maxReceive, false), false);
+            receiver.receiveEnergy(getTileFacing(), internal_extractEnergy(maxReceive, false, false), false);
     }
 
     @Override
@@ -124,11 +124,11 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
         return (int) Math.ceil((double) amount * 0.75d);
     }
 
-    private int internal_extractEnergy(int extractEnergy, boolean simulate) {
+    private int internal_extractEnergy(int extractEnergy, boolean simulate, boolean ignoreGetExtract) {
         if(!isValid())
             return 0;
 
-        if(!getExtract())
+        if(!getExtract() && !ignoreGetExtract)
             return 0;
 
         if(getFluidAmount() <= 0)
@@ -146,7 +146,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
     public int extractEnergy(EnumFacing facing, int maxExtract, boolean simulate) {
         maxExtract = Math.min(maxExtract, getFluidAmount());
 
-        return internal_extractEnergy(maxExtract, simulate);
+        return internal_extractEnergy(maxExtract, simulate, true);
     }
 
     @Override
