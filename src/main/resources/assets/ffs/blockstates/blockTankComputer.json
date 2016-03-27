@@ -8,7 +8,9 @@
       "north": "ffs:blocks/blockValve",
       "south": "ffs:blocks/blockValve",
       "west": "ffs:blocks/blockValve",
-      "east": "ffs:blocks/blockValve"
+      "east": "ffs:blocks/blockValve",
+
+      "particle": "ffs:blocks/blockValve"
     }
   },
   "variants": {
