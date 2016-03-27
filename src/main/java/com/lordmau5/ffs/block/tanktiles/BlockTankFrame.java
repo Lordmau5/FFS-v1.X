@@ -33,6 +33,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.Optional;
+import team.chisel.api.IFacade;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -43,7 +44,7 @@ import java.util.Random;
 @Optional.InterfaceList(
         @Optional.Interface(iface = "team.chisel.api.IFacade", modid = "chisel")
 )
-public class BlockTankFrame extends Block { //implements IFacade {
+public class BlockTankFrame extends Block implements IFacade {
 
     public BlockTankFrame() {
         super(Material.rock);
@@ -189,7 +190,6 @@ public class BlockTankFrame extends Block { //implements IFacade {
                     return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 
                 player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
-                return true;
             }
         }
         return true;
@@ -325,7 +325,8 @@ public class BlockTankFrame extends Block { //implements IFacade {
     /**
      * Chisel!
      */
-    /*@Override
+    @Optional.Method(modid = "chisel")
+    @Override
     public IBlockState getFacade(IBlockAccess world, BlockPos blockPos, EnumFacing enumFacing) {
         TileEntity tile = world.getTileEntity(blockPos);
         if(tile != null && tile instanceof TileEntityTankFrame) {
@@ -336,5 +337,5 @@ public class BlockTankFrame extends Block { //implements IFacade {
             return frame.getBlockState();
         }
         return world.getBlockState(blockPos);
-    }*/
+    }
 }

@@ -1,6 +1,7 @@
 package com.lordmau5.ffs.tile.abstracts;
 
 import com.lordmau5.ffs.util.FakeWorldWrapper;
+import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -22,7 +23,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
         STATE,
         FULL
     }
-    private UpdateType updateType = UpdateType.NONE;
+    public UpdateType updateType = UpdateType.NONE;
 
     /**
      * Necessary stuff for the interfaces.
@@ -121,7 +122,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
             }
         }
         else if(updateType == UpdateType.STATE) {
-            getWorld().notifyBlockOfStateChange(getPos(), blockType);
+            GenericUtil.sendTileEntityPacketToPlayers(getDescriptionPacket(), getWorld());
             if (getWorld().isRemote) {
                 getWorld().checkLight(getPos());
             }

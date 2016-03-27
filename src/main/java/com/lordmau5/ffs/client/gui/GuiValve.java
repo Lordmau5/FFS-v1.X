@@ -8,6 +8,7 @@ import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.tile.interfaces.INameableTile;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
+import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
 import com.lordmau5.ffs.util.GenericUtil;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.gui.GuiButton;
@@ -29,19 +30,22 @@ import java.util.List;
  */
 public class GuiValve extends GuiScreen {
 
-    protected static final ResourceLocation tex = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
-    protected static final int AUTO_FLUID_OUTPUT_BTN_ID = 23442;
-    protected static final int LOCK_FLUID_BTN_ID = 23443;
+    private static final ResourceLocation tex = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
 
-    AbstractTankTile tile;
-    AbstractTankValve valve;
-    AbstractTankValve masterValve;
+    private GuiToggle autoFluidOutputButton;
+    private GuiToggle metaphaserToggleButton;
 
-    GuiTextField tileName;
+    private GuiButtonLockFluid lockFluidButton;
 
-    int xSize = 256, ySize = 121;
-    int left = 0, top = 0;
-    int mouseX, mouseY;
+    private AbstractTankTile tile;
+    private AbstractTankValve valve;
+    private AbstractTankValve masterValve;
+
+    private GuiTextField tileName;
+
+    private int xSize = 256, ySize = 121;
+    private int left = 0, top = 0;
+    private int mouseX, mouseY;
 
     public GuiValve(AbstractTankTile tile) {
         super();
@@ -62,14 +66,17 @@ public class GuiValve extends GuiScreen {
         this.left = (this.width - this.xSize) / 2;
         this.top = (this.height - this.ySize) / 2;
         if(tile instanceof TileEntityFluidValve) {
-            this.buttonList.add(new GuiToggle(AUTO_FLUID_OUTPUT_BTN_ID, this.left + 80, this.top + 20, "Auto fluid output", ((TileEntityFluidValve)tile).getAutoOutput(), 16777215));
+            this.buttonList.add(autoFluidOutputButton = new GuiToggle(this.left + 80, this.top + 20, "Auto fluid output", ((TileEntityFluidValve)tile).getAutoOutput(), 16777215));
+        }
+        else if(tile instanceof TileEntityMetaphaser) {
+            this.buttonList.add(metaphaserToggleButton = new GuiToggle(this.left + 80, this.top + 20, "Metaphaser extract", ((TileEntityMetaphaser)tile).getExtract(), 16777215));
         }
         if(tile instanceof INameableTile) {
             tileName = new GuiTextField(0, this.fontRendererObj, this.left + 80, this.top + 100, 120, 10);
             tileName.setText(valve.getTileName());
             tileName.setMaxStringLength(32);
         }
-        this.buttonList.add(new GuiButtonLockFluid(LOCK_FLUID_BTN_ID, this.left + 67, this.top + 9, masterValve.getTankConfig().isFluidLocked()));
+        this.buttonList.add(lockFluidButton = new GuiButtonLockFluid(this.left + 67, this.top + 9, masterValve.getTankConfig().isFluidLocked()));
     }
 
     @Override
@@ -185,13 +192,19 @@ public class GuiValve extends GuiScreen {
     }
 
     public void actionPerformed(GuiButton btn) {
-        if (btn.id == AUTO_FLUID_OUTPUT_BTN_ID && btn instanceof GuiToggle) {
+        if (btn == autoFluidOutputButton) {
             GuiToggle toggle = (GuiToggle)btn;
 
             ((TileEntityFluidValve)valve).setAutoOutput(toggle.getState());
             NetworkHandler.sendPacketToServer(new FFSPacket.Server.UpdateAutoOutput((TileEntityFluidValve) this.valve));
         }
-        else if (btn.id == LOCK_FLUID_BTN_ID && btn instanceof GuiButtonLockFluid) {
+        else if (btn == metaphaserToggleButton) {
+            GuiToggle toggle = (GuiToggle)btn;
+
+            ((TileEntityMetaphaser)valve).setExtract(toggle.getState());
+            NetworkHandler.sendPacketToServer(new FFSPacket.Server.UpdateMetaphaserMode((TileEntityMetaphaser) this.valve));
+        }
+        else if (btn == lockFluidButton) {
             GuiButtonLockFluid toggle = (GuiButtonLockFluid) btn;
 
             this.masterValve.toggleFluidLock(toggle.getState());

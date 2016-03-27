@@ -4,17 +4,15 @@ package com.lordmau5.ffs.tile.valves;
  * Created by Dustin on 07.02.2016.
  */
 
-
 import cofh.api.energy.IEnergyProvider;
 import cofh.api.energy.IEnergyReceiver;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fml.common.Optional;
 
 /**
  * - Slave-valve to extract the fluid
@@ -23,16 +21,10 @@ import net.minecraftforge.fml.common.Optional;
  *
  * - 1:1 ratio
  */
-
-@Optional.InterfaceList(value = {
-        @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|transport")
-})
-public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyReceiver, IEnergyProvider
-        //,IPipeConnection
-{
+public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyReceiver, IEnergyProvider {
 
     private int maxEnergyBuffer = -1;
-    public boolean isExtract = false;
+    private boolean isExtract = false;
 
     @Override
     public void buildTank(EnumFacing inside) {
@@ -43,6 +35,10 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
         super();
 
         maxEnergyBuffer = -1;
+    }
+
+    public boolean getExtract() {
+        return isExtract;
     }
 
     public void setExtract(boolean extract) {
@@ -73,7 +69,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
         IEnergyReceiver receiver = (IEnergyReceiver) outsideTile;
         int maxReceive = receiver.receiveEnergy(getTileFacing(), getFluidAmount(), true);
         if(maxReceive > 0)
-            receiver.receiveEnergy(getTileFacing(), internal_extractEnergy(maxReceive, false), false);
+            receiver.receiveEnergy(getTileFacing(), internal_extractEnergy(maxReceive, false, false), false);
     }
 
     @Override
@@ -89,18 +85,6 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
 
         isExtract = tag.getBoolean("isExtract");
     }
-
-    // BC
-    /*
-    @Optional.Method(modid = "BuildCraftAPI|transport")
-    @Override
-    public ConnectOverride overridePipeConnection(IPipeTile.PipeType pipeType, EnumFacing from) {
-        if(pipeType != IPipeTile.PipeType.POWER)
-            return ConnectOverride.DISCONNECT;
-
-        return isValid() ? ConnectOverride.CONNECT : ConnectOverride.DISCONNECT;
-    }
-    */
 
     // CoFH / RF-API
 
@@ -122,11 +106,11 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
         return (int) Math.ceil((double) amount * 0.75d);
     }
 
-    private int internal_extractEnergy(int extractEnergy, boolean simulate) {
+    private int internal_extractEnergy(int extractEnergy, boolean simulate, boolean ignoreGetExtract) {
         if(!isValid())
             return 0;
 
-        if(!isExtract)
+        if(!getExtract() && !ignoreGetExtract)
             return 0;
 
         if(getFluidAmount() <= 0)
@@ -144,7 +128,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
     public int extractEnergy(EnumFacing facing, int maxExtract, boolean simulate) {
         maxExtract = Math.min(maxExtract, getFluidAmount());
 
-        return internal_extractEnergy(maxExtract, simulate);
+        return internal_extractEnergy(maxExtract, simulate, true);
     }
 
     @Override
@@ -152,7 +136,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
         if(!isValid())
             return 0;
 
-        if(isExtract)
+        if(getExtract())
             return 0;
 
         if(getCapacity() - getFluidAmount() <= 0)

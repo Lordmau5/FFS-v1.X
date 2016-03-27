@@ -23,7 +23,7 @@ public class UpdateTileName_Server extends SimpleChannelInboundHandler<FFSPacket
             if(w_Tile != null && w_Tile instanceof AbstractTankTile && w_Tile instanceof INameableTile) {
                 AbstractTankTile tile = (AbstractTankTile) w_Tile;
                 ((INameableTile)tile).setTileName(msg.name);
-                tile.setNeedsUpdate();
+                tile.setNeedsUpdate(AbstractTankTile.UpdateType.STATE);
             }
         }
     }

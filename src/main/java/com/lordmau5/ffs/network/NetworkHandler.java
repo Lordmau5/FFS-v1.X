@@ -2,6 +2,7 @@ package com.lordmau5.ffs.network;
 
 import com.lordmau5.ffs.network.handlers.server.UpdateAutoOutput_Server;
 import com.lordmau5.ffs.network.handlers.server.UpdateFluidLock_Server;
+import com.lordmau5.ffs.network.handlers.server.UpdateMetaphaserMode_Server;
 import com.lordmau5.ffs.network.handlers.server.UpdateTileName_Server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
@@ -33,6 +34,7 @@ public class NetworkHandler {
         pipeline.addAfter(targetName, "UpdateAutoOutput_Server", new UpdateAutoOutput_Server());
         pipeline.addAfter(targetName, "UpdateTileName_Server", new UpdateTileName_Server());
         pipeline.addAfter(targetName, "UpdateFluidLock_Server", new UpdateFluidLock_Server());
+        pipeline.addAfter(targetName, "UpdateMetaphaserMode_Server", new UpdateMetaphaserMode_Server());
 
         if(side.isClient()){
             registerClientHandlers();

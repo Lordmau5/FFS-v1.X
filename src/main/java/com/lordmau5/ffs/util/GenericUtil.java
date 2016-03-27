@@ -10,13 +10,15 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidContainerItem;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.text.NumberFormat;
@@ -316,6 +318,13 @@ public class GenericUtil {
 
     public static String intToFancyNumber(int number) {
         return NumberFormat.getIntegerInstance().format(number);
+    }
+
+    public static void sendTileEntityPacketToPlayers(Packet tileEntityPacket, World world) {
+        if(world.isRemote)
+            return;
+
+        FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayersInDimension(tileEntityPacket, world.provider.getDimension());
     }
 
 }
