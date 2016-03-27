@@ -285,7 +285,11 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
     }
 
     public <T> List<T> getTankTiles(Class<T> type) {
-        return tankTiles.stream().filter(p -> type.isAssignableFrom(p.getClass())).map(p -> (T) p).collect(Collectors.toList());
+        List<T> tiles = tankTiles.stream().filter(p -> type.isAssignableFrom(p.getClass())).map(p -> (T) p).collect(Collectors.toList());
+        if(this.getClass().isAssignableFrom(type))
+            tiles.add((T) this);
+
+        return tiles;
     }
 
     public List<AbstractTankValve> getAllValves() {
@@ -889,7 +893,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             if (fluidStack == null)
             {
                 fluidStack = new FluidStack(resource, Math.min(fluidCapacity, resource.amount));
-                setNeedsUpdate();
+                setNeedsUpdate(UpdateType.STATE);
                 return fluidStack.amount;
             }
 
@@ -901,7 +905,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             else {
                 fluidStack.amount = fluidCapacity;
             }
-            setNeedsUpdate();
+            setNeedsUpdate(UpdateType.STATE);
             return filled;
         }
         else
@@ -925,7 +929,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                 if (fluidStack.amount <= 0) {
                     fluidStack = null;
                 }
-                setNeedsUpdate();
+                setNeedsUpdate(UpdateType.STATE);
             }
             return stack;
         }
