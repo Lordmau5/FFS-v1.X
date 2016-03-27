@@ -191,7 +191,6 @@ public class BlockTankFrame extends Block implements IFacade {
                     return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
 
                 player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
-                return true;
             }
         }
         return true;
