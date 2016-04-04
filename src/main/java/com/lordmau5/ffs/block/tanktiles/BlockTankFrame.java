@@ -139,7 +139,7 @@ public class BlockTankFrame extends Block implements IFacade {
     }
 
     @Override
-    public boolean canRenderInLayer(BlockRenderLayer layer) {
+    public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
          return true;
      }
 
@@ -187,7 +187,7 @@ public class BlockTankFrame extends Block implements IFacade {
             AbstractTankValve valve = tile.getMasterValve();
             if (valve.isValid()) {
                 if (GenericUtil.isFluidContainer(heldItem))
-                    return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
+                    return GenericUtil.fluidContainerHandler(world, valve, player, side);
 
                 player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
             }

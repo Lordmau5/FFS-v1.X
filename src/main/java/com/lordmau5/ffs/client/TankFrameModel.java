@@ -30,7 +30,7 @@ public class TankFrameModel implements IBakedModel {
             return Lists.newArrayList();
 
         if(fake_state != null) {
-            if(fake_state.getBlock().canRenderInLayer(MinecraftForgeClient.getRenderLayer())) {
+            if(fake_state.getBlock().canRenderInLayer(fake_state, MinecraftForgeClient.getRenderLayer())) {
                 return model.getQuads(fake_state, enumFacing, l);
             }
         }

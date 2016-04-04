@@ -83,7 +83,7 @@ public abstract class AbstractBlockValve extends Block {
 
         if(valve.isValid()) {
             if(GenericUtil.isFluidContainer(heldItem))
-                return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
+                return GenericUtil.fluidContainerHandler(world, valve, player, side);
 
             player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
             return true;
@@ -100,7 +100,7 @@ public abstract class AbstractBlockValve extends Block {
     }
 
     @Override
-    public boolean canRenderInLayer(BlockRenderLayer layer) {
+    public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
         return layer == BlockRenderLayer.SOLID || layer == BlockRenderLayer.TRANSLUCENT;
     }
 

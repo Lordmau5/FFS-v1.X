@@ -158,7 +158,7 @@ public class GenericUtil {
 
     }
 
-    public static boolean fluidContainerHandler(World world, BlockPos pos, AbstractTankValve valve, EntityPlayer player, EnumFacing side) {
+    public static boolean fluidContainerHandler(World world, AbstractTankValve valve, EntityPlayer player, EnumFacing side) {
         if(world.isRemote)
             return true;
 

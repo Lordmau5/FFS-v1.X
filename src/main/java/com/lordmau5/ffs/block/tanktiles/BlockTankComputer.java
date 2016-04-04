@@ -78,7 +78,7 @@ public class BlockTankComputer extends Block {
         if (tile != null && tile.getMasterValve() != null) {
             AbstractTankValve valve = tile.getMasterValve();
             if(GenericUtil.isFluidContainer(heldItem))
-                return GenericUtil.fluidContainerHandler(world, pos, valve, player, side);
+                return GenericUtil.fluidContainerHandler(world,  valve, player, side);
 
             player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
         }
@@ -86,7 +86,7 @@ public class BlockTankComputer extends Block {
     }
 
     @Override
-    public boolean canRenderInLayer(BlockRenderLayer layer) {
+    public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
         return layer == BlockRenderLayer.SOLID || layer == BlockRenderLayer.TRANSLUCENT;
     }
 

@@ -136,16 +136,17 @@ public class FancyFluidStorage {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         config = new Configuration(event.getSuggestedConfigurationFile());
         loadConfig();
 
-        GameRegistry.registerBlock(blockFluidValve = new BlockFluidValve(), "blockFluidValve");
-        GameRegistry.registerBlock(blockMetaphaser = new BlockMetaphaser(), "blockMetaphaser");
-        GameRegistry.registerBlock(blockTankComputer = new BlockTankComputer(), "blockTankComputer");
-        GameRegistry.registerBlock(blockTankFrame = new BlockTankFrame("blockTankFrame"), "blockTankFrame");
-        GameRegistry.registerBlock(blockTankFrameOpaque = new BlockTankFrameOpaque(), "blockTankFrameOpaque");
+        GameRegistry.registerWithItem(blockFluidValve = new BlockFluidValve());
+        GameRegistry.registerWithItem(blockMetaphaser = new BlockMetaphaser());
+        GameRegistry.registerWithItem(blockTankComputer = new BlockTankComputer());
+        GameRegistry.registerWithItem(blockTankFrame = new BlockTankFrame("blockTankFrame"));
+        GameRegistry.registerWithItem(blockTankFrameOpaque = new BlockTankFrameOpaque());
 
         FluidRegistry.registerFluid(fluidMetaphasedFlux = new FluidMetaphasedFlux());
 

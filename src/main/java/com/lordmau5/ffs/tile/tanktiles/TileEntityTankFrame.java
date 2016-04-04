@@ -144,8 +144,8 @@ public class TileEntityTankFrame extends AbstractTankTile {
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        if(getBlockStateForNBT() != null && getBlockStateForNBT().getBlock() != null) {
-            tag.setString("blockName", getBlockStateForNBT().getBlock().getRegistryName());
+        if(getBlockStateForNBT() != null && getBlockStateForNBT().getBlock() != null && getBlockStateForNBT().getBlock().getRegistryName() != null) {
+            tag.setString("blockName", getBlockStateForNBT().getBlock().getRegistryName().toString());
             tag.setInteger("metadata", getBlockStateForNBT().getBlock().getMetaFromState(getBlockStateForNBT()));
         }
 
