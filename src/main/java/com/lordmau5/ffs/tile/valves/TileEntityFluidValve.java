@@ -110,6 +110,9 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
     // IFluidHandler
     @Override
     public boolean canFill(EnumFacing from, Fluid fluid) {
+        if(getMasterValve() == null)
+            return false;
+
         if(!canFillIncludingContainers(from, fluid))
             return false;
 
@@ -118,6 +121,9 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
 
     @Override
     public boolean canDrain(EnumFacing from, Fluid fluid) {
+        if(getMasterValve() == null)
+            return false;
+
         return getFluid() != null && getFluid().getFluid() == fluid && getFluidAmount() > 0;
     }
 
@@ -139,11 +145,17 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
 
     @Override
     public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain) {
+        if(getMasterValve() == null)
+            return null;
+
         return getMasterValve() == this ? drain(resource.amount, doDrain) : getMasterValve().drain(resource.amount, doDrain);
     }
 
     @Override
     public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain) {
+        if(getMasterValve() == null)
+            return null;
+
         return getMasterValve() == this ? drain(maxDrain, doDrain) : getMasterValve().drain(maxDrain, doDrain);
     }
 
