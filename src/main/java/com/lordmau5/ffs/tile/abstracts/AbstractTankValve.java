@@ -10,6 +10,7 @@ import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -69,9 +70,6 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
     public int initialWaitTick = 20;
 
     // TANK LOGIC
-    private FluidStack fluidStack;
-    private int fluidTemperature = 0;
-    private int fluidCapacity = 0;
     private int lastComparatorOut = 0;
     // ---------------
 
@@ -132,12 +130,12 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             return;
 
         if(isMaster()) {
-            if (minBurnableTemp > 0 && fluidTemperature >= minBurnableTemp && frameBurnability > 0) {
+            if (minBurnableTemp > 0 && getTankConfig().getFluidTemperature() >= minBurnableTemp && frameBurnability > 0) {
                 if (randomBurnTicks-- <= 0) {
                     randomBurnTicks = 20 * 5;
                     Random random = new Random();
 
-                    int temperatureDiff = fluidTemperature - minBurnableTemp;
+                    int temperatureDiff = getTankConfig().getFluidTemperature() - minBurnableTemp;
                     int chanceOfBurnability = 300 - frameBurnability;
                     int rand = random.nextInt(300) + temperatureDiff + ((int) Math.floor((float) getFluidAmount() / (float) getCapacity() * 300));
                     if (rand >= chanceOfBurnability) {
@@ -305,6 +303,20 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         return getTankConfig().getTankHeight();
     }
 
+    private EntityPlayer buildPlayer;
+    /**
+     * Let a player build a tank!
+     * @param player - The player that tries to build the tank
+     * @param inside - The direction of the inside of the tank
+     */
+    public void buildTank_player(EntityPlayer player, EnumFacing inside) {
+        if (getWorld().isRemote)
+            return;
+
+        buildPlayer = player;
+        buildTank(inside);
+    }
+
     /**
      * Let's build a tank!
      * @param inside - The direction of the inside of the tank
@@ -323,7 +335,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
          */
         setValid(false);
 
-        fluidCapacity = 0;
+        getTankConfig().setFluidCapacity(0);
 
         tankTiles.clear();
 
@@ -347,6 +359,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
          * Also, update our neighbor blocks, e.g. pipes or similar.
          */
         initiated = false;
+        buildPlayer = null;
         updateBlockAndNeighbors();
     }
 
@@ -456,9 +469,9 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         BlockPos pos;
 
         if (FancyFluidStorage.instance.INSIDE_CAPACITY) {
-            fluidCapacity = (maps[2].size()) * mbPerVirtualTank;
+            getTankConfig().setFluidCapacity((maps[2].size()) * mbPerVirtualTank);
         } else {
-            fluidCapacity = (maps[0].size() + maps[1].size() + maps[2].size()) * mbPerVirtualTank;
+            getTankConfig().setFluidCapacity((maps[0].size() + maps[1].size() + maps[2].size()) * mbPerVirtualTank);
         }
 
         for (Map.Entry<BlockPos, IBlockState> frameCheck : maps[0].entrySet()) {
@@ -472,6 +485,8 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                 return false;
             }
         }
+
+        FluidStack tempNewFluidStack = getTankConfig().getFluidStack();
 
         List<TileEntity> facingTiles = new ArrayList<>();
         for (Map.Entry<BlockPos, IBlockState> insideFrameCheck : maps[1].entrySet()) {
@@ -491,13 +506,34 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                     if (valve == this)
                         continue;
 
-                    if (valve.fluidStack != null) {
-                        this.fluidStack = valve.fluidStack;
-                        updateFluidTemperature();
+                    if (valve.getTankConfig().getFluidStack() != null) {
+                        if(getTankConfig() != null && getTankConfig().getFluidStack() != null) {
+                            FluidStack myFS = getTankConfig().getFluidStack();
+                            FluidStack otherFS = valve.getTankConfig().getFluidStack();
+
+                            if(!myFS.isFluidEqual(otherFS)) {
+                                GenericUtil.sendMessageToClient(buildPlayer, "One or more valves contain different fluids! Could not build the tank!");
+                                return false;
+                            }
+                            else {
+                                tempNewFluidStack.amount += otherFS.amount;
+                                updateFluidTemperature();
+                            }
+                        }
+                        else {
+                            tempNewFluidStack = valve.getTankConfig().getFluidStack();
+                            updateFluidTemperature();
+                        }
                     }
                     continue;
                 }
                 else if(tile instanceof AbstractTankTile) {
+                    AbstractTankValve masterValve = ((AbstractTankTile)tile).getMasterValve();
+                    if(masterValve != null && masterValve != this) {
+                        GenericUtil.sendMessageToClient(buildPlayer, "One or more blocks already belong to another tank!");
+                        return false;
+                    }
+
                     continue;
                 }
             }
@@ -506,9 +542,10 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                 return false;
         }
 
+        getTankConfig().setFluidStack(tempNewFluidStack);
         // Make sure we don't overfill a tank. If the new tank is smaller than the old one, excess liquid disappear.
-        if (this.fluidStack != null)
-            this.fluidStack.amount = Math.min(this.fluidStack.amount, this.fluidCapacity);
+        if (getTankConfig().getFluidStack() != null)
+            getTankConfig().getFluidStack().amount = Math.min(getTankConfig().getFluidStack().amount, getTankConfig().getFluidCapacity());
 
         for (TileEntity facingTile : facingTiles) {
             setTankTileFacing(maps[2], facingTile);
@@ -604,9 +641,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             if(valve == this)
                 continue;
 
-            valve.setTankConfig(getTankConfig());
-            valve.fluidStack = getFluid();
-            valve.updateFluidTemperature();
+            valve.setTankConfig(null);
             valve.setValvePos(null);
             valve.setValid(false);
             valve.updateBlockAndNeighbors(true);
@@ -745,21 +780,6 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         isMaster = tag.getBoolean("master");
         if(isMaster()) {
             isValid = tag.getBoolean("isValid");
-            if(tag.getBoolean("hasFluid")) {
-                if(tag.hasKey("fluidName"))
-                    try {
-                        fluidStack = new FluidStack(FluidRegistry.getFluid(tag.getString("fluidName")), tag.getInteger("fluidAmount"));
-                        updateFluidTemperature();
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Unable to load fluid: "+tag.getString("fluidName"));
-                    }
-            }
-            else {
-                fluidStack = null;
-            }
-
-            fluidCapacity = tag.getInteger("fluidCapacity");
-
             getTankConfig().readFromNBT(tag);
         }
 
@@ -779,14 +799,6 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         tag.setBoolean("master", isMaster());
         if(isMaster()) {
             tag.setBoolean("isValid", isValid());
-            tag.setBoolean("hasFluid", fluidStack != null);
-            if(fluidStack != null) {
-                tag.setString("fluidName", FluidRegistry.getFluidName(fluidStack));
-                tag.setInteger("fluidAmount", fluidStack.amount);
-            }
-
-            tag.setInteger("fluidCapacity", fluidCapacity);
-
             getTankConfig().writeToNBT(tag);
         }
 
@@ -831,7 +843,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         if(fluid == null)
             return;
 
-        this.fluidTemperature = fluid.getTemperature(fstack);
+        getTankConfig().setFluidTemperature(fluid.getTemperature(fstack));
     }
 
     @Override
@@ -839,7 +851,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         if(!isValid())
             return null;
 
-        return getMasterValve() == this ? fluidStack : getMasterValve().fluidStack;
+        return getTankConfig().getFluidStack();
     }
 
     @Override
@@ -855,7 +867,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         if(!isValid())
             return 0;
 
-        return getMasterValve() == this ? fluidCapacity : getMasterValve().fluidCapacity;
+        return getTankConfig().getFluidCapacity();
     }
 
     @Override
@@ -869,7 +881,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
     @Override
     public int fill(FluidStack resource, boolean doFill) {
         if(getMasterValve() == this) {
-            if (!isValid() || fluidStack != null && !fluidStack.isFluidEqual(resource))
+            if (!isValid() || getTankConfig().getFluidStack() != null && !getTankConfig().getFluidStack().isFluidEqual(resource))
                 return 0;
 
             if (getFluidAmount() >= getCapacity()) {
@@ -887,27 +899,27 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
             if (!doFill)
             {
-                if (fluidStack == null) {
-                    return Math.min(fluidCapacity, resource.amount);
+                if (getTankConfig().getFluidStack() == null) {
+                    return Math.min(getTankConfig().getFluidCapacity(), resource.amount);
                 }
 
-                return Math.min(fluidCapacity - fluidStack.amount, resource.amount);
+                return Math.min(getTankConfig().getFluidCapacity() - getTankConfig().getFluidStack().amount, resource.amount);
             }
 
-            if (fluidStack == null)
+            if (getTankConfig().getFluidStack() == null)
             {
-                fluidStack = new FluidStack(resource, Math.min(fluidCapacity, resource.amount));
+                getTankConfig().setFluidStack(new FluidStack(resource, Math.min(getTankConfig().getFluidCapacity(), resource.amount)));
                 setNeedsUpdate(UpdateType.STATE);
-                return fluidStack.amount;
+                return getTankConfig().getFluidStack().amount;
             }
 
-            int filled = fluidCapacity - fluidStack.amount;
+            int filled = getTankConfig().getFluidCapacity() - getTankConfig().getFluidStack().amount;
             if (resource.amount < filled) {
-                fluidStack.amount += resource.amount;
+                getTankConfig().getFluidStack().amount += resource.amount;
                 filled = resource.amount;
             }
             else {
-                fluidStack.amount = fluidCapacity;
+                getTankConfig().getFluidStack().amount = getTankConfig().getFluidCapacity();
             }
             setNeedsUpdate(UpdateType.STATE);
             return filled;
@@ -919,19 +931,19 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
     @Override
     public FluidStack drain(int maxDrain, boolean doDrain) {
         if(getMasterValve() == this) {
-            if(!isValid() || fluidStack == null)
+            if(!isValid() || getTankConfig().getFluidStack() == null)
                 return null;
 
             int drained = maxDrain;
-            if (fluidStack.amount < drained) {
-                drained = fluidStack.amount;
+            if (getTankConfig().getFluidStack().amount < drained) {
+                drained = getTankConfig().getFluidStack().amount;
             }
 
-            FluidStack stack = new FluidStack(fluidStack, drained);
+            FluidStack stack = new FluidStack(getTankConfig().getFluidStack(), drained);
             if (doDrain) {
-                fluidStack.amount -= drained;
-                if (fluidStack.amount <= 0) {
-                    fluidStack = null;
+                getTankConfig().getFluidStack().amount -= drained;
+                if (getTankConfig().getFluidStack().amount <= 0) {
+                    getTankConfig().setFluidStack(null);
                 }
                 setNeedsUpdate(UpdateType.STATE);
             }

@@ -14,6 +14,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -325,6 +326,13 @@ public class GenericUtil {
             return;
 
         FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendPacketToAllPlayersInDimension(tileEntityPacket, world.provider.getDimension());
+    }
+
+    public static void sendMessageToClient(EntityPlayer player, String message) {
+        if(player == null)
+            return;
+
+        player.addChatMessage(new TextComponentString(message));
     }
 
 }

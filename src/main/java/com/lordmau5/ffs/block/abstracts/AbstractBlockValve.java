@@ -76,6 +76,20 @@ public abstract class AbstractBlockValve extends Block {
     }
 
     @Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        if(!world.isRemote) {
+            AbstractTankValve valve = (AbstractTankValve) world.getTileEntity(pos);
+            if(valve.isValid()) {
+                // TODO: If there's still some fluid in the valve, warn the player before he can remove it.
+                // This has time up until the next build! People want a crash-fix!
+                valve.breakTank(null);
+            }
+        }
+
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+
+    @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (player.isSneaking()) return false;
 
@@ -89,7 +103,7 @@ public abstract class AbstractBlockValve extends Block {
             return true;
         }
         else {
-            valve.buildTank(side.getOpposite());
+            valve.buildTank_player(player, side.getOpposite());
         }
         return true;
     }
