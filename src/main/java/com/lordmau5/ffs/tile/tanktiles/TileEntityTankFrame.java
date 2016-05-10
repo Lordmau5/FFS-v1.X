@@ -42,11 +42,7 @@ public class TileEntityTankFrame extends AbstractTankTile {
     }
 
     public IBakedModel getFakeModel() {
-        IBakedModel fake_model = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelForState(getBlockState());
-        //if(fake_model instanceof ISmartBl) {
-        //    fake_model = ((ISmartBlockModel) fake_model).handleBlockState(getExtendedBlockState());
-        //}
-        return fake_model;
+        return Minecraft.getMinecraft().getBlockRendererDispatcher().getModelForState(getBlockState());
     }
 
     public IBlockState getBlockState() {
