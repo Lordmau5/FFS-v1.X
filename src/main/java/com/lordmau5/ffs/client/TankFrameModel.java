@@ -3,6 +3,7 @@ package com.lordmau5.ffs.client;
 import com.google.common.collect.Lists;
 import com.lordmau5.ffs.util.FFSStateProps;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -20,6 +21,7 @@ import java.util.List;
 public class TankFrameModel implements IBakedModel {
 
     private IBakedModel model;
+    private TextureAtlasSprite cachedParticleTexture;
 
     @Override
     public List<BakedQuad> getQuads(IBlockState iBlockState, EnumFacing enumFacing, long l) {
@@ -54,7 +56,10 @@ public class TankFrameModel implements IBakedModel {
 
     @Override
     public TextureAtlasSprite getParticleTexture() {
-        return model != null ? model.getParticleTexture() : null;
+        if(model != null && model != this) {
+            cachedParticleTexture = model.getParticleTexture();
+        }
+        return cachedParticleTexture != null ? cachedParticleTexture : Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/stone");
     }
 
     @Override
