@@ -13,6 +13,8 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Created by Dustin on 20.01.2016.
  */
@@ -141,15 +143,15 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
 
     //------------------------------
 
-    private FakeWorldWrapper wrapper;
+    private WeakReference<FakeWorldWrapper> wrapper;
 
     public World getFakeWorld() {
         if(getWorld() == null)
             return null;
 
-        if(wrapper == null || wrapper.wrappedWorld != getWorld())
-            wrapper = new FakeWorldWrapper(getWorld());
+        if(wrapper == null || wrapper.get() == null || wrapper.get().wrappedWorld != getWorld())
+            wrapper = new WeakReference<>(new FakeWorldWrapper(getWorld()));
 
-        return wrapper;
+        return wrapper.get();
     }
 }
