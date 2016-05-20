@@ -37,20 +37,24 @@ public class GenericUtil {
     private static List<String> validTiles;
     private static List<ItemStack> glassList;
 
+    private static Map<World, FakeWorldWrapper> fakeWorldWrapperMap;
+
     public static void init() {
         glassList = OreDictionary.getOres("blockGlass");
 
         blacklistedBlocks = new ArrayList<>();
 
-        blacklistedBlocks.add(Blocks.grass);
-        blacklistedBlocks.add(Blocks.dirt);
-        blacklistedBlocks.add(Blocks.bedrock);
-        blacklistedBlocks.add(Blocks.redstone_lamp);
-        blacklistedBlocks.add(Blocks.sponge);
+        blacklistedBlocks.add(Blocks.GRASS);
+        blacklistedBlocks.add(Blocks.DIRT);
+        blacklistedBlocks.add(Blocks.BEDROCK);
+        blacklistedBlocks.add(Blocks.REDSTONE_LAMP);
+        blacklistedBlocks.add(Blocks.SPONGE);
 
         validTiles = new ArrayList<>();
 
         validTiles.add("blockFusedQuartz");
+
+        fakeWorldWrapperMap = new HashMap<>();
     }
 
     public static String getUniquePositionName(AbstractTankValve valve) {
@@ -67,7 +71,7 @@ public class GenericUtil {
     }
 
     public static boolean isBlockGlass(IBlockState blockState, int metadata) {
-        if(blockState == null || blockState.getMaterial() == Material.air)
+        if(blockState == null || blockState.getMaterial() == Material.AIR)
             return false;
 
         if(blockState.getBlock() instanceof BlockGlass)
@@ -75,7 +79,7 @@ public class GenericUtil {
 
         ItemStack is = new ItemStack(blockState.getBlock(), 1, metadata);
 
-        if(blockState.getMaterial() == Material.glass && !is.getUnlocalizedName().contains("pane"))
+        if(blockState.getMaterial() == Material.GLASS && !is.getUnlocalizedName().contains("pane"))
             return true;
 
         for(ItemStack is2 : glassList) {
@@ -133,7 +137,7 @@ public class GenericUtil {
         if(state.canProvidePower())
             return false;
 
-        if(state.getMaterial() == Material.sand)
+        if(state.getMaterial() == Material.SAND)
             return false;
 
         if(!state.isOpaqueCube())
@@ -148,7 +152,7 @@ public class GenericUtil {
 
     public static boolean canBlockLeak(IBlockState state) {
         Material mat = state.getMaterial();
-        return mat.equals(Material.grass) || mat.equals(Material.sponge) || mat.equals(Material.cloth) || mat.equals(Material.clay) || mat.equals(Material.gourd) || mat.equals(Material.sand);
+        return mat.equals(Material.GRASS) || mat.equals(Material.SPONGE) || mat.equals(Material.CLOTH) || mat.equals(Material.CLAY) || mat.equals(Material.GOURD) || mat.equals(Material.SAND);
     }
 
     public static boolean isFluidContainer(ItemStack playerItem) {
@@ -176,7 +180,7 @@ public class GenericUtil {
                     if (qty != 0 && !player.capabilities.isCreativeMode) {
                         if (current.stackSize > 1) {
                             if (!player.inventory.addItemStackToInventory(FluidContainerRegistry.drainFluidContainer(current))) {
-                                player.dropPlayerItemWithRandomChoice(FluidContainerRegistry.drainFluidContainer(current), false);
+                                player.dropItem(FluidContainerRegistry.drainFluidContainer(current), false);
                             }
 
                             player.inventory.setInventorySlotContents(player.inventory.currentItem, GenericUtil.consumeItem(current));
@@ -333,6 +337,15 @@ public class GenericUtil {
             return;
 
         player.addChatMessage(new TextComponentString(message));
+    }
+
+    public static FakeWorldWrapper getFakeWorld(World world) {
+        if(fakeWorldWrapperMap.containsKey(world))
+            return fakeWorldWrapperMap.get(world);
+
+        FakeWorldWrapper wrapper = new FakeWorldWrapper(world);
+        fakeWorldWrapperMap.put(world, wrapper);
+        return wrapper;
     }
 
 }

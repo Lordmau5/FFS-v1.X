@@ -75,7 +75,7 @@ public class TileEntityTankFrame extends AbstractTankTile {
 
         BlockPos pos = getPos();
         for(EnumFacing dr : EnumFacing.VALUES) {
-            if(block == Blocks.air) {
+            if(block == Blocks.AIR) {
                 if (getWorld().isAirBlock(pos.offset(dr)))
                     dirs.add(dr);
             }
@@ -94,10 +94,10 @@ public class TileEntityTankFrame extends AbstractTankTile {
         if(block == null)
             return false;
 
-        List<EnumFacing> air = getNeighborBlockOrAir(Blocks.air);
+        List<EnumFacing> air = getNeighborBlockOrAir(Blocks.AIR);
         for(EnumFacing dr : air) {
             if(block.isFlammable(getWorld(), getPos(), dr)) {
-                getWorld().setBlockState(getPos(), Blocks.fire.getDefaultState());
+                getWorld().setBlockState(getPos(), Blocks.FIRE.getDefaultState());
                 return true;
             }
         }
@@ -139,13 +139,14 @@ public class TileEntityTankFrame extends AbstractTankTile {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag) {
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         if(getBlockStateForNBT() != null && getBlockStateForNBT().getBlock() != null && getBlockStateForNBT().getBlock().getRegistryName() != null) {
             tag.setString("blockName", getBlockStateForNBT().getBlock().getRegistryName().toString());
             tag.setInteger("metadata", getBlockStateForNBT().getBlock().getMetaFromState(getBlockStateForNBT()));
         }
 
         super.writeToNBT(tag);
+        return tag;
     }
 
     public int getLightValue() {

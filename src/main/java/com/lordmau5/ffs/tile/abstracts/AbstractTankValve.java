@@ -17,8 +17,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fluids.*;
@@ -103,7 +103,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                     BlockPos diff = pos_chunkTop.subtract(pos_chunkBottom);
                     for (int x = 0; x <= diff.getX(); x++) {
                         for (int z = 0; z <= diff.getZ(); z++) {
-                            ForgeChunkManager.forceChunk(ForgeChunkManager.requestTicket(FancyFluidStorage.instance, getWorld(), ForgeChunkManager.Type.NORMAL), new ChunkCoordIntPair(pos_chunkTop.getX() + x, pos_chunkTop.getZ() + z));
+                            ForgeChunkManager.forceChunk(ForgeChunkManager.requestTicket(FancyFluidStorage.instance, getWorld(), ForgeChunkManager.Type.NORMAL), new ChunkPos(pos_chunkTop.getX() + x, pos_chunkTop.getZ() + z));
                         }
                     }
 
@@ -177,7 +177,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                                     remainingFrames.remove(id);
                             }
                             for (BlockPos pos : firePos) {
-                                getWorld().setBlockState(pos, Blocks.fire.getDefaultState());
+                                getWorld().setBlockState(pos, Blocks.FIRE.getDefaultState());
                             }
                         }
 
@@ -795,7 +795,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag) {
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         tag.setBoolean("master", isMaster());
         if(isMaster()) {
             tag.setBoolean("isValid", isValid());
@@ -811,6 +811,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
         saveTileFacingToNBT(tag);
 
         super.writeToNBT(tag);
+        return tag;
     }
 
 

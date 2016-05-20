@@ -55,9 +55,10 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag) {
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
         saveTileFacingToNBT(tag);
+        return tag;
     }
 
     // ComputerCraft

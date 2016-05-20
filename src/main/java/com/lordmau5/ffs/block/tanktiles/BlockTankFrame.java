@@ -11,7 +11,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.particle.EffectRenderer;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -47,7 +47,7 @@ import java.util.Random;
 public class BlockTankFrame extends Block implements IFacade {
 
     public BlockTankFrame() {
-        super(Material.rock);
+        super(Material.ROCK);
     }
 
     public BlockTankFrame(String name) {
@@ -102,7 +102,7 @@ public class BlockTankFrame extends Block implements IFacade {
                 IBlockState state = frame.getBlockState();
                 Block block = state.getBlock();
 
-                if(block.canSilkHarvest(world, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.silkTouch, player.getHeldItemMainhand()) > 0) {
+                if(block.canSilkHarvest(world, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, player.getHeldItemMainhand()) > 0) {
                     ForgeEventFactory.fireBlockHarvesting(items, world, pos, state, 0, 1.0f, true, player);
 
                     ItemStack itemstack = new ItemStack(Item.getItemFromBlock(block), 1, block.getMetaFromState(state));
@@ -260,19 +260,19 @@ public class BlockTankFrame extends Block implements IFacade {
 
 
     @Override
-    public boolean addDestroyEffects(World world, BlockPos pos, EffectRenderer effectRenderer) {
+    public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager particleManager) {
         World fakeWorld = getFakeWorld(world, pos);
         Block fakeBlock = getFakeBlock(world, pos);
 
-        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.addDestroyEffects(fakeWorld, pos, effectRenderer) : super.addDestroyEffects(world, pos, effectRenderer);
+        return (fakeWorld != null && fakeBlock != null) ? fakeBlock.addDestroyEffects(fakeWorld, pos, particleManager) : super.addDestroyEffects(world, pos, particleManager);
     }
 
     @Override
-    public boolean addHitEffects(IBlockState state, World world, RayTraceResult target, EffectRenderer effectRenderer) {
+    public boolean addHitEffects(IBlockState state, World world, RayTraceResult target, ParticleManager particleManager) {
         World fakeWorld = getFakeWorld(world, target.getBlockPos());
         IBlockState fakeState = getFakeBlockState(world, target.getBlockPos());
 
-        return (fakeWorld != null && fakeState != null && fakeState.getBlock() != null) ? fakeState.getBlock().addHitEffects(fakeState, fakeWorld, target, effectRenderer) : super.addHitEffects(state, world, target, effectRenderer);
+        return (fakeWorld != null && fakeState != null && fakeState.getBlock() != null) ? fakeState.getBlock().addHitEffects(fakeState, fakeWorld, target, particleManager) : super.addHitEffects(state, world, target, particleManager);
     }
 
     @Override

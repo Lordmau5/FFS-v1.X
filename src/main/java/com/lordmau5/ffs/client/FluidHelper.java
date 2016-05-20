@@ -61,7 +61,7 @@ public final class FluidHelper {
         }
     }
 
-    public static final ResourceLocation BLOCK_TEXTURE = TextureMap.locationBlocksTexture;
+    public static final ResourceLocation BLOCK_TEXTURE = TextureMap.LOCATION_BLOCKS_TEXTURE;
 
     public static TextureAtlasSprite getFluidTexture(Fluid fluid, FluidType type) {
         if (fluid == null || type == null) {

@@ -1,19 +1,15 @@
 package com.lordmau5.ffs.tile.abstracts;
 
-import com.lordmau5.ffs.util.FakeWorldWrapper;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.lang.ref.WeakReference;
 
 /**
  * Created by Dustin on 20.01.2016.
@@ -87,7 +83,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag) {
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         if(getMasterValve() != null) {
             BlockPos pos = getMasterValve().getPos();
             tag.setInteger("valveX", pos.getX());
@@ -96,6 +92,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
         }
 
         super.writeToNBT(tag);
+        return tag;
     }
 
     @Override
@@ -104,7 +101,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     }
 
     @Override
-    public Packet getDescriptionPacket() {
+    public SPacketUpdateTileEntity getUpdatePacket() {
         NBTTagCompound tag = new NBTTagCompound();
         writeToNBT(tag);
         return new SPacketUpdateTileEntity(getPos(), 0, tag);
@@ -124,7 +121,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
             }
         }
         else if(updateType == UpdateType.STATE) {
-            GenericUtil.sendTileEntityPacketToPlayers(getDescriptionPacket(), getWorld());
+            GenericUtil.sendTileEntityPacketToPlayers(getUpdatePacket(), getWorld());
             if (getWorld().isRemote) {
                 getWorld().checkLight(getPos());
             }
@@ -143,15 +140,10 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
 
     //------------------------------
 
-    private WeakReference<FakeWorldWrapper> wrapper;
-
     public World getFakeWorld() {
         if(getWorld() == null)
             return null;
 
-        if(wrapper == null || wrapper.get() == null || wrapper.get().wrappedWorld != getWorld())
-            wrapper = new WeakReference<>(new FakeWorldWrapper(getWorld()));
-
-        return wrapper.get();
+        return GenericUtil.getFakeWorld(getWorld());
     }
 }

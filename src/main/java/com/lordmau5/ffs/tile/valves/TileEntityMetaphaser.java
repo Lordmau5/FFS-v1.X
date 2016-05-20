@@ -73,10 +73,11 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag) {
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
 
         tag.setBoolean("isExtract", isExtract);
+        return tag;
     }
 
     @Override

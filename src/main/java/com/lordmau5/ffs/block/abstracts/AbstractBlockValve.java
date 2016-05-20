@@ -31,12 +31,12 @@ public abstract class AbstractBlockValve extends Block {
     private Block blockDrop;
 
     public AbstractBlockValve(String name, Block blockDrop) {
-        super(Material.iron);
+        super(Material.IRON);
         this.blockDrop = blockDrop;
 
         setUnlocalizedName(name);
         setRegistryName(name);
-        setCreativeTab(CreativeTabs.tabRedstone);
+        setCreativeTab(CreativeTabs.REDSTONE);
         setHardness(5.0F);
         setResistance(10.0F);
 

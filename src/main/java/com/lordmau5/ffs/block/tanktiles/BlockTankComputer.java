@@ -29,10 +29,10 @@ import net.minecraft.world.World;
 public class BlockTankComputer extends Block {
 
     public BlockTankComputer() {
-        super(Material.iron);
+        super(Material.IRON);
         setUnlocalizedName("blockTankComputer");
         setRegistryName("blockTankComputer");
-        setCreativeTab(CreativeTabs.tabRedstone);
+        setCreativeTab(CreativeTabs.REDSTONE);
         setHardness(5.0F); // Same hardness as an iron block
         setResistance(10.0F); // Same as hardness
 

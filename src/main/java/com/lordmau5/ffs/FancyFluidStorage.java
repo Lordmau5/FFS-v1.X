@@ -166,9 +166,9 @@ public class FancyFluidStorage {
     public void init(FMLInitializationEvent event) {
 
         GameRegistry.addRecipe(new ItemStack(blockFluidValve), "IGI", "GBG", "IGI",
-                'I', Items.iron_ingot,
-                'G', Blocks.iron_bars,
-                'B', Items.bucket);
+                'I', Items.IRON_INGOT,
+                'G', Blocks.IRON_BARS,
+                'B', Items.BUCKET);
 
         /*GameRegistry.addRecipe(new ItemStack(blockTankComputer), "IGI", "GBG", "IGI",
                 'I', Items.iron_ingot,

@@ -100,10 +100,11 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag) {
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         tag.setBoolean("autoOutput", autoOutput);
 
         super.writeToNBT(tag);
+        return tag;
     }
 
     // IFluidHandler
