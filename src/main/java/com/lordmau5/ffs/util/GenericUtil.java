@@ -36,6 +36,8 @@ public class GenericUtil {
     private static List<String> validTiles;
     private static List<ItemStack> glassList;
 
+    private static Map<World, FakeWorldWrapper> fakeWorldWrapperMap;
+
     public static void init() {
         glassList = OreDictionary.getOres("blockGlass");
 
@@ -50,6 +52,8 @@ public class GenericUtil {
         validTiles = new ArrayList<>();
 
         validTiles.add("blockFusedQuartz");
+
+        fakeWorldWrapperMap = new HashMap<>();
     }
 
     public static String getUniquePositionName(AbstractTankValve valve) {
@@ -325,6 +329,15 @@ public class GenericUtil {
             return;
 
         MinecraftServer.getServer().getConfigurationManager().sendPacketToAllPlayersInDimension(tileEntityPacket, world.provider.getDimensionId());
+    }
+
+    public static FakeWorldWrapper getFakeWorld(World world) {
+        if(fakeWorldWrapperMap.containsKey(world))
+            return fakeWorldWrapperMap.get(world);
+
+        FakeWorldWrapper wrapper = new FakeWorldWrapper(world);
+        fakeWorldWrapperMap.put(world, wrapper);
+        return wrapper;
     }
 
 }

@@ -1,6 +1,5 @@
 package com.lordmau5.ffs.tile.abstracts;
 
-import com.lordmau5.ffs.util.FakeWorldWrapper;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -12,8 +11,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.world.World;
-
-import java.lang.ref.WeakReference;
 
 /**
  * Created by Dustin on 20.01.2016.
@@ -145,15 +142,10 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
 
     //------------------------------
 
-    private WeakReference<FakeWorldWrapper> wrapper;
-
     public World getFakeWorld() {
         if(getWorld() == null)
             return null;
 
-        if(wrapper == null || wrapper.get() == null || wrapper.get().wrappedWorld != getWorld())
-            wrapper = new WeakReference<>(new FakeWorldWrapper(getWorld()));
-
-        return wrapper.get();
+        return GenericUtil.getFakeWorld(getWorld());
     }
 }
