@@ -3,9 +3,12 @@ package com.lordmau5.ffs.util;
 import com.lordmau5.ffs.block.tanktiles.BlockTankFrame;
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 
 /**
@@ -56,6 +59,31 @@ public class FakeWorldWrapper extends World {
     @Override
     public boolean isBlockLoaded(BlockPos pos, boolean allowEmpty) {
         return wrappedWorld.isBlockLoaded(pos, allowEmpty);
+    }
+
+    @Override
+    public Chunk getChunkFromChunkCoords(int chunkX, int chunkZ) {
+        return wrappedWorld.getChunkFromChunkCoords(chunkX, chunkZ);
+    }
+
+    @Override
+    public String getProviderName() {
+        return wrappedWorld.getProviderName();
+    }
+
+    @Override
+    public boolean isBlockNormalCube(BlockPos pos, boolean _default) {
+        return wrappedWorld.isBlockNormalCube(pos, _default);
+    }
+
+    @Override
+    public IChunkProvider getChunkProvider() {
+        return wrappedWorld.getChunkProvider();
+    }
+
+    @Override
+    public CrashReportCategory addWorldInfoToCrashReport(CrashReport report) {
+        return wrappedWorld.addWorldInfoToCrashReport(report);
     }
 
     @Override
