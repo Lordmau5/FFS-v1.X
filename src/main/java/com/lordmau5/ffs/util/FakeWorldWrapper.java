@@ -49,6 +49,16 @@ public class FakeWorldWrapper extends World {
     }
 
     @Override
+    public boolean isBlockLoaded(BlockPos pos) {
+        return wrappedWorld.isBlockLoaded(pos);
+    }
+
+    @Override
+    public boolean isBlockLoaded(BlockPos pos, boolean allowEmpty) {
+        return wrappedWorld.isBlockLoaded(pos, allowEmpty);
+    }
+
+    @Override
     protected IChunkProvider createChunkProvider() {
         return wrappedWorld.getChunkProvider();
     }
