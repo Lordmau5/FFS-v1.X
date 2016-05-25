@@ -32,8 +32,6 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.common.Optional;
-import team.chisel.api.IFacade;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -41,10 +39,18 @@ import java.util.Random;
 /**
  * Created by Dustin on 02.07.2015.
  */
+/*
+
+// Dropped support for Chisel up until the Chisel-Team and Cricket figure something out in regards to
+// the "having the same modid and causing the game to crash at runtime" thing.
+
 @Optional.InterfaceList(
         @Optional.Interface(iface = "team.chisel.api.IFacade", modid = "chisel")
 )
-public class BlockTankFrame extends Block implements IFacade {
+//public class BlockTankFrame extends Block implements IFacade {
+
+*/
+public class BlockTankFrame extends Block {
 
     public BlockTankFrame() {
         super(Material.ROCK);
@@ -322,9 +328,15 @@ public class BlockTankFrame extends Block implements IFacade {
         return (fakeWorld != null && fakeState != null) ? fakeState.getPlayerRelativeBlockHardness(player, fakeWorld, pos) : super.getPlayerRelativeBlockHardness(state, player, world, pos);
     }
 
+
     /**
      * Chisel!
      */
+    /*
+
+    // Dropped support for Chisel up until the Chisel-Team and Cricket figure something out in regards to
+    // the "having the same modid and causing the game to crash at runtime" thing.
+
     @Optional.Method(modid = "chisel")
     @Override
     public IBlockState getFacade(IBlockAccess world, BlockPos blockPos, EnumFacing enumFacing) {
@@ -338,4 +350,5 @@ public class BlockTankFrame extends Block implements IFacade {
         }
         return world.getBlockState(blockPos);
     }
+    */
 }
