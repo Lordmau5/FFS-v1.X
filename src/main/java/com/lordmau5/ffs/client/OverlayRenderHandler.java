@@ -5,9 +5,11 @@ import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -83,7 +85,6 @@ public class OverlayRenderHandler {
         playerZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double) event.getPartialTicks();
 
         drawAll(modifyBoundingBox(valve.getRenderBoundingBox()));
-
     }
 
     private AxisAlignedBB modifyBoundingBox(AxisAlignedBB box)
@@ -95,6 +96,7 @@ public class OverlayRenderHandler {
     private void drawAll(AxisAlignedBB b)
     {
         GlStateManager.pushMatrix();
+        //GlStateManager.pushAttrib();
         GlStateManager.enableBlend();
         GlStateManager.enableCull();
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -110,6 +112,8 @@ public class OverlayRenderHandler {
                 texMaxU = overlayTexture.getMaxU(),
                 texMinV = overlayTexture.getMinV(),
                 texMaxV = overlayTexture.getMaxV();
+
+        mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
         for(int x = 0; x < x_axis; x++) {
             for(int y = 0; y < y_axis; y++) {
@@ -193,6 +197,7 @@ public class OverlayRenderHandler {
 
         GlStateManager.disableCull();
         GlStateManager.disableBlend();
+        //GlStateManager.popAttrib();
         GlStateManager.popMatrix();
     }
 

@@ -14,6 +14,7 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -169,11 +170,11 @@ public class GuiValve extends GuiScreen {
             texts.add(ChatFormatting.GRAY + "Locked to: " + valve.getTankConfig().getLockedFluid().getLocalizedName());
         }
 
-        GL11.glPushMatrix();
-        GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
+        GlStateManager.pushMatrix();
+        //GlStateManager.pushAttrib(GL11.GL_LIGHTING_BIT);
         drawHoveringText(texts, mouseX, mouseY, fontRendererObj);
-        GL11.glPopAttrib();
-        GL11.glPopMatrix();
+        //GlStateManager.popAttrib();
+        GlStateManager.popMatrix();
     }
 
     private void fluidHoveringText(String fluid) {
@@ -183,11 +184,11 @@ public class GuiValve extends GuiScreen {
             texts.add(fluid);
             texts.add(ChatFormatting.GRAY + (GenericUtil.intToFancyNumber(this.valve.getFluidAmount()) + " / " + GenericUtil.intToFancyNumber(this.valve.getCapacity())) + " mB");
 
-            GL11.glPushMatrix();
-            GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
+            GlStateManager.pushMatrix();
+            //GlStateManager.pushAttrib(GL11.GL_LIGHTING_BIT);
             drawHoveringText(texts, mouseX, mouseY, fontRendererObj);
-            GL11.glPopAttrib();
-            GL11.glPopMatrix();
+            //GlStateManager.popAttrib();
+            GlStateManager.popMatrix();
         }
     }
 
