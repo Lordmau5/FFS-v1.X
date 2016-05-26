@@ -170,7 +170,7 @@ public class FancyFluidStorage {
                 'G', Blocks.IRON_BARS,
                 'B', Items.BUCKET);
 
-        /*GameRegistry.addRecipe(new ItemStack(blockTankComputer), "IGI", "GBG", "IGI",
+        GameRegistry.addRecipe(new ItemStack(blockTankComputer), "IGI", "GBG", "IGI",
                 'I', Items.iron_ingot,
                 'G', Blocks.iron_bars,
                 'B', Blocks.redstone_block);
@@ -179,7 +179,6 @@ public class FancyFluidStorage {
                 'I', Items.iron_ingot,
                 'G', Blocks.iron_bars,
                 'B', Items.comparator);
-        */
 
         proxy.init();
     }
