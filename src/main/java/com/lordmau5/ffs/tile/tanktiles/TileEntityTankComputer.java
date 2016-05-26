@@ -7,6 +7,7 @@ package com.lordmau5.ffs.tile.tanktiles;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.interfaces.IFacingTile;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
+import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.common.Optional;
@@ -22,6 +23,10 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
         return getMasterValve().getAllValves().stream().filter(p -> p instanceof TileEntityFluidValve).map(p -> (TileEntityFluidValve) p).collect(Collectors.toList());
     }
 
+    public List<TileEntityMetaphaser> getMetaphasers() {
+        return getMasterValve().getTankTiles(TileEntityMetaphaser.class);
+    }
+
     // Used by CC and OC
     public List<TileEntityFluidValve> getValvesByName(String name) {
         List<TileEntityFluidValve> valves = new ArrayList<>();
@@ -33,6 +38,18 @@ public class TileEntityTankComputer extends AbstractTankTile implements IFacingT
                 valves.add(valve);
         }
         return valves;
+    }
+
+    public List<TileEntityMetaphaser> getMetaphasersByName(String name) {
+        List<TileEntityMetaphaser> metaphasers = new ArrayList<>();
+        if(getMetaphasers().isEmpty())
+            return metaphasers;
+
+        for(TileEntityMetaphaser valve : getMetaphasers()) {
+            if(valve.getTileName().toLowerCase().equals(name.toLowerCase()))
+                metaphasers.add(valve);
+        }
+        return metaphasers;
     }
 
     @Override

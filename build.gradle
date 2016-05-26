@@ -51,10 +51,10 @@ repositories {
     //    name 'chisel'
     //    url "http://coloredlightscore.us.to/maven/chisel-2"
     //}
-    //maven { // OpenComputers
-    //    name 'opencomputers'
-    //    url "http://maven.cil.li"
-    //}
+    maven { // OpenComputers
+        name 'opencomputers'
+        url "http://maven.cil.li"
+    }
     //ivy { // Buildcraft
     //    name "BuildCraft"
     //    artifactPattern "http://www.mod-buildcraft.com/releases/BuildCraft/[revision]/[module]-[revision]-dev.[ext]"
@@ -74,11 +74,11 @@ repositories {
 
 dependencies {
     //compile name: "buildcraft-7.2.0-pre11"
-    compile name: "Chisel-MC1.9-0.0.4.13"
+    compile name: "Chisel_DEV-MC1.9.4-0.0.4.1"
     //compile name: "buildcraft", version: "${buildcraft_version}"
     //compile name: "PlanetguyLib", version: "${pglib_version}"
     //compile name: "RemainInMotion", version: "${rim_version}"
-    //compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev"
+    compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev"
 
     //compile "com.cricketcraft.chisel:Chisel2:${chisel_version}:deobf"
     // Oh cool, it doesn't find CTMLib. Freaking useless.

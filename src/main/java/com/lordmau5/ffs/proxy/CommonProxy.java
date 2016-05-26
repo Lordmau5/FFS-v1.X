@@ -1,6 +1,7 @@
 package com.lordmau5.ffs.proxy;
 
 import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.compat.oc.OCCompatibility;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 
@@ -19,7 +20,7 @@ public class CommonProxy {
         }
 
         if(Loader.isModLoaded("OpenComputers")) {
-            //new OCCompatibility().init();
+            new OCCompatibility().init();
         }
     }
 }
