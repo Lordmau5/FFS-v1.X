@@ -104,7 +104,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
     }
 
     private int convertForOutput(int amount) {
-        return (int) Math.ceil((double) amount * 0.75d);
+        return (int) Math.ceil((double) amount * 0.90d);
     }
 
     private int internal_extractEnergy(int extractEnergy, boolean simulate, boolean ignoreGetExtract) {
