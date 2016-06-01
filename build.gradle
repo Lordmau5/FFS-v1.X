@@ -59,7 +59,7 @@ dependencies {
     compile "mcp.mobius.waila:Waila:${waila_version}:dev"
 }
 
-if (System.env.BUILD_NUMBER != null) mod_version = "$mod_version [b$System.env.BUILD_NUMBER]"
+if (System.env.BUILD_NUMBER != null) mod_version = "$mod_version-b$System.env.BUILD_NUMBER"
 
 group = 'lordmau5.ffs'
 version = "$minecraft_version-$mod_version"
