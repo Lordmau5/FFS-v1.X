@@ -16,6 +16,7 @@ import com.lordmau5.ffs.tile.tanktiles.TileEntityTankComputer;
 import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
+import com.lordmau5.ffs.util.Compatibility;
 import com.lordmau5.ffs.util.GenericUtil;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
@@ -139,21 +140,23 @@ public class FancyFluidStorage {
     @SuppressWarnings("deprecation")
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        Compatibility.init();
+
         config = new Configuration(event.getSuggestedConfigurationFile());
         loadConfig();
 
         GameRegistry.registerWithItem(blockFluidValve = new BlockFluidValve());
-        GameRegistry.registerWithItem(blockMetaphaser = new BlockMetaphaser());
         GameRegistry.registerWithItem(blockTankComputer = new BlockTankComputer());
         GameRegistry.registerWithItem(blockTankFrame = new BlockTankFrame("blockTankFrame"));
         GameRegistry.registerWithItem(blockTankFrameOpaque = new BlockTankFrameOpaque());
 
-        FluidRegistry.registerFluid(fluidMetaphasedFlux = new FluidMetaphasedFlux());
-
         GameRegistry.registerTileEntity(TileEntityFluidValve.class, "tileEntityFluidValve");
-        GameRegistry.registerTileEntity(TileEntityMetaphaser.class, "tileEntityMetaphaser");
         GameRegistry.registerTileEntity(TileEntityTankComputer.class, "tileEntityTankComputer");
         GameRegistry.registerTileEntity(TileEntityTankFrame.class, "tileEntityTankFrame");
+
+        FluidRegistry.registerFluid(fluidMetaphasedFlux = new FluidMetaphasedFlux());
+        GameRegistry.registerWithItem(blockMetaphaser = new BlockMetaphaser());
+        GameRegistry.registerTileEntity(TileEntityMetaphaser.class, "tileEntityMetaphaser");
 
         NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 
@@ -175,10 +178,12 @@ public class FancyFluidStorage {
                 'G', Blocks.IRON_BARS,
                 'B', Blocks.REDSTONE_BLOCK);
 
-        GameRegistry.addRecipe(new ItemStack(blockMetaphaser), "IGI", "GBG", "IGI",
-                'I', Items.IRON_INGOT,
-                'G', Blocks.IRON_BARS,
-                'B', Items.COMPARATOR);
+        if(Compatibility.isEnergyModSupplied()) {
+            GameRegistry.addRecipe(new ItemStack(blockMetaphaser), "IGI", "GBG", "IGI",
+                    'I', Items.IRON_INGOT,
+                    'G', Blocks.IRON_BARS,
+                    'B', Items.COMPARATOR);
+        }
 
         proxy.init();
     }

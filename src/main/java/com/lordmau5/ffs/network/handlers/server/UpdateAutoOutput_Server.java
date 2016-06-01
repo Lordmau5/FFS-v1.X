@@ -1,8 +1,8 @@
 package com.lordmau5.ffs.network.handlers.server;
 
 
-import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.network.FFSPacket;
+import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

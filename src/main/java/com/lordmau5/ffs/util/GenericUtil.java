@@ -225,23 +225,21 @@ public class GenericUtil {
                     return false;
                 }
 
-                if (!world.isRemote) {
-                    IFluidContainerItem container = (IFluidContainerItem) current.getItem();
-                    FluidStack liquid = container.getFluid(current);
-                    FluidStack tankLiquid = valve.getInfo().fluid;
-                    boolean mustDrain = liquid == null || liquid.amount == 0;
-                    boolean mustFill = tankLiquid == null || tankLiquid.amount == 0;
-                    if (mustDrain && mustFill) {
-                        // Both are empty, do nothing
-                    } else if (mustDrain || !player.isSneaking()) {
-                        liquid = valve.drain(1000, false);
-                        int qtyToFill = container.fill(current, liquid, true);
-                        valve.drain(qtyToFill, true);
-                    } else {
-                        if (liquid.amount > 0) {
-                            int qty = valve.fill(liquid, false);
-                            valve.fill(container.drain(current, qty, true), true);
-                        }
+                IFluidContainerItem container = (IFluidContainerItem) current.getItem();
+                FluidStack liquid = container.getFluid(current);
+                FluidStack tankLiquid = valve.getInfo().fluid;
+                boolean mustDrain = liquid == null || liquid.amount == 0;
+                boolean mustFill = tankLiquid == null || tankLiquid.amount == 0;
+                if (mustDrain && mustFill) {
+                    // Both are empty, do nothing
+                } else if (mustDrain || !player.isSneaking()) {
+                    liquid = valve.drain(1000, false);
+                    int qtyToFill = container.fill(current, liquid, true);
+                    valve.drain(qtyToFill, true);
+                } else {
+                    if (liquid.amount > 0) {
+                        int qty = valve.fill(liquid, false);
+                        valve.fill(container.drain(current, qty, true), true);
                     }
                 }
 

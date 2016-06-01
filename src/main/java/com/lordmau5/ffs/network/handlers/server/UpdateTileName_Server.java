@@ -1,8 +1,8 @@
 package com.lordmau5.ffs.network.handlers.server;
 
 
-import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.network.FFSPacket;
+import com.lordmau5.ffs.network.NetworkHandler;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.interfaces.INameableTile;
 import io.netty.channel.ChannelHandlerContext;

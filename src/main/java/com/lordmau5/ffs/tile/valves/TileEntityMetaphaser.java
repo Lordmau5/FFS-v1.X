@@ -13,6 +13,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.Optional;
 
 /**
  * - Slave-valve to extract the fluid
@@ -21,6 +22,10 @@ import net.minecraftforge.fluids.FluidRegistry;
  *
  * - 1:1 ratio
  */
+@Optional.InterfaceList(value = {
+        @Optional.Interface(iface = "cofh.api.energy.IEnergyProvider", modid = "CoFHAPI|energy"),
+        @Optional.Interface(iface = "cofh.api.energy.IEnergyReceiver", modid = "CoFHAPI|energy")
+})
 public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyReceiver, IEnergyProvider {
 
     private int maxEnergyBuffer = -1;
@@ -125,6 +130,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
         return convertForOutput(drain(extractEnergy, true).amount);
     }
 
+    @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public int extractEnergy(EnumFacing facing, int maxExtract, boolean simulate) {
         maxExtract = Math.min(maxExtract, getFluidAmount());
@@ -132,6 +138,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
         return internal_extractEnergy(maxExtract, simulate, true);
     }
 
+    @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public int receiveEnergy(EnumFacing facing, int maxReceive, boolean simulate) {
         if(!isValid())
@@ -153,16 +160,19 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
         return fill(FluidRegistry.getFluidStack(FancyFluidStorage.fluidMetaphasedFlux.getName(), maxReceive), true);
     }
 
+    @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public int getEnergyStored(EnumFacing facing) {
         return (int) Math.ceil((double) getFluidAmount() * 0.75d);
     }
 
+    @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public int getMaxEnergyStored(EnumFacing facing) {
         return getCapacity();
     }
 
+    @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public boolean canConnectEnergy(EnumFacing facing) {
         return isValid();
