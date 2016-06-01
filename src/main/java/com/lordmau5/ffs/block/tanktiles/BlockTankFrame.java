@@ -32,6 +32,8 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.common.Optional;
+import team.chisel.api.IFacade;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -39,18 +41,10 @@ import java.util.Random;
 /**
  * Created by Dustin on 02.07.2015.
  */
-/*
-
-// Dropped support for Chisel up until the Chisel-Team and Cricket figure something out in regards to
-// the "having the same modid and causing the game to crash at runtime" thing.
-
 @Optional.InterfaceList(
         @Optional.Interface(iface = "team.chisel.api.IFacade", modid = "chisel")
 )
-//public class BlockTankFrame extends Block implements IFacade {
-
-*/
-public class BlockTankFrame extends Block {
+public class BlockTankFrame extends Block implements IFacade {
 
     public BlockTankFrame() {
         super(Material.ROCK);
@@ -175,6 +169,7 @@ public class BlockTankFrame extends Block {
         return lightValue;
     }
 
+    //TODO: Store the Fake Blockstate within *my* Blockstate so I can fetch it here
     @Override
     public boolean isOpaqueCube(IBlockState state) {
         return false;
@@ -238,7 +233,7 @@ public class BlockTankFrame extends Block {
 
         return frame != null ? frame.getFakeWorld() : null;
     }
-    
+
     private World getFakeWorld(World world, BlockPos pos) {
         return (World) getFakeBlockAccess(world, pos);
     }
@@ -332,11 +327,6 @@ public class BlockTankFrame extends Block {
     /**
      * Chisel!
      */
-    /*
-
-    // Dropped support for Chisel up until the Chisel-Team and Cricket figure something out in regards to
-    // the "having the same modid and causing the game to crash at runtime" thing.
-
     @Optional.Method(modid = "chisel")
     @Override
     public IBlockState getFacade(IBlockAccess world, BlockPos blockPos, EnumFacing enumFacing) {
@@ -350,5 +340,4 @@ public class BlockTankFrame extends Block {
         }
         return world.getBlockState(blockPos);
     }
-    */
 }

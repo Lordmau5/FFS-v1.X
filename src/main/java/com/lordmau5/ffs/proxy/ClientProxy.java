@@ -3,6 +3,7 @@ package com.lordmau5.ffs.proxy;
 import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.client.OverlayRenderHandler;
 import com.lordmau5.ffs.client.ValveRenderer;
+import com.lordmau5.ffs.compat.waila.WailaPluginTank;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
 import com.lordmau5.ffs.util.Compatibility;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -30,7 +31,7 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(new OverlayRenderHandler());
 
         if(Loader.isModLoaded("Waila")) {
-            //ailaPluginTank.init();
+            WailaPluginTank.init();
         }
         super.init();
     }
