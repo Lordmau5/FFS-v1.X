@@ -170,9 +170,9 @@ public class GuiValve extends GuiScreen {
         }
 
         GL11.glPushMatrix();
-        GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
+        //GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
         drawHoveringText(texts, mouseX, mouseY, fontRendererObj);
-        GL11.glPopAttrib();
+        //GL11.glPopAttrib();
         GL11.glPopMatrix();
     }
 
@@ -184,9 +184,9 @@ public class GuiValve extends GuiScreen {
             texts.add(EnumChatFormatting.GRAY + (GenericUtil.intToFancyNumber(this.valve.getFluidAmount()) + " / " + GenericUtil.intToFancyNumber(this.valve.getCapacity())) + " mB");
 
             GL11.glPushMatrix();
-            GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
+            //GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
             drawHoveringText(texts, mouseX, mouseY, fontRendererObj);
-            GL11.glPopAttrib();
+            //GL11.glPopAttrib();
             GL11.glPopMatrix();
         }
     }

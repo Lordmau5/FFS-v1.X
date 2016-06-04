@@ -105,7 +105,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                     BlockPos diff = pos_chunkTop.subtract(pos_chunkBottom);
                     for (int x = 0; x <= diff.getX(); x++) {
                         for (int z = 0; z <= diff.getZ(); z++) {
-                            ForgeChunkManager.forceChunk(ForgeChunkManager.requestTicket(FancyFluidStorage.instance, getWorld(), ForgeChunkManager.Type.NORMAL), new ChunkCoordIntPair(pos_chunkTop.getX() + x, pos_chunkTop.getZ() + z));
+                            ForgeChunkManager.forceChunk(GenericUtil.getChunkLoadTicket(getWorld()), new ChunkCoordIntPair(pos_chunkTop.getX() + x, pos_chunkTop.getZ() + z));
                         }
                     }
 
