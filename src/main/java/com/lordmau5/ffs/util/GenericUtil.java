@@ -24,9 +24,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Dustin on 28.06.2015.
@@ -322,7 +320,7 @@ public class GenericUtil {
     }
 
     public static String intToFancyNumber(int number) {
-        return NumberFormat.getIntegerInstance().format(number);
+        return NumberFormat.getIntegerInstance(Locale.ENGLISH).format(number);
     }
 
     public static void sendTileEntityPacketToPlayers(Packet tileEntityPacket, World world) {
