@@ -187,7 +187,8 @@ public class FancyFluidStorage {
         GenericUtil.init();
 
         ForgeChunkManager.setForcedChunkLoadingCallback(instance, (tickets, world) -> {
-            // Good day sir
+            if(tickets != null && tickets.size() > 0)
+                GenericUtil.initChunkLoadTicket(world, tickets.get(0));
         });
     }
 

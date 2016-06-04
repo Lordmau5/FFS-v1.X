@@ -343,6 +343,10 @@ public class GenericUtil {
         return wrapper;
     }
 
+    public static void initChunkLoadTicket(World world, ForgeChunkManager.Ticket ticket) {
+        chunkloadTicketMap.put(world, ticket);
+    }
+
     public static ForgeChunkManager.Ticket getChunkLoadTicket(World world) {
         if(chunkloadTicketMap.containsKey(world))
             return chunkloadTicketMap.get(world);
