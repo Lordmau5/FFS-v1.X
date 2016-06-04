@@ -16,6 +16,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidContainerItem;
@@ -25,7 +26,6 @@ import net.minecraftforge.oredict.OreDictionary;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,6 +38,7 @@ public class GenericUtil {
     private static List<ItemStack> glassList;
 
     private static Map<World, FakeWorldWrapper> fakeWorldWrapperMap;
+    private static Map<World, ForgeChunkManager.Ticket> chunkloadTicketMap;
 
     public static void init() {
         glassList = OreDictionary.getOres("blockGlass");
@@ -55,6 +56,7 @@ public class GenericUtil {
         validTiles.add("blockFusedQuartz");
 
         fakeWorldWrapperMap = new HashMap<>();
+        chunkloadTicketMap = new HashMap<>();
     }
 
     public static String getUniquePositionName(AbstractTankValve valve) {
@@ -344,6 +346,15 @@ public class GenericUtil {
         FakeWorldWrapper wrapper = new FakeWorldWrapper(world);
         fakeWorldWrapperMap.put(world, wrapper);
         return wrapper;
+    }
+
+    public static ForgeChunkManager.Ticket getChunkLoadTicket(World world) {
+        if(chunkloadTicketMap.containsKey(world))
+            return chunkloadTicketMap.get(world);
+
+        ForgeChunkManager.Ticket chunkloadTicket = ForgeChunkManager.requestTicket(FancyFluidStorage.instance, world, ForgeChunkManager.Type.NORMAL);
+        chunkloadTicketMap.put(world, chunkloadTicket);
+        return chunkloadTicket;
     }
 
 }
