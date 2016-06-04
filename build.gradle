@@ -48,8 +48,8 @@ repositories {
         url "http://maven.cil.li"
     }
     maven { // Tesla
-        name 'rubbix'
-        url "http://maven.rubbix.net"
+        name 'epoxide'
+        url "http://maven.epoxide.xyz/"
     }
     maven { // Chisel / tterrag's maven
         name 'tterrag'
