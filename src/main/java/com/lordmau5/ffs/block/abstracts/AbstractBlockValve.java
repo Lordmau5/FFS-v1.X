@@ -99,7 +99,7 @@ public abstract class AbstractBlockValve extends Block {
             if(GenericUtil.isFluidContainer(heldItem))
                 return GenericUtil.fluidContainerHandler(world, valve, player, side);
 
-            player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
+            player.openGui(FancyFluidStorage.INSTANCE, 0, world, pos.getX(), pos.getY(), pos.getZ());
             return true;
         }
         else {

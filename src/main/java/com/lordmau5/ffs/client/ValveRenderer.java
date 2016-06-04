@@ -52,8 +52,8 @@ public class ValveRenderer extends FastTESR {
         vb.setTranslation(x, y, z);
 
         int height = topDiag.getY() - bottomDiag.getY();
-        int xSize = topDiag.getX() - bottomDiag.getX() + (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 0 : 1);
-        int zSize = topDiag.getZ() - bottomDiag.getZ() + (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 0 : 1);
+        int xSize = topDiag.getX() - bottomDiag.getX() + (FancyFluidStorage.INSTANCE.TANK_RENDER_INSIDE ? 0 : 1);
+        int zSize = topDiag.getZ() - bottomDiag.getZ() + (FancyFluidStorage.INSTANCE.TANK_RENDER_INSIDE ? 0 : 1);
 
         if (valve.getCapacity() == 0 || valve.getFluidAmount() == 0)
             return;
@@ -100,15 +100,15 @@ public class ValveRenderer extends FastTESR {
                 if (renderHeight - rY < 1.0f)
                     flowMinV += (flowMaxV_ - flowMinV_) * (1.0f - (renderHeight - rY));
 
-                for (int rX = (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0); rX < xSize; rX++) {
-                    for (int rZ = (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0); rZ < zSize; rZ++) {
+                for (int rX = (FancyFluidStorage.INSTANCE.TANK_RENDER_INSIDE ? 1 : 0); rX < xSize; rX++) {
+                    for (int rZ = (FancyFluidStorage.INSTANCE.TANK_RENDER_INSIDE ? 1 : 0); rZ < zSize; rZ++) {
 
                         float zMinOffset = 0;
                         float zMaxOffset = 0;
                         float xMinOffset = 0;
                         float xMaxOffset = 0;
                         //North
-                        if (rZ == (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0)) {
+                        if (rZ == (FancyFluidStorage.INSTANCE.TANK_RENDER_INSIDE ? 1 : 0)) {
                             zMinOffset = 0.001f;
 
                             addVertexWithUV(vb, rX, rY, rZ + zMinOffset, flowMaxU, flowMaxV_);
@@ -128,7 +128,7 @@ public class ValveRenderer extends FastTESR {
                         }
 
                         //West
-                        if (rX == (FancyFluidStorage.instance.TANK_RENDER_INSIDE ? 1 : 0)) {
+                        if (rX == (FancyFluidStorage.INSTANCE.TANK_RENDER_INSIDE ? 1 : 0)) {
                             xMinOffset = 0.001f;
 
                             addVertexWithUV(vb, rX + xMinOffset, rY, rZ, flowMaxU, flowMaxV_);

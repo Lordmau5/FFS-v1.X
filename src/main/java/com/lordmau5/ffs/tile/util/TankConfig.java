@@ -103,13 +103,12 @@ public class TankConfig {
                 lockFluid(FluidStack.loadFluidStackFromNBT((NBTTagCompound) base));
             }
         }
+        setFluidCapacity(tag.getInteger("capacity"));
 
         if(tag.hasKey("fluid")) {
             NBTTagCompound fluidTag = tag.getCompoundTag("fluid");
 
             setFluidStack(FluidStack.loadFluidStackFromNBT(fluidTag));
-
-            setFluidCapacity(fluidTag.getInteger("capacity"));
         }
 
     }
@@ -124,12 +123,11 @@ public class TankConfig {
 
             tag.setTag("lockedFluid", fluidTag);
         }
+        tag.setInteger("capacity", getFluidCapacity());
 
         if(getFluidStack() != null) {
             NBTTagCompound fluidTag = new NBTTagCompound();
             getFluidStack().writeToNBT(fluidTag);
-
-            fluidTag.setInteger("capacity", getFluidCapacity());
 
             tag.setTag("fluid", fluidTag);
         }

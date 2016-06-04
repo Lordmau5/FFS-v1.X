@@ -47,16 +47,29 @@ repositories {
         name 'opencomputers'
         url "http://maven.cil.li"
     }
+    maven { // Tesla
+        name 'rubbix'
+        url "http://maven.rubbix.net"
+    }
+    maven { // Chisel / tterrag's maven
+        name 'tterrag'
+        url "http://maven.tterrag.com/"
+    }
     flatDir {
       dirs 'libs'
     }
 }
 
 dependencies {
-    compile name: "Chisel_DEV-MC1.9.4-0.0.4.16"
+    compile name: "industrialcraft-2-2.5.1-ex19-dev"
+
+    compile "team.chisel:Chisel:MC${minecraft_version}-${chisel_version}"
+
     compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev"
 
     compile "mcp.mobius.waila:Waila:${waila_version}:dev"
+
+    compile "net.darkhax.tesla:Tesla:${minecraft_version}-${tesla_version}"
 }
 
 if (System.env.BUILD_NUMBER != null) mod_version = "$mod_version-b$System.env.BUILD_NUMBER"
@@ -69,9 +82,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    runDir = "runtime/client/assets"
+    runDir = "runtime/client"
     version = "$minecraft_version-$forge_version"
-    mappings = "snapshot_20160518"
+    mappings = "snapshot_20160604"
 }
 
 processResources {

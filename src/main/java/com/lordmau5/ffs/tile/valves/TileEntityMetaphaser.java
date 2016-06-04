@@ -6,13 +6,19 @@ package com.lordmau5.ffs.tile.valves;
 
 import cofh.api.energy.IEnergyProvider;
 import cofh.api.energy.IEnergyReceiver;
-import com.lordmau5.ffs.FancyFluidStorage;
+import com.lordmau5.ffs.compat.Capabilities;
+import com.lordmau5.ffs.compat.Compatibility;
+import com.lordmau5.ffs.compat.energy.eu.MetaphaserEU;
+import com.lordmau5.ffs.compat.energy.rf.MetaphaserRF;
+import com.lordmau5.ffs.compat.energy.tesla.MetaphaserTesla;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
+import ic2.api.energy.tile.IEnergyAcceptor;
+import ic2.api.energy.tile.IEnergyEmitter;
+import ic2.api.energy.tile.IEnergySink;
+import ic2.api.energy.tile.IEnergySource;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.Optional;
 
 /**
@@ -24,22 +30,46 @@ import net.minecraftforge.fml.common.Optional;
  */
 @Optional.InterfaceList(value = {
         @Optional.Interface(iface = "cofh.api.energy.IEnergyProvider", modid = "CoFHAPI|energy"),
-        @Optional.Interface(iface = "cofh.api.energy.IEnergyReceiver", modid = "CoFHAPI|energy")
+        @Optional.Interface(iface = "cofh.api.energy.IEnergyReceiver", modid = "CoFHAPI|energy"),
+
+        @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "IC2API"),
+        @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "IC2API")
 })
-public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyReceiver, IEnergyProvider {
+public class TileEntityMetaphaser extends AbstractTankValve implements
+        IEnergyReceiver, IEnergyProvider, // CoFH
+        IEnergySink, IEnergySource // IC2
+{
 
-    private int maxEnergyBuffer = -1;
+    private MetaphaserTesla teslaContainer;
+
+    public double ic2Overflow = 0.0d;
+
     private boolean isExtract = false;
-
-    @Override
-    public void buildTank(EnumFacing inside) {
-        super.buildTank(inside);
-    }
 
     public TileEntityMetaphaser() {
         super();
 
-        maxEnergyBuffer = -1;
+        if(Compatibility.INSTANCE.isTeslaLoaded) {
+            teslaContainer = new MetaphaserTesla(this);
+        }
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+
+        if(Compatibility.INSTANCE.isIC2Loaded) {
+            MetaphaserEU.INSTANCE.load(this);
+        }
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+
+        if(Compatibility.INSTANCE.isIC2Loaded) {
+            MetaphaserEU.INSTANCE.unload(this);
+        }
     }
 
     public boolean getExtract() {
@@ -55,26 +85,14 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
     public void update() {
         super.update();
 
-        if(isExtract)
-            outputToTile();
-    }
-
-    private void outputToTile() {
-        if(getFluidAmount() <= 0)
-            return;
-
-        BlockPos outsidePos = getPos().offset(getTileFacing().getOpposite());
-        if(getWorld().isAirBlock(outsidePos))
-            return;
-
-        TileEntity outsideTile = getWorld().getTileEntity(outsidePos);
-        if(outsideTile == null || !(outsideTile instanceof IEnergyReceiver))
-            return;
-
-        IEnergyReceiver receiver = (IEnergyReceiver) outsideTile;
-        int maxReceive = receiver.receiveEnergy(getTileFacing(), getFluidAmount(), true);
-        if(maxReceive > 0)
-            receiver.receiveEnergy(getTileFacing(), internal_extractEnergy(maxReceive, false, false), false);
+        if(getExtract()) {
+            if(Compatibility.INSTANCE.isTeslaLoaded) {
+                teslaContainer.outputToTile();
+            }
+            if(Compatibility.INSTANCE.isCoFHLoaded) {
+                MetaphaserRF.INSTANCE.outputToTile(this);
+            }
+        }
     }
 
     @Override
@@ -92,89 +110,110 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IEnergyRe
         isExtract = tag.getBoolean("isExtract");
     }
 
-    // CoFH / RF-API
+    @Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        if(capability == Capabilities.Tesla.RECEIVER || capability == Capabilities.Tesla.PROVIDER || capability == Capabilities.Tesla.HOLDER)
+            return true;
 
-    private int getMaxEnergyBuffer() {
-        if(maxEnergyBuffer == -1)
-            maxEnergyBuffer = (int) Math.ceil((float) getCapacity() / 200f);
-
-        return maxEnergyBuffer;
+        return super.hasCapability(capability, facing);
     }
 
     @Override
-    public void setValvePos(BlockPos masterValvePos) {
-        super.setValvePos(masterValvePos);
+    @SuppressWarnings("unchecked")
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if(capability == Capabilities.Tesla.RECEIVER || capability == Capabilities.Tesla.PROVIDER || capability == Capabilities.Tesla.HOLDER)
+            return (T) teslaContainer;
 
-        maxEnergyBuffer = -1;
+        return super.getCapability(capability, facing);
     }
 
-    private int convertForOutput(int amount) {
-        return (int) Math.ceil((double) amount * 0.90d);
-    }
-
-    private int internal_extractEnergy(int extractEnergy, boolean simulate, boolean ignoreGetExtract) {
-        if(!isValid())
-            return 0;
-
-        if(!getExtract() && !ignoreGetExtract)
-            return 0;
-
-        if(getFluidAmount() <= 0)
-            return 0;
-
-        int energy = convertForOutput(drain(extractEnergy, false).amount);
-
-        if(simulate)
-            return energy;
-
-        return convertForOutput(drain(extractEnergy, true).amount);
-    }
+    /**
+     * -------------------------------------------------------------------------
+     * Start of the CoFH Energy implementation, also known as Redstone Flux (RF)
+     * -------------------------------------------------------------------------
+     */
 
     @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public int extractEnergy(EnumFacing facing, int maxExtract, boolean simulate) {
-        maxExtract = Math.min(maxExtract, getFluidAmount());
-
-        return internal_extractEnergy(maxExtract, simulate, true);
+        return MetaphaserRF.INSTANCE.extractEnergy(this, facing, maxExtract, simulate, false);
     }
 
     @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public int receiveEnergy(EnumFacing facing, int maxReceive, boolean simulate) {
-        if(!isValid())
-            return 0;
-
-        if(getExtract())
-            return 0;
-
-        if(getCapacity() - getFluidAmount() <= 0)
-            return 0;
-
-        maxReceive = Math.min(maxReceive, getMaxEnergyBuffer());
-
-        maxReceive = fill(FluidRegistry.getFluidStack(FancyFluidStorage.fluidMetaphasedFlux.getName(), maxReceive), false);
-
-        if(simulate)
-            return maxReceive;
-
-        return fill(FluidRegistry.getFluidStack(FancyFluidStorage.fluidMetaphasedFlux.getName(), maxReceive), true);
+        return MetaphaserRF.INSTANCE.receiveEnergy(this, facing, maxReceive, simulate);
     }
 
     @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public int getEnergyStored(EnumFacing facing) {
-        return (int) Math.ceil((double) getFluidAmount() * 0.75d);
+        return MetaphaserRF.INSTANCE.convertForOutput(getFluidAmount());
     }
 
     @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public int getMaxEnergyStored(EnumFacing facing) {
-        return getCapacity();
+        return MetaphaserRF.INSTANCE.getMaxEnergyStored(this, facing);
     }
 
     @Optional.Method(modid = "CoFHAPI|energy")
     @Override
     public boolean canConnectEnergy(EnumFacing facing) {
-        return isValid();
+        return MetaphaserRF.INSTANCE.canConnectEnergy(this, facing);
+    }
+
+    /**
+     * -----------------------------------------------------------------------
+     * Start of the IC2 Energy implementation, also known as Energy Units (EU)
+     * -----------------------------------------------------------------------
+     */
+
+    @Optional.Method(modid = "IC2API")
+    @Override
+    public double getDemandedEnergy() {
+        return MetaphaserEU.INSTANCE.getDemandedEnergy(this);
+    }
+
+    @Optional.Method(modid = "IC2API")
+    @Override
+    public int getSinkTier() {
+        return MetaphaserEU.INSTANCE.getSinkTier(this);
+    }
+
+    @Optional.Method(modid = "IC2API")
+    @Override
+    public double injectEnergy(EnumFacing directionFrom, double amount, double voltage) {
+        return MetaphaserEU.INSTANCE.injectEnergy(this, directionFrom, amount, voltage);
+    }
+
+    @Optional.Method(modid = "IC2API")
+    @Override
+    public boolean acceptsEnergyFrom(IEnergyEmitter emitter, EnumFacing side) {
+        return MetaphaserEU.INSTANCE.acceptsEnergyFrom(this, emitter, side);
+    }
+
+    @Optional.Method(modid = "IC2API")
+    @Override
+    public double getOfferedEnergy() {
+        return MetaphaserEU.INSTANCE.getOfferedEnergy(this);
+    }
+
+    @Optional.Method(modid = "IC2API")
+    @Override
+    public void drawEnergy(double amount) {
+        MetaphaserEU.INSTANCE.drawEnergy(this, amount);
+    }
+
+    @Optional.Method(modid = "IC2API")
+    @Override
+    public int getSourceTier() {
+        return MetaphaserEU.INSTANCE.getSourceTier(this);
+    }
+
+    @Optional.Method(modid = "IC2API")
+    @Override
+    public boolean emitsEnergyTo(IEnergyAcceptor receiver, EnumFacing side) {
+        return MetaphaserEU.INSTANCE.emitsEnergyTo(this, receiver, side);
     }
 }

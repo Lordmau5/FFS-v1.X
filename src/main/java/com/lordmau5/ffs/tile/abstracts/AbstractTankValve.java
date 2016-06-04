@@ -21,7 +21,10 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.IFluidTank;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +37,9 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractTankValve extends AbstractTankTile implements IFacingTile, INameableTile, IFluidTank {
 
-    private final int maxSize = FancyFluidStorage.instance.MAX_SIZE;
-    protected int mbPerVirtualTank = FancyFluidStorage.instance.MB_PER_TANK_BLOCK;
-    protected int minBurnableTemp = FancyFluidStorage.instance.MIN_BURNABLE_TEMPERATURE;
+    private final int maxSize = FancyFluidStorage.INSTANCE.MAX_SIZE;
+    protected int mbPerVirtualTank = FancyFluidStorage.INSTANCE.MB_PER_TANK_BLOCK;
+    protected int minBurnableTemp = FancyFluidStorage.INSTANCE.MIN_BURNABLE_TEMPERATURE;
     private TankConfig tankConfig;
 
     private int oldLuminosity;
@@ -183,13 +186,13 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
                         frameBurnability = 0;
 
-                        //if (FancyFluidStorage.instance.SET_WORLD_ON_FIRE)
+                        //if (FancyFluidStorage.INSTANCE.SET_WORLD_ON_FIRE)
                         //    getWorld().playSound(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D, FancyFluidStorage.modId + ":fire", SoundCategory.MUSIC, 1.0F, getWorld().rand.nextFloat() * 0.1F + 0.9F, false);
                     }
                 }
             }
 
-            if (FancyFluidStorage.instance.SHOULD_TANKS_LEAK) {
+            if (FancyFluidStorage.INSTANCE.SHOULD_TANKS_LEAK) {
                 if (randomLeakTicks-- <= 0 && getFluid().getFluid().canBePlacedInWorld()) {
                     randomLeakTicks = 20 * 60;
 
@@ -210,8 +213,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                         if(blockState == null)
                             continue;
 
-                        Block block = blockState.getBlock();
-                        if (GenericUtil.canBlockLeak(blockState) && !frame.getNeighborBlockOrAir(getFluid().getFluid().getBlock()).isEmpty() && block.getBlockHardness(blockState, getFakeWorld(), frame.getPos()) <= 1.0F) {
+                        if (GenericUtil.canBlockLeak(blockState) && !frame.getNeighborBlockOrAir(getFluid().getFluid().getBlock()).isEmpty() && blockState.getBlockHardness(getFakeWorld(), frame.getPos()) <= 1.0F) {
                             validFrames.add(frame);
                             i++;
                         } else
@@ -225,8 +227,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                         if(blockState == null)
                             continue;
 
-                        Block block = blockState.getBlock();
-                        int hardness = (int) Math.ceil(block.getBlockHardness(blockState, getFakeWorld(), frame.getPos()) * 100);
+                        int hardness = (int) Math.ceil(blockState.getBlockHardness(getFakeWorld(), frame.getPos()) * 100);
                         int rand = random.nextInt(hardness) + 1;
                         if (rand >= hardness - diff) {
                             EnumFacing leakDir;
@@ -244,10 +245,10 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                             if (maps[2].containsKey(leakPos))
                                 continue;
 
-                            if (getFluid().amount >= FluidContainerRegistry.BUCKET_VOLUME) {
+                            if (getFluid().amount >= Fluid.BUCKET_VOLUME) {
                                 getWorld().setBlockState(leakPos, getFluid().getFluid().getBlock().getDefaultState());
                                 getWorld().notifyBlockOfStateChange(leakPos, getFluid().getFluid().getBlock());
-                                drain(FluidContainerRegistry.BUCKET_VOLUME, true);
+                                drain(Fluid.BUCKET_VOLUME, true);
                             }
                         }
                     }
@@ -468,7 +469,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
 
         BlockPos pos;
 
-        if (FancyFluidStorage.instance.INSIDE_CAPACITY) {
+        if (FancyFluidStorage.INSTANCE.INSIDE_CAPACITY) {
             getTankConfig().setFluidCapacity((maps[2].size()) * mbPerVirtualTank);
         } else {
             getTankConfig().setFluidCapacity((maps[0].size() + maps[1].size() + maps[2].size()) * mbPerVirtualTank);
@@ -715,9 +716,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
     public void markForUpdate() {
         if (getFluidLuminosity() != oldLuminosity) {
             oldLuminosity = getFluidLuminosity();
-            for (TileEntityTankFrame tile : getTankTiles(TileEntityTankFrame.class)) {
-                tile.setNeedsUpdate();
-            }
+            getTankTiles(TileEntityTankFrame.class).forEach(AbstractTankTile::setNeedsUpdate);
         }
 
 //        EnumFacing facing = getTileFacing();

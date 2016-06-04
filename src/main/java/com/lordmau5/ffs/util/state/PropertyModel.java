@@ -1,6 +1,5 @@
 package com.lordmau5.ffs.util.state;
 
-
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraftforge.common.property.IUnlistedProperty;
 

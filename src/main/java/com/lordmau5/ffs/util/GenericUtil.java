@@ -93,7 +93,7 @@ public class GenericUtil {
         if(!isValidTankBlock(world, bottomPos, bottomBlock))
             return false;
 
-        switch (FancyFluidStorage.instance.TANK_FRAME_MODE) {
+        switch (FancyFluidStorage.INSTANCE.TANK_FRAME_MODE) {
             case SAME_BLOCK:
                 return bottomBlock.equals(topBlock);
             case DIFFERENT_METADATA:
@@ -143,7 +143,7 @@ public class GenericUtil {
         if(!state.isOpaqueCube())
             return true;
 
-        if(FancyFluidStorage.instance.TANK_FRAME_MODE == FancyFluidStorage.TankFrameMode.DIFFERENT_BLOCK)
+        if(FancyFluidStorage.INSTANCE.TANK_FRAME_MODE == FancyFluidStorage.TankFrameMode.DIFFERENT_BLOCK)
             return true;
 
         return true;
@@ -346,13 +346,21 @@ public class GenericUtil {
         return wrapper;
     }
 
+    public static void initChunkLoadTicket(World world, ForgeChunkManager.Ticket ticket) {
+        chunkloadTicketMap.put(world, ticket);
+    }
+
     public static ForgeChunkManager.Ticket getChunkLoadTicket(World world) {
         if(chunkloadTicketMap.containsKey(world))
             return chunkloadTicketMap.get(world);
 
-        ForgeChunkManager.Ticket chunkloadTicket = ForgeChunkManager.requestTicket(FancyFluidStorage.instance, world, ForgeChunkManager.Type.NORMAL);
+        ForgeChunkManager.Ticket chunkloadTicket = ForgeChunkManager.requestTicket(FancyFluidStorage.INSTANCE, world, ForgeChunkManager.Type.NORMAL);
         chunkloadTicketMap.put(world, chunkloadTicket);
         return chunkloadTicket;
+    }
+
+    public static double calculateEnergyLoss() {
+        return (100 - FancyFluidStorage.INSTANCE.METAPHASED_FLUX_ENERGY_LOSS) / 100d;
     }
 
 }

@@ -41,6 +41,7 @@ import java.util.Random;
 /**
  * Created by Dustin on 02.07.2015.
  */
+@SuppressWarnings("deprecation")
 @Optional.InterfaceList(
         @Optional.Interface(iface = "team.chisel.api.IFacade", modid = "chisel")
 )
@@ -169,10 +170,20 @@ public class BlockTankFrame extends Block implements IFacade {
         return lightValue;
     }
 
-    //TODO: Store the Fake Blockstate within *my* Blockstate so I can fetch it here
+    @Override
+    public boolean isVisuallyOpaque() {
+        return true;
+    }
+
     @Override
     public boolean isOpaqueCube(IBlockState state) {
-        return false;
+        IBlockState fake_state = ((IExtendedBlockState) state).getValue(FFSStateProps.FRAME_STATE);
+        return fake_state != null && fake_state.isOpaqueCube();
+    }
+
+    @Override
+    public boolean isFullBlock(IBlockState state) {
+        return isOpaqueCube(state);
     }
 
     @Override
@@ -190,7 +201,7 @@ public class BlockTankFrame extends Block implements IFacade {
                 if (GenericUtil.isFluidContainer(heldItem))
                     return GenericUtil.fluidContainerHandler(world, valve, player, side);
 
-                player.openGui(FancyFluidStorage.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
+                player.openGui(FancyFluidStorage.INSTANCE, 0, world, pos.getX(), pos.getY(), pos.getZ());
             }
         }
         return true;

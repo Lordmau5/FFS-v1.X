@@ -120,7 +120,7 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
 
         if(updateType == UpdateType.FULL) {
             IBlockState state = getWorld().getBlockState(getPos());
-            getWorld().notifyBlockUpdate(getPos(), state, state, 4);
+            getWorld().notifyBlockUpdate(getPos(), state, state, 8);
             if (getWorld().isRemote) {
                 getWorld().checkLight(getPos());
             }

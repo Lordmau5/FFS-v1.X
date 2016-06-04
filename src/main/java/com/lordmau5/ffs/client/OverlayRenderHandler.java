@@ -55,7 +55,7 @@ public class OverlayRenderHandler {
 
     @SubscribeEvent
     public void overlayRender(DrawBlockHighlightEvent event) {
-        if(!FancyFluidStorage.instance.TANK_OVERLAY_RENDER)
+        if(!FancyFluidStorage.INSTANCE.TANK_OVERLAY_RENDER)
             return;
 
         EntityPlayer player = event.getPlayer();

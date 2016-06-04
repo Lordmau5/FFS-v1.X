@@ -8,18 +8,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fluids.*;
-import net.minecraftforge.fml.common.Optional;
 
 /**
  * Created by Dustin on 28.06.2015.
  */
-
-@Optional.InterfaceList(value = {
-        @Optional.Interface(iface = "buildcraft.api.transport.IPipeConnection", modid = "BuildCraftAPI|transport")
-})
-public class TileEntityFluidValve extends AbstractTankValve implements IFluidHandler
-        //,IPipeConnection
-{
+public class TileEntityFluidValve extends AbstractTankValve implements IFluidHandler {
 
     private boolean autoOutput;
 
@@ -73,7 +66,7 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
 
         if(fluid == FluidRegistry.WATER) {
             if(getWorld().isRaining()) {
-                int rate = (int) Math.floor(getWorld().rainingStrength * 5 * worldObj.getBiomeGenForCoords(getPos()).getRainfall());
+                int rate = (int) Math.floor(getWorld().rainingStrength * 5 * worldObj.getBiomeForCoordsBody(getPos()).getRainfall());
                 if (getPos().getY() == getWorld().getPrecipitationHeight(getPos()).getY() - 1) {
                     FluidStack waterStack = fluidStack.copy();
                     waterStack.amount = rate * 10;
@@ -152,17 +145,5 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
 
         return getMasterValve() == this ? drain(maxDrain, doDrain) : getMasterValve().drain(maxDrain, doDrain);
     }
-
-    // BC
-    /*
-    @Optional.Method(modid = "BuildCraftAPI|transport")
-    @Override
-    public ConnectOverride overridePipeConnection(IPipeTile.PipeType pipeType, EnumFacing from) {
-        if(pipeType != IPipeTile.PipeType.FLUID)
-            return ConnectOverride.DISCONNECT;
-
-        return isValid() ? ConnectOverride.CONNECT : ConnectOverride.DISCONNECT;
-    }
-    */
 
 }
