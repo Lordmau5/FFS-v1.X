@@ -1,0 +1,5 @@
+tile.blockFluidValve.name=Tankventil
+tile.blockMetaphaser.name=Phasenwandler
+tile.blockTankComputer.name=Tank-Computer
+
+fluid.metaphasedFlux=Flüssig-Flux
