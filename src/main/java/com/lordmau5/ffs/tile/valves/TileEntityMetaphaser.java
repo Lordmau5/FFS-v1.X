@@ -15,6 +15,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Optional;
 
 /**
@@ -121,7 +122,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
     }
 
     private int convertForOutput(int amount) {
-        return (int) Math.ceil((double) amount * 0.75d);
+        return (int) Math.ceil((double) amount * 0.90d);
     }
 
     private int internal_extractEnergy(int extractEnergy, boolean simulate, boolean ignoreGetExtract) {
@@ -132,6 +133,9 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
             return 0;
 
         if(getFluidAmount() <= 0)
+            return 0;
+
+        if(!getFluid().isFluidEqual(new FluidStack(FancyFluidStorage.fluidMetaphasedFlux, 1000)))
             return 0;
 
         int energy = convertForOutput(drain(extractEnergy, false).amount);
@@ -172,7 +176,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements IPipeConn
 
     @Override
     public int getEnergyStored(EnumFacing facing) {
-        return (int) Math.ceil((double) getFluidAmount() * 0.75d);
+        return (int) Math.ceil((double) getFluidAmount() * 0.90d);
     }
 
     @Override
