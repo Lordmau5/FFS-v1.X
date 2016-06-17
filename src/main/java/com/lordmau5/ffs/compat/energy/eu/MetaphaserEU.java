@@ -59,7 +59,7 @@ public enum MetaphaserEU {
     }
 
     public boolean acceptsEnergyFrom(TileEntityMetaphaser metaphaser, IEnergyEmitter emitter, EnumFacing side) {
-        return metaphaser.isValid() && !metaphaser.getExtract();
+        return metaphaser.isValid() && !metaphaser.getExtract() && metaphaser.containsMetaphasedFlux();
     }
 
     public double getOfferedEnergy(TileEntityMetaphaser metaphaser) {
@@ -74,6 +74,9 @@ public enum MetaphaserEU {
             return;
 
         if(metaphaser.getFluidAmount() <= 0)
+            return;
+
+        if(!metaphaser.containsMetaphasedFlux())
             return;
 
         double actualDrain = amount / 4d * (1d + (1d - GenericUtil.calculateEnergyLoss()));
@@ -97,7 +100,7 @@ public enum MetaphaserEU {
     }
 
     public boolean emitsEnergyTo(TileEntityMetaphaser metaphaser, IEnergyAcceptor receiver, EnumFacing side) {
-        return metaphaser.isValid() && metaphaser.getExtract();
+        return metaphaser.isValid() && metaphaser.getExtract() && metaphaser.containsMetaphasedFlux();
     }
 
 }

@@ -41,6 +41,9 @@ public class MetaphaserTesla implements ITeslaConsumer, ITeslaProducer, ITeslaHo
         if(outsideTile == null)
             return;
 
+        if(!metaphaser.containsMetaphasedFlux())
+            return;
+
         if(!outsideTile.hasCapability(Capabilities.Tesla.RECEIVER, metaphaser.getTileFacing().getOpposite()))
             return;
 
@@ -82,6 +85,9 @@ public class MetaphaserTesla implements ITeslaConsumer, ITeslaProducer, ITeslaHo
             return 0;
 
         if(metaphaser.getFluidAmount() <= 0)
+            return 0;
+
+        if(!metaphaser.containsMetaphasedFlux())
             return 0;
 
         int i_power = (int) Math.min(power, metaphaser.getFluidAmount());

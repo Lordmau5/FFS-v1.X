@@ -6,6 +6,7 @@ package com.lordmau5.ffs.tile.valves;
 
 import cofh.api.energy.IEnergyProvider;
 import cofh.api.energy.IEnergyReceiver;
+import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.compat.Capabilities;
 import com.lordmau5.ffs.compat.Compatibility;
 import com.lordmau5.ffs.compat.energy.eu.MetaphaserEU;
@@ -19,6 +20,7 @@ import ic2.api.energy.tile.IEnergySource;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Optional;
 
 /**
@@ -125,6 +127,13 @@ public class TileEntityMetaphaser extends AbstractTankValve implements
             return (T) teslaContainer;
 
         return super.getCapability(capability, facing);
+    }
+
+    /**
+     * This method is being used to check if the Metaphaser can extract energy in the first place
+     */
+    public boolean containsMetaphasedFlux() {
+        return getFluid() != null && getFluid().isFluidEqual(new FluidStack(FancyFluidStorage.fluidMetaphasedFlux, 1000));
     }
 
     /**

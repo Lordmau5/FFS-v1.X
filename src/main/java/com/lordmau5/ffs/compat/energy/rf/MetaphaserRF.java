@@ -31,6 +31,9 @@ public enum MetaphaserRF {
         if(outsideTile == null || !(outsideTile instanceof IEnergyReceiver))
             return;
 
+        if(!metaphaser.containsMetaphasedFlux())
+            return;
+
         IEnergyReceiver receiver = (IEnergyReceiver) outsideTile;
         int maxReceive = receiver.receiveEnergy(metaphaser.getTileFacing(), extractEnergy(metaphaser, EnumFacing.DOWN, metaphaser.getFluidAmount(), true, true), true);
         if(maxReceive > 0)
@@ -61,6 +64,9 @@ public enum MetaphaserRF {
             return 0;
 
         if(metaphaser.getFluidAmount() <= 0)
+            return 0;
+
+        if(!metaphaser.containsMetaphasedFlux())
             return 0;
 
         maxExtract = Math.min(maxExtract, metaphaser.getFluidAmount());
