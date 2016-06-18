@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 public class BlockFluidValve extends AbstractBlockValve {
 
     public BlockFluidValve() {
-        super("blockFluidValve", FancyFluidStorage.blockFluidValve);
+        super("blockFluidValve");
     }
 
     @Override

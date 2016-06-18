@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 public class BlockMetaphaser extends AbstractBlockValve {
 
     public BlockMetaphaser() {
-        super("blockMetaphaser", FancyFluidStorage.blockMetaphaser);
+        super("blockMetaphaser");
     }
 
     @Override
