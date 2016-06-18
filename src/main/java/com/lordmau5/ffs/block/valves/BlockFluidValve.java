@@ -1,6 +1,5 @@
 package com.lordmau5.ffs.block.valves;
 
-import com.lordmau5.ffs.FancyFluidStorage;
 import com.lordmau5.ffs.block.abstracts.AbstractBlockValve;
 import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
 import com.lordmau5.ffs.util.FFSStateProps;
@@ -18,7 +17,7 @@ import net.minecraft.world.World;
 public class BlockFluidValve extends AbstractBlockValve {
 
     public BlockFluidValve() {
-        super("blockFluidValve", FancyFluidStorage.blockFluidValve);
+        super("blockFluidValve");
     }
 
     @Override

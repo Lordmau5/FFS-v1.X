@@ -28,11 +28,8 @@ import java.util.Random;
  */
 public abstract class AbstractBlockValve extends Block {
 
-    private Block blockDrop;
-
-    public AbstractBlockValve(String name, Block blockDrop) {
+    public AbstractBlockValve(String name) {
         super(Material.IRON);
-        this.blockDrop = blockDrop;
 
         setUnlocalizedName(name);
         setRegistryName(name);
@@ -110,7 +107,7 @@ public abstract class AbstractBlockValve extends Block {
 
     @Override
     public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-        return Item.getItemFromBlock(this.blockDrop);
+        return Item.getItemFromBlock(this);
     }
 
     @Override
