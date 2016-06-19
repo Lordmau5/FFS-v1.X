@@ -4,13 +4,18 @@ import com.lordmau5.ffs.client.FluidHelper;
 import com.lordmau5.ffs.client.OverlayRenderHandler;
 import com.lordmau5.ffs.client.TankFrameModel;
 import com.lordmau5.ffs.compat.Compatibility;
+import com.lordmau5.ffs.network.NetworkHandler;
+import com.lordmau5.ffs.proxy.GuiHandler;
 import com.lordmau5.ffs.proxy.IProxy;
 import com.lordmau5.ffs.util.GenericUtil;
+import com.lordmau5.ffs.util.ModBlocksAndItems;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.crash.CrashReport;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -25,6 +30,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -136,12 +142,10 @@ public class FancyFluidStorage {
         try {
             Class.forName("com.cricketcraft.chisel.Chisel");
 
-            System.out.println("Hi there!");
-
-            throw new RuntimeException("You are using an unsupported version of Chisel 3, which crashes my mod when being used." +
+            throw new ReportedException(new CrashReport("Compatibility error", new Exception("You are using an unsupported version of Chisel 3, which crashes my mod when being used." +
                     "Please use the proper version from the following links:" +
                     "http://minecraft.curseforge.com/projects/chisel" +
-                    "http://ci.tterrag.com/job/Chisel/branch/1.9%252Fdev/");
+                    "http://ci.tterrag.com/job/Chisel/branch/1.9%252Fdev/")));
         }
         catch(ClassNotFoundException e) {
             // Bad Chisel wasn't found, continue.
@@ -160,6 +164,11 @@ public class FancyFluidStorage {
 
         CONFIG = new Configuration(event.getSuggestedConfigurationFile());
         loadConfig();
+
+        ModBlocksAndItems.preInit(event);
+
+        NetworkRegistry.INSTANCE.registerGuiHandler(FancyFluidStorage.INSTANCE, new GuiHandler());
+        NetworkHandler.registerChannels(event.getSide());
 
         PROXY.preInit(event);
     }

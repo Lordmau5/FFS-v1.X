@@ -26,8 +26,6 @@ public class ClientProxy extends CommonProxy {
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockTankComputer), 0, new ModelResourceLocation("ffs:blockTankComputer", "inventory"));
 
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockMetaphaser), 0, new ModelResourceLocation("ffs:blockMetaphaser", "inventory"));
-
-        super.preInit(event);
     }
 
     public void init(FMLInitializationEvent event) {
