@@ -141,14 +141,12 @@ public class FancyFluidStorage {
     private void checkForBadChisel() {
         try {
             Class.forName("com.cricketcraft.chisel.Chisel");
-
-            throw new ReportedException(new CrashReport("Compatibility error", new Exception("You are using an unsupported version of Chisel 3, which crashes my mod when being used." +
-                    "Please use the proper version from the following links:" +
-                    "http://minecraft.curseforge.com/projects/chisel" +
-                    "http://ci.tterrag.com/job/Chisel/branch/1.9%252Fdev/")));
         }
         catch(ClassNotFoundException e) {
-            // Bad Chisel wasn't found, continue.
+            throw new ReportedException(new CrashReport("Compatibility error", new Exception("You are using an unsupported version of Chisel, which crashes my mod when being used.\n" +
+                    "Please use the proper, supported version from one of the following links:\n" +
+                    "http://minecraft.curseforge.com/projects/chisel\n" +
+                    "http://ci.tterrag.com/job/Chisel/branch/1.9%252Fdev/")));
         }
     }
 
