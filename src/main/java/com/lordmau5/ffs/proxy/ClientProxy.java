@@ -11,27 +11,32 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 /**
  * Created by Dustin on 29.06.2015.
  */
 public class ClientProxy extends CommonProxy {
 
-    public void preInit() {
+    public void preInit(FMLPreInitializationEvent event) {
         ClientRegistry.bindTileEntitySpecialRenderer(AbstractTankValve.class, new ValveRenderer());
 
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockFluidValve), 0, new ModelResourceLocation("ffs:blockFluidValve", "inventory"));
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockTankComputer), 0, new ModelResourceLocation("ffs:blockTankComputer", "inventory"));
 
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FancyFluidStorage.blockMetaphaser), 0, new ModelResourceLocation("ffs:blockMetaphaser", "inventory"));
+
+        super.preInit(event);
     }
 
-    public void init() {
+    public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new OverlayRenderHandler());
 
         if(Loader.isModLoaded("Waila")) {
             WailaPluginTank.init();
         }
-        super.init();
+
+        super.init(event);
     }
 }

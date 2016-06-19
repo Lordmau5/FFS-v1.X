@@ -1,23 +1,12 @@
 package com.lordmau5.ffs;
 
-import com.lordmau5.ffs.block.fluid.FluidMetaphasedFlux;
-import com.lordmau5.ffs.block.tanktiles.BlockTankComputer;
-import com.lordmau5.ffs.block.tanktiles.BlockTankFrame;
-import com.lordmau5.ffs.block.tanktiles.BlockTankFrameOpaque;
-import com.lordmau5.ffs.block.valves.BlockFluidValve;
-import com.lordmau5.ffs.block.valves.BlockMetaphaser;
 import com.lordmau5.ffs.client.FluidHelper;
 import com.lordmau5.ffs.client.OverlayRenderHandler;
 import com.lordmau5.ffs.client.TankFrameModel;
 import com.lordmau5.ffs.compat.Compatibility;
-import com.lordmau5.ffs.network.NetworkHandler;
-import com.lordmau5.ffs.proxy.CommonProxy;
-import com.lordmau5.ffs.proxy.GuiHandler;
-import com.lordmau5.ffs.tile.tanktiles.TileEntityTankComputer;
-import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
-import com.lordmau5.ffs.tile.valves.TileEntityFluidValve;
-import com.lordmau5.ffs.tile.valves.TileEntityMetaphaser;
+import com.lordmau5.ffs.proxy.IProxy;
 import com.lordmau5.ffs.util.GenericUtil;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -29,14 +18,13 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -44,16 +32,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * Created by Dustin on 28.06.2015.
  */
-@Mod(modid = FancyFluidStorage.modId, name = "Fancy Fluid Storage", dependencies="after:waila;after:chisel;after:OpenComputers;after:ComputerCraft;after:BuildCraftAPI|transport;after:funkylocomotion")
+@Mod(modid = FancyFluidStorage.modId, name = "Fancy Fluid Storage", dependencies="after:waila;after:OpenComputers;after:ComputerCraft;before:chisel")
 public class FancyFluidStorage {
 
     public static final String modId = "FFS";
 
-    public static BlockFluidValve blockFluidValve;
-    public static BlockMetaphaser blockMetaphaser;
-    public static BlockTankComputer blockTankComputer;
-    public static BlockTankFrame blockTankFrame;
-    public static BlockTankFrameOpaque blockTankFrameOpaque;
+    public static Block blockFluidValve;
+    public static Block blockMetaphaser;
+    public static Block blockTankComputer;
+    public static Block blockTankFrame;
+    public static Block blockTankFrameOpaque;
 
     public static Fluid fluidMetaphasedFlux;
 
@@ -63,7 +51,7 @@ public class FancyFluidStorage {
     public static FancyFluidStorage INSTANCE;
 
     @SidedProxy(clientSide = "com.lordmau5.ffs.proxy.ClientProxy", serverSide = "com.lordmau5.ffs.proxy.CommonProxy")
-    public static CommonProxy PROXY;
+    public static IProxy PROXY;
 
     public int MB_PER_TANK_BLOCK = 16000;
     public boolean INSIDE_CAPACITY = false;
@@ -144,6 +132,27 @@ public class FancyFluidStorage {
         }
     }
 
+    private void checkForBadChisel() {
+        try {
+            Class.forName("com.cricketcraft.chisel.Chisel");
+
+            System.out.println("Hi there!");
+
+            throw new RuntimeException("You are using an unsupported version of Chisel 3, which crashes my mod when being used." +
+                    "Please use the proper version from the following links:" +
+                    "http://minecraft.curseforge.com/projects/chisel" +
+                    "http://ci.tterrag.com/job/Chisel/branch/1.9%252Fdev/");
+        }
+        catch(ClassNotFoundException e) {
+            // Bad Chisel wasn't found, continue.
+        }
+    }
+
+    @Mod.EventHandler
+    public void constructionEvent(FMLConstructionEvent event) {
+        checkForBadChisel();
+    }
+
     @SuppressWarnings("deprecation")
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -152,24 +161,7 @@ public class FancyFluidStorage {
         CONFIG = new Configuration(event.getSuggestedConfigurationFile());
         loadConfig();
 
-        GameRegistry.registerWithItem(blockFluidValve = new BlockFluidValve());
-        GameRegistry.registerWithItem(blockTankComputer = new BlockTankComputer());
-        GameRegistry.registerWithItem(blockTankFrame = new BlockTankFrame("blockTankFrame"));
-        GameRegistry.registerWithItem(blockTankFrameOpaque = new BlockTankFrameOpaque());
-
-        GameRegistry.registerTileEntity(TileEntityFluidValve.class, "tileEntityFluidValve");
-        GameRegistry.registerTileEntity(TileEntityTankComputer.class, "tileEntityTankComputer");
-        GameRegistry.registerTileEntity(TileEntityTankFrame.class, "tileEntityTankFrame");
-
-        FluidRegistry.registerFluid(fluidMetaphasedFlux = new FluidMetaphasedFlux());
-        GameRegistry.registerWithItem(blockMetaphaser = new BlockMetaphaser());
-        GameRegistry.registerTileEntity(TileEntityMetaphaser.class, "tileEntityMetaphaser");
-
-        NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
-
-        NetworkHandler.registerChannels(event.getSide());
-
-        PROXY.preInit();
+        PROXY.preInit(event);
     }
 
     @Mod.EventHandler
@@ -192,7 +184,7 @@ public class FancyFluidStorage {
                     'B', Items.COMPARATOR);
         }
 
-        PROXY.init();
+        PROXY.init(event);
     }
 
     @Mod.EventHandler
