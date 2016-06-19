@@ -25,7 +25,6 @@ import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -38,7 +37,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * Created by Dustin on 28.06.2015.
  */
-@Mod(modid = FancyFluidStorage.modId, name = "Fancy Fluid Storage", dependencies="after:waila;after:OpenComputers;after:ComputerCraft;before:chisel")
+@Mod(modid = FancyFluidStorage.modId, name = "Fancy Fluid Storage", dependencies="after:waila;after:OpenComputers;after:ComputerCraft;after:chisel")
 public class FancyFluidStorage {
 
     public static final String modId = "FFS";
@@ -138,26 +137,24 @@ public class FancyFluidStorage {
         }
     }
 
-    private void checkForBadChisel() {
+    private void checkForBadChisel(FMLPreInitializationEvent event) {
         try {
             Class.forName("com.cricketcraft.chisel.Chisel");
-        }
-        catch(ClassNotFoundException e) {
+
             throw new ReportedException(new CrashReport("Compatibility error", new Exception("You are using an unsupported version of Chisel, which crashes my mod when being used.\n" +
                     "Please use the proper, supported version from one of the following links:\n" +
                     "http://minecraft.curseforge.com/projects/chisel\n" +
                     "http://ci.tterrag.com/job/Chisel/branch/1.9%252Fdev/")));
         }
-    }
-
-    @Mod.EventHandler
-    public void constructionEvent(FMLConstructionEvent event) {
-        checkForBadChisel();
+        catch(ClassNotFoundException e) {
+        }
     }
 
     @SuppressWarnings("deprecation")
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        checkForBadChisel(event);
+
         Compatibility.INSTANCE.init();
 
         CONFIG = new Configuration(event.getSuggestedConfigurationFile());
