@@ -137,7 +137,7 @@ public class FancyFluidStorage {
         }
     }
 
-    private void checkForBadChisel(FMLPreInitializationEvent event) {
+    private void checkForIncompatibleChisel(FMLPreInitializationEvent event) {
         try {
             Class.forName("com.cricketcraft.chisel.Chisel");
 
@@ -153,7 +153,7 @@ public class FancyFluidStorage {
     @SuppressWarnings("deprecation")
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        checkForBadChisel(event);
+        checkForIncompatibleChisel(event);
 
         Compatibility.INSTANCE.init();
 
