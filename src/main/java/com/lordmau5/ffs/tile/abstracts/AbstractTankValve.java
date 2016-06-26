@@ -557,12 +557,12 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             pos = setTiles.getKey();
             IBlockState blockState = setTiles.getValue();
             Block block = blockState.getBlock();
-            if (!blockState.isOpaqueCube() && block != FancyFluidStorage.blockTankFrame) {
+            if (block != FancyFluidStorage.blockTankFrame) {
                 getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
             }
-            else if(blockState.isOpaqueCube() && block != FancyFluidStorage.blockTankFrameOpaque) {
-                getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrameOpaque.getDefaultState());
-            }
+//            else if(blockState.isOpaqueCube() && block != FancyFluidStorage.blockTankFrameOpaque) {
+//                getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrameOpaque.getDefaultState());
+//            }
             TileEntityTankFrame tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
             tankFrame.initialize(getPos(), setTiles.getValue());
             tankTiles.add(tankFrame);
@@ -583,12 +583,12 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                 else if (GenericUtil.isTileEntityAcceptable(setTiles.getValue().getBlock(), tile)) {
                     IBlockState blockState = setTiles.getValue();
                     Block block = blockState.getBlock();
-                    if (!blockState.isOpaqueCube() && block != FancyFluidStorage.blockTankFrame) {
+                    if (block != FancyFluidStorage.blockTankFrame) {
                         getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
                     }
-                    else if(blockState.isOpaqueCube() && block != FancyFluidStorage.blockTankFrameOpaque) {
-                        getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrameOpaque.getDefaultState());
-                    }
+//                    else if(blockState.isOpaqueCube() && block != FancyFluidStorage.blockTankFrameOpaque) {
+//                        getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrameOpaque.getDefaultState());
+//                    }
                     TileEntityTankFrame tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
                     tankFrame.initialize(getPos(), setTiles.getValue());
                     tankTiles.add(tankFrame);
@@ -612,12 +612,12 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
             } else {
                 IBlockState blockState = setTiles.getValue();
                 Block block = blockState.getBlock();
-                if (!blockState.isOpaqueCube() && block != FancyFluidStorage.blockTankFrame) {
+                if (block != FancyFluidStorage.blockTankFrame) {
                     getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrame.getDefaultState());
                 }
-                else if(blockState.isOpaqueCube() && block != FancyFluidStorage.blockTankFrameOpaque) {
-                    getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrameOpaque.getDefaultState());
-                }
+//                else if(blockState.isOpaqueCube() && block != FancyFluidStorage.blockTankFrameOpaque) {
+//                    getWorld().setBlockState(pos, FancyFluidStorage.blockTankFrameOpaque.getDefaultState());
+//                }
                 TileEntityTankFrame tankFrame = (TileEntityTankFrame) getWorld().getTileEntity(pos);
                 tankFrame.initialize(getPos(), setTiles.getValue());
                 tankTiles.add(tankFrame);
