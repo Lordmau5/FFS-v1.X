@@ -34,7 +34,7 @@ public class FakeWorldWrapper extends World {
 
     @Override
     public TileEntity getTileEntity(BlockPos pos) {
-        IBlockState state = getBlockState(pos);
+        IBlockState state = wrappedWorld.getBlockState(pos);
         if(state == null || !state.getBlock().hasTileEntity(state))
             return null;
 
