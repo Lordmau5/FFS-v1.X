@@ -107,10 +107,6 @@ public class BlockTankComputer extends Block {
         return state;
     }
 
-    @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return getDefaultState();
-    }
 
     @Override
     public int getMetaFromState(IBlockState state) {

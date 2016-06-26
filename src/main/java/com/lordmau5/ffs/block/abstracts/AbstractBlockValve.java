@@ -116,11 +116,6 @@ public abstract class AbstractBlockValve extends Block {
     }
 
     @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return getDefaultState();
-    }
-
-    @Override
     public int getMetaFromState(IBlockState state) {
         return 0;
     }
