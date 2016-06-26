@@ -95,9 +95,9 @@ public class OverlayRenderHandler {
     private void drawAll(AxisAlignedBB b)
     {
         GlStateManager.pushMatrix();
-        //GlStateManager.pushAttrib();
         GlStateManager.enableBlend();
         GlStateManager.enableCull();
+        GlStateManager.depthMask(false);
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         Tessellator tess = Tessellator.getInstance();
@@ -194,9 +194,9 @@ public class OverlayRenderHandler {
             }
         }
 
+        GlStateManager.depthMask(true);
         GlStateManager.disableCull();
         GlStateManager.disableBlend();
-        //GlStateManager.popAttrib();
         GlStateManager.popMatrix();
     }
 
