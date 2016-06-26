@@ -91,8 +91,6 @@ public class TileEntityTankFrame extends AbstractTankTile {
 
     public boolean tryBurning() {
         Block block = getBlockState().getBlock();
-        if(block == null)
-            return false;
 
         List<EnumFacing> air = getNeighborBlockOrAir(Blocks.AIR);
         for(EnumFacing dr : air) {
@@ -118,7 +116,7 @@ public class TileEntityTankFrame extends AbstractTankTile {
     }
 
     public void onBreak() {
-        if(getWorld() != null && !getWorld().isRemote && getMasterValve() != null) {
+        if(!getWorld().isRemote && getMasterValve() != null) {
             getMasterValve().breakTank(this);
         }
     }
@@ -127,8 +125,12 @@ public class TileEntityTankFrame extends AbstractTankTile {
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
-        if(tag.hasKey("blockName")) {
+        if(tag.hasKey("blockName") && tag.hasKey("metadata")) { // Legacy support
             setBlockState(Block.getBlockFromName(tag.getString("blockName")).getStateFromMeta(tag.getInteger("metadata")));
+        }
+
+        if(tag.hasKey("blockState")) {
+            setBlockState(Block.getStateById(tag.getInteger("blockState")));
         }
 
         int newLightValue = (getMasterValve() != null ? getMasterValve().getFluidLuminosity() : 0);
@@ -140,9 +142,11 @@ public class TileEntityTankFrame extends AbstractTankTile {
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
-        if(getBlockStateForNBT() != null && getBlockStateForNBT().getBlock() != null && getBlockStateForNBT().getBlock().getRegistryName() != null) {
-            tag.setString("blockName", getBlockStateForNBT().getBlock().getRegistryName().toString());
-            tag.setInteger("metadata", getBlockStateForNBT().getBlock().getMetaFromState(getBlockStateForNBT()));
+        if(getBlockStateForNBT() != null) {
+            tag.setInteger("blockState", Block.getStateId(getBlockStateForNBT()));
+
+//            tag.setString("blockName", getBlockStateForNBT().getBlock().getRegistryName().toString());
+//            tag.setInteger("metadata", getBlockStateForNBT().getBlock().getMetaFromState(getBlockStateForNBT()));
         }
 
         super.writeToNBT(tag);
