@@ -143,9 +143,6 @@ public class GenericUtil {
         if(!state.isFullBlock())
             return false;
 
-        if(!state.isOpaqueCube())
-            return true;
-
         if(FancyFluidStorage.INSTANCE.TANK_FRAME_MODE == FancyFluidStorage.TankFrameMode.DIFFERENT_BLOCK)
             return true;
 
