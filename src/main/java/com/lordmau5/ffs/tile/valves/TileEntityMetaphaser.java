@@ -58,15 +58,6 @@ public class TileEntityMetaphaser extends AbstractTankValve implements
     }
 
     @Override
-    public void onLoad() {
-        super.onLoad();
-
-        if(Compatibility.INSTANCE.isIC2Loaded) {
-            MetaphaserEU.INSTANCE.load(this);
-        }
-    }
-
-    @Override
     public void invalidate() {
         super.invalidate();
 
@@ -87,6 +78,9 @@ public class TileEntityMetaphaser extends AbstractTankValve implements
     @Override
     public void update() {
         super.update();
+
+        if(Compatibility.INSTANCE.isIC2Loaded && !addedToEnet)
+            MetaphaserEU.INSTANCE.load(this);
 
         if(getExtract()) {
             if(Compatibility.INSTANCE.isTeslaLoaded) {
