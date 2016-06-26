@@ -7,12 +7,18 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fluids.*;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 /**
  * Created by Dustin on 28.06.2015.
  */
-public class TileEntityFluidValve extends AbstractTankValve implements IFluidHandler {
+public class TileEntityFluidValve extends AbstractTankValve implements net.minecraftforge.fluids.IFluidHandler {
 
     private boolean autoOutput;
 
@@ -47,15 +53,15 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
                             int maxAmount = 0;
                             if (tile instanceof TileEntityFluidValve)
                                 maxAmount = 1000; // When two tanks are connected by valves, allow faster output
-                            else if (tile instanceof IFluidHandler)
+                            else if (tile.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, out))
                                 maxAmount = 50;
 
                             if (maxAmount != 0) {
-                                IFluidHandler handler = (IFluidHandler) tile;
+                                IFluidHandler handler = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, out);
                                 FluidStack fillStack = fluidStack.copy();
                                 fillStack.amount = Math.min(getFluidAmount(), maxAmount);
-                                if (handler.fill(getTileFacing(), fillStack, false) > 0) {
-                                    drain(handler.fill(getTileFacing(), fillStack, true), true);
+                                if (handler.fill(fillStack, false) > 0) {
+                                    drain(handler.fill(fillStack, true), true);
                                 }
                             }
                         }
@@ -100,10 +106,28 @@ public class TileEntityFluidValve extends AbstractTankValve implements IFluidHan
         return tag;
     }
 
+    @Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+    {
+        return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    {
+        if(capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            if(getTankConfig() != null)
+                return (T) getTankConfig().getFluidTank();
+        }
+
+        return super.getCapability(capability, facing);
+    }
+
     // IFluidHandler
     @Override
     public boolean canFill(EnumFacing from, Fluid fluid) {
-        if(!canFillIncludingContainers(from, fluid))
+        if(!canFillIncludingContainers(new FluidStack(fluid, 1000)))
             return false;
 
         return !getAutoOutput() || valveHeightPosition > getTankHeight() || valveHeightPosition + 0.5f >= getTankHeight() * getFillPercentage();

@@ -45,6 +45,7 @@ public class TileEntityMetaphaser extends AbstractTankValve implements
     private MetaphaserTesla teslaContainer;
 
     public double ic2Overflow = 0.0d;
+    public boolean addedToEnet = false;
 
     private boolean isExtract = false;
 

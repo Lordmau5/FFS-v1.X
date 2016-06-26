@@ -140,6 +140,9 @@ public class GenericUtil {
         if(state.getMaterial() == Material.SAND)
             return false;
 
+        if(!state.isFullBlock())
+            return false;
+
         if(!state.isOpaqueCube())
             return true;
 
@@ -147,7 +150,6 @@ public class GenericUtil {
             return true;
 
         return true;
-
     }
 
     public static boolean canBlockLeak(IBlockState state) {

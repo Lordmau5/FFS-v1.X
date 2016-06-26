@@ -20,6 +20,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
  */
 public class ModBlocksAndItems {
 
+    @SuppressWarnings("deprecation")
     public static void preInit(FMLPreInitializationEvent event) {
         GameRegistry.registerWithItem(FancyFluidStorage.blockFluidValve = new BlockFluidValve());
         GameRegistry.registerWithItem(FancyFluidStorage.blockTankComputer = new BlockTankComputer());

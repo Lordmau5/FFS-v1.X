@@ -892,7 +892,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                     EnumFacing outside = valve.getTileFacing().getOpposite();
                     TileEntity tile = getWorld().getTileEntity(valve.getPos().offset(outside));
                     if (tile != null && tile instanceof TileEntityFluidValve) {
-                        return ((TileEntityFluidValve) tile).fill(getTileFacing(), resource, doFill);
+                        return ((TileEntityFluidValve) tile).getTankConfig().getFluidTank().fill(resource, doFill);
                     }
                 }
             }
@@ -964,17 +964,17 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
     }
 
     public int fillFromContainer(EnumFacing from, FluidStack resource, boolean doFill) {
-        if(!canFillIncludingContainers(from, resource.getFluid()))
+        if(!canFillIncludingContainers(resource))
             return 0;
 
         return getMasterValve() == this ? fill(resource, doFill) : getMasterValve().fill(resource, doFill);
     }
 
-    public boolean canFillIncludingContainers(EnumFacing from, Fluid fluid) {
-        if (getFluid() != null && getFluid().getFluid() != fluid)
+    public boolean canFillIncludingContainers(FluidStack fluid) {
+        if (getFluid() != null && !getFluid().isFluidEqual(fluid))
             return false;
 
-        if(getTankConfig().isFluidLocked() && getTankConfig().getLockedFluid().getFluid() != fluid)
+        if(getTankConfig().isFluidLocked() && !getTankConfig().getLockedFluid().isFluidEqual(fluid))
             return false;
 
         if (getFluidAmount() >= getCapacity()) {
@@ -986,7 +986,7 @@ public abstract class AbstractTankValve extends AbstractTankTile implements IFac
                     EnumFacing outside = valve.getTileFacing().getOpposite();
                     TileEntity tile = getWorld().getTileEntity(valve.getPos().offset(outside));
                     if (tile != null && tile instanceof TileEntityFluidValve) {
-                        return ((TileEntityFluidValve) tile).canFill(valve.getTileFacing(), fluid);
+                        return ((TileEntityFluidValve) tile).getTankConfig().getFluidTank().canFillFluidType(fluid);
                     }
                 }
             }

@@ -5,6 +5,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
 
 /**
  * Created by Dustin on 20.01.2016.
@@ -14,20 +15,21 @@ public class TankConfig {
     private int tankHeight;
     private FluidStack lockedFluid;
 
-    private FluidStack fluidStack;
+    private FluidTank fluidTank = new FluidTank(0);
     private int fluidTemperature = 0;
-    private int fluidCapacity = 0;
 
     private void resetVariables() {
         tankHeight = 0;
         lockedFluid = null;
-        fluidStack = null;
+
+        fluidTank.setFluid(null);
+        fluidTank.setCapacity(0);
+
         fluidTemperature = 0;
-        fluidCapacity = 0;
     }
 
     public int getTankHeight() {
-        return tankHeight;
+        return this.tankHeight;
     }
 
     public void setTankHeight(int tankHeight) {
@@ -43,23 +45,27 @@ public class TankConfig {
     }
 
     public boolean isFluidLocked() {
-        return lockedFluid != null;
+        return this.lockedFluid != null;
     }
 
     public FluidStack getLockedFluid() {
-        return lockedFluid;
+        return this.lockedFluid;
+    }
+
+    public FluidTank getFluidTank() {
+        return this.fluidTank;
     }
 
     public FluidStack getFluidStack() {
-        return fluidStack;
+        return this.fluidTank.getFluid();
     }
 
     public void setFluidStack(FluidStack fluidStack) {
-        this.fluidStack = fluidStack;
+        this.fluidTank.setFluid(fluidStack);
     }
 
     public int getFluidTemperature() {
-        return fluidTemperature;
+        return this.fluidTemperature;
     }
 
     public void setFluidTemperature(int fluidTemperature) {
@@ -67,11 +73,11 @@ public class TankConfig {
     }
 
     public int getFluidCapacity() {
-        return fluidCapacity;
+        return this.fluidTank.getCapacity();
     }
 
     public void setFluidCapacity(int fluidCapacity) {
-        this.fluidCapacity = fluidCapacity;
+        this.fluidTank.setCapacity(fluidCapacity);
     }
 
     public void readFromNBT(NBTTagCompound mainTag) {
@@ -80,7 +86,8 @@ public class TankConfig {
         if(!mainTag.hasKey("tankConfig"))
             return;
 
-        if(mainTag.getBoolean("hasFluid")) {
+        getFluidTank().readFromNBT(mainTag);
+        if(mainTag.getBoolean("hasFluid")) { // Legacy support
             if (mainTag.hasKey("fluidName")) {
                 try {
                     setFluidStack(new FluidStack(FluidRegistry.getFluid(mainTag.getString("fluidName")), mainTag.getInteger("fluidAmount")));
@@ -125,12 +132,13 @@ public class TankConfig {
         }
         tag.setInteger("capacity", getFluidCapacity());
 
-        if(getFluidStack() != null) {
-            NBTTagCompound fluidTag = new NBTTagCompound();
-            getFluidStack().writeToNBT(fluidTag);
-
-            tag.setTag("fluid", fluidTag);
-        }
+        getFluidTank().writeToNBT(mainTag);
+//        if(getFluidStack() != null) {
+//            NBTTagCompound fluidTag = new NBTTagCompound();
+//            getFluidStack().writeToNBT(fluidTag);
+//
+//            tag.setTag("fluid", fluidTag);
+//        }
 
         mainTag.setTag("tankConfig", tag);
     }

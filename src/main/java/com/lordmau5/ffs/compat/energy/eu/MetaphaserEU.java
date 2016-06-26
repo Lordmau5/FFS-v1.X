@@ -23,13 +23,17 @@ public enum MetaphaserEU {
     INSTANCE;
 
     public void load(TileEntityMetaphaser metaphaser) {
-        if(!metaphaser.getWorld().isRemote)
+        if(!metaphaser.addedToEnet && !metaphaser.getWorld().isRemote) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(metaphaser));
+            metaphaser.addedToEnet = true;
+        }
     }
 
     public void unload(TileEntityMetaphaser metaphaser) {
-        if(!metaphaser.getWorld().isRemote)
+        if(metaphaser.addedToEnet && !metaphaser.getWorld().isRemote) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(metaphaser));
+            metaphaser.addedToEnet = false;
+        }
     }
 
     public double getDemandedEnergy(TileEntityMetaphaser metaphaser) {
