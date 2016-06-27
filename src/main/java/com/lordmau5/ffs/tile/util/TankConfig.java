@@ -87,7 +87,7 @@ public class TankConfig {
             return;
 
         getFluidTank().readFromNBT(mainTag);
-        if(mainTag.getBoolean("hasFluid")) { // Legacy support
+        if(mainTag.getBoolean("hasFluid")) { // TODO: Remove legacy support
             if (mainTag.hasKey("fluidName")) {
                 try {
                     setFluidStack(new FluidStack(FluidRegistry.getFluid(mainTag.getString("fluidName")), mainTag.getInteger("fluidAmount")));

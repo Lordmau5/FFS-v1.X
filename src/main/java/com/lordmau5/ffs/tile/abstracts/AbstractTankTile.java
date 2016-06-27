@@ -74,8 +74,11 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
-        if(tag.hasKey("valveX")) {
+        if(tag.hasKey("valveX")) { // TODO: Remove legacy support
             setValvePos(new BlockPos(tag.getInteger("valveX"), tag.getInteger("valveY"), tag.getInteger("valveZ")));
+        }
+        else if(tag.hasKey("valvePos")) {
+            setValvePos(BlockPos.fromLong(tag.getLong("valvePos")));
         }
         else {
             setValvePos(null);
@@ -85,10 +88,12 @@ public abstract class AbstractTankTile extends TileEntity implements ITickable {
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         if(getMasterValve() != null) {
-            BlockPos pos = getMasterValve().getPos();
-            tag.setInteger("valveX", pos.getX());
-            tag.setInteger("valveY", pos.getY());
-            tag.setInteger("valveZ", pos.getZ());
+            tag.setLong("valvePos", getMasterValve().getPos().toLong());
+
+//            BlockPos pos = getMasterValve().getPos();
+//            tag.setInteger("valveX", pos.getX());
+//            tag.setInteger("valveY", pos.getY());
+//            tag.setInteger("valveZ", pos.getZ());
         }
 
         super.writeToNBT(tag);

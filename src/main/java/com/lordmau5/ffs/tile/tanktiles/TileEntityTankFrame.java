@@ -125,7 +125,7 @@ public class TileEntityTankFrame extends AbstractTankTile {
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
-        if(tag.hasKey("blockName") && tag.hasKey("metadata")) { // Legacy support
+        if(tag.hasKey("blockName") && tag.hasKey("metadata")) { // TODO: Remove legacy support
             setBlockState(Block.getBlockFromName(tag.getString("blockName")).getStateFromMeta(tag.getInteger("metadata")));
         }
 

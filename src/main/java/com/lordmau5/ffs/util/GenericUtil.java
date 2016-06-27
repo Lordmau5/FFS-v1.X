@@ -1,8 +1,8 @@
 package com.lordmau5.ffs.util;
 
 import com.lordmau5.ffs.FancyFluidStorage;
-import com.lordmau5.ffs.tile.abstracts.AbstractTankTile;
 import com.lordmau5.ffs.tile.abstracts.AbstractTankValve;
+import com.lordmau5.ffs.tile.tanktiles.TileEntityTankFrame;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGlass;
 import net.minecraft.block.material.Material;
@@ -119,15 +119,14 @@ public class GenericUtil {
         if(state == null)
             return false;
 
-        Block block = state.getBlock();
-
         if(world.isAirBlock(pos))
             return false;
 
+        Block block = state.getBlock();
         if (block.hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             if(tile != null) {
-                return tile instanceof AbstractTankTile || isTileEntityAcceptable(block, tile);
+                return tile instanceof TileEntityTankFrame || isTileEntityAcceptable(block, tile);
             }
         }
 
