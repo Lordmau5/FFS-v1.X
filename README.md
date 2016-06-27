@@ -1,5 +1,6 @@
 # FFS - *Fancy Fluid Storage* 
-[![Build Status](https://jenkins.maxpowa.us/job/FFS/badge/icon)](https://jenkins.maxpowa.us/job/FFS)
+Build Status for 1.8.9: [![Build Status 1.8.9](https://jenkins.maxpowa.us/job/FFS/branch/master/badge/icon)](https://jenkins.maxpowa.us/job/FFS/branch/master)  
+Build Status for 1.9.4: [![Build Status 1.9.4](https://jenkins.maxpowa.us/job/FFS/branch/1.9/badge/icon)](https://jenkins.maxpowa.us/job/FFS/branch/1.9)
 
 A simple fluid storage mod that's gonna *fancy* up your world!  
 
