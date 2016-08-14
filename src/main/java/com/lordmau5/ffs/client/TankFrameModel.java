@@ -32,7 +32,9 @@ public class TankFrameModel implements IBakedModel {
 
         if(fake_state != null) {
             if(fake_state.getBlock().canRenderInLayer(fake_state, MinecraftForgeClient.getRenderLayer())) {
-                return model.getQuads(fake_state, enumFacing, l);
+                List<BakedQuad> bakedQuads = model.getQuads(fake_state, enumFacing, l);
+                if(bakedQuads!=null)
+                    return bakedQuads;
             }
         }
         return Lists.newArrayList();
