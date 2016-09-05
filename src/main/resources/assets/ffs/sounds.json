@@ -3,7 +3,7 @@
 		"category": "master",
 		"sounds": [
 			{
-				"name": "fire",
+				"name": "ffs:fire",
 				"stream": false
 			}
 		]

@@ -89,7 +89,7 @@ public class FancyFluidStorage {
         insideCapacityProp.setComment("Should tank capacity only count the interior air blocks, rather than including the frame?\nDefault: true");
         INSIDE_CAPACITY = insideCapacityProp.getBoolean(true);
 
-        Property maxSizeProp = CONFIG.get(Configuration.CATEGORY_GENERAL, "maxSize", 13);
+        Property maxSizeProp = CONFIG.get(Configuration.CATEGORY_GENERAL, "maxSize", 7);
         maxSizeProp.setComment("Define the maximum size a tank can have. This includes the whole tank, including the frame!\nMinimum: 3, Maximum: 13\nDefault: 7");
         MAX_SIZE = Math.max(3, Math.min(maxSizeProp.getInt(7), 13));
         if(maxSizeProp.getInt(7) < 3 || maxSizeProp.getInt(7) > 13)
