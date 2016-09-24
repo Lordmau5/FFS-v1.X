@@ -37,10 +37,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * Created by Dustin on 28.06.2015.
  */
-@Mod(modid = FancyFluidStorage.modId, name = "Fancy Fluid Storage", dependencies="after:waila;after:OpenComputers;after:ComputerCraft;after:chisel")
+@Mod(modid = FancyFluidStorage.MODID, name = "Fancy Fluid Storage", dependencies="after:waila;after:OpenComputers;after:ComputerCraft;after:chisel")
 public class FancyFluidStorage {
 
-    public static final String modId = "FFS";
+    public static final String MODID = "FFS";
 
     public static Block blockFluidValve;
     public static Block blockMetaphaser;
@@ -52,7 +52,7 @@ public class FancyFluidStorage {
 
     public static Configuration CONFIG;
 
-    @Mod.Instance(modId)
+    @Mod.Instance(MODID)
     public static FancyFluidStorage INSTANCE;
 
     @SidedProxy(clientSide = "com.lordmau5.ffs.proxy.ClientProxy", serverSide = "com.lordmau5.ffs.proxy.CommonProxy")

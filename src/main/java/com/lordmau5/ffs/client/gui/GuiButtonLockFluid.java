@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GL11;
  */
 public class GuiButtonLockFluid extends GuiButton {
 
-    protected static final ResourceLocation toggleTexture = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
+    protected static final ResourceLocation toggleTexture = new ResourceLocation(FancyFluidStorage.MODID + ":textures/gui/gui_tank.png");
     protected boolean state = false;
 
     public GuiButtonLockFluid(int x, int y, boolean state) {
