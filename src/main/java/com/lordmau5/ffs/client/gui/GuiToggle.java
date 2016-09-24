@@ -13,7 +13,7 @@ import org.lwjgl.opengl.GL11;
  */
 public class GuiToggle extends GuiButton {
 
-    private static final ResourceLocation toggleTexture = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
+    private static final ResourceLocation toggleTexture = new ResourceLocation(FancyFluidStorage.MODID + ":textures/gui/gui_tank.png");
     protected boolean state = false;
     private int textColor = 16777215;
 

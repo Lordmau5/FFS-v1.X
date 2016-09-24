@@ -55,21 +55,29 @@ repositories {
         name 'tterrag'
         url "http://maven.tterrag.com/"
     }
+	    maven { // Chisel / tterrag's maven
+        name 'tterrag'
+        url "http://maven.tterrag.com/"
+    }
+    maven { // IC2 / Player's maven
+        name 'player'
+        url "http://maven.ic2.player.to/"
+    }
     flatDir {
       dirs 'libs'
     }
 }
 
 dependencies {
-    compile name: "industrialcraft-2-2.5.1-ex19-dev"
+    deobfCompile "net.industrial-craft:industrialcraft-2:${ic2_version}:dev"
 
-    compile "team.chisel:Chisel:MC${minecraft_version}-${chisel_version}"
+    deobfCompile "team.chisel:Chisel:MC${chisel_version}"
 
-    compile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev"
+    deobfCompile "li.cil.oc:OpenComputers:MC${minecraft_version}-${opencomputers_version}-dev"
 
-    compile "mcp.mobius.waila:Waila:${waila_version}:dev"
+    deobfCompile "mcp.mobius.waila:Waila:${waila_version}:dev"
 
-    compile "net.darkhax.tesla:Tesla:${minecraft_version}-${tesla_version}"
+    deobfCompile "net.darkhax.tesla:Tesla:${minecraft_version}-${tesla_version}"
 }
 
 if (System.env.BUILD_NUMBER != null) mod_version = "$mod_version-b$System.env.BUILD_NUMBER"
@@ -84,7 +92,7 @@ targetCompatibility = 1.8
 minecraft {
     runDir = "runtime/client"
     version = "$minecraft_version-$forge_version"
-    mappings = "snapshot_20160604"
+    mappings = "snapshot_20160518"
 }
 
 processResources {

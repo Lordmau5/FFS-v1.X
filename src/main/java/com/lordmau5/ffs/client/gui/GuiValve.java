@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class GuiValve extends GuiScreen {
 
-    private static final ResourceLocation tex = new ResourceLocation(FancyFluidStorage.modId + ":textures/gui/gui_tank.png");
+    private static final ResourceLocation tex = new ResourceLocation(FancyFluidStorage.MODID + ":textures/gui/gui_tank.png");
 
     private GuiToggle autoFluidOutputButton;
     private GuiToggle metaphaserToggleButton;
